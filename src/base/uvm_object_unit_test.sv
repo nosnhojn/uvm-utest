@@ -4,6 +4,9 @@ import uvm_pkg::*;
 import svunit_pkg::*;
 
 class test_uvm_object extends uvm_object;
+  function new(string name);
+    super.new(name);
+  endfunction
 endclass
 
 module uvm_object_unit_test;
@@ -16,7 +19,7 @@ module uvm_object_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-  test_uvm_object my_uvm_object;
+  test_uvm_object uut;
 
 
   //===================================
@@ -24,8 +27,6 @@ module uvm_object_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-
-    my_uvm_object = new(/* New arguments if needed */);
   endfunction
 
 
@@ -34,7 +35,8 @@ module uvm_object_unit_test;
   //===================================
   task setup();
     svunit_ut.setup();
-    /* Place Setup Code Here */
+
+    uut = new("object_name");
   endtask
 
 
@@ -44,7 +46,6 @@ module uvm_object_unit_test;
   //===================================
   task teardown();
     svunit_ut.teardown();
-    /* Place Teardown Code Here */
   endtask
 
 
@@ -63,7 +64,22 @@ module uvm_object_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  `SVTEST(getname_set_by_constructor)
+    string n = "object_name";
+    `FAIL_IF(uut.get_name() != n); 
+  `SVTEST_END(getname_set_by_constructor)
 
+
+  `SVTEST(override_with_setname)
+    string n = "other_name";
+    uut.set_name(n);
+    `FAIL_IF(uut.get_name() != n); 
+  `SVTEST_END(override_with_setname)
+
+
+  `SVTEST(get_full_name_returns_get_name)
+    `FAIL_IF(uut.get_name() != uut.get_full_name()); 
+  `SVTEST_END(get_full_name_returns_get_name)
 
   `SVUNIT_TESTS_END
 
