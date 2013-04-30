@@ -111,7 +111,7 @@ module uvm_misc_unit_test;
   `SVTEST(add_global_seed_table_entry)
     uvm_seed_map sm;
 
-    uvm_create_random_seed("tst_obj");
+    void'(uvm_create_random_seed("tst_obj"));
     sm = uvm_random_seed_table_lookup["__global__"];
 
     `FAIL_IF(sm == null);
@@ -122,7 +122,7 @@ module uvm_misc_unit_test;
   `SVTEST(add_inst_seed_table_entry)
     uvm_seed_map sm;
 
-    uvm_create_random_seed("tst_obj", "tst_inst");
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
 
     `FAIL_IF(sm == null);
@@ -131,8 +131,8 @@ module uvm_misc_unit_test;
 
 
   `SVTEST(_1_entry_for_reseeded_seed_table_entry)
-    uvm_create_random_seed("tst_obj", "tst_inst");
-    uvm_create_random_seed("tst_obj", "tst_inst");
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
 
     `FAIL_IF(uvm_random_seed_table_lookup.num() != 1);
   `SVTEST_END(_1_entry_for_reseeded_seed_table_entry)
@@ -142,9 +142,9 @@ module uvm_misc_unit_test;
     uvm_seed_map sm;
     string key_act, key_exp;
 
-    uvm_create_random_seed("tst_obj", "tst_inst");
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
-    sm.seed_table.first(key_act);
+    void'(sm.seed_table.first(key_act));
 
     key_exp = "uvm_pkg.tst_obj";
     `FAIL_IF(key_act != key_exp);
@@ -156,9 +156,9 @@ module uvm_misc_unit_test;
     uvm_seed_map sm;
     string key_act, key_exp;
 
-    uvm_create_random_seed("tst_obj", "tst_inst");
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
-    sm.count.first(key_act);
+    void'(sm.count.first(key_act));
 
     key_exp = "uvm_pkg.tst_obj";
     `FAIL_IF(key_act != key_exp);
@@ -170,7 +170,7 @@ module uvm_misc_unit_test;
     uvm_seed_map sm;
     int unsigned cnt;
 
-    repeat (4) uvm_create_random_seed("tst_obj", "tst_inst");
+    repeat (4) void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
     cnt = sm.count["uvm_pkg.tst_obj"];
 
@@ -184,7 +184,7 @@ module uvm_misc_unit_test;
 
     exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst");
 
-    uvm_create_random_seed("tst_obj", "tst_inst");
+    void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
     act = sm.seed_table["uvm_pkg.tst_obj"];
 
@@ -198,7 +198,7 @@ module uvm_misc_unit_test;
 
     exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst") + 1;
 
-    repeat (2) uvm_create_random_seed("tst_obj", "tst_inst");
+    repeat (2) void'(uvm_create_random_seed("tst_obj", "tst_inst"));
 
     sm = uvm_random_seed_table_lookup["tst_inst"];
     act = sm.seed_table["uvm_pkg.tst_obj"];
@@ -211,8 +211,8 @@ module uvm_misc_unit_test;
     uvm_seed_map sm0, sm1;
     int unsigned cnt0, cnt1;
 
-    repeat (3) uvm_create_random_seed("tst_obj0");
-    repeat (5) uvm_create_random_seed("tst_obj1", "tst_inst");
+    repeat (3) void'(uvm_create_random_seed("tst_obj0"));
+    repeat (5) void'(uvm_create_random_seed("tst_obj1", "tst_inst"));
 
     sm0 = uvm_random_seed_table_lookup["__global__"];
     sm1 = uvm_random_seed_table_lookup["tst_inst"];
@@ -232,8 +232,8 @@ module uvm_misc_unit_test;
     exp0 = uvm_oneway_hash("uvm_pkg.tst_obj0::tst_inst") + 1;
     exp1 = uvm_oneway_hash("uvm_pkg.tst_obj1::__global__") + 1;
 
-    repeat (2) uvm_create_random_seed("tst_obj0", "tst_inst");
-    repeat (2) uvm_create_random_seed("tst_obj1");
+    repeat (2) void'(uvm_create_random_seed("tst_obj0", "tst_inst"));
+    repeat (2) void'(uvm_create_random_seed("tst_obj1"));
 
     sm0 = uvm_random_seed_table_lookup["tst_inst"];
     sm1 = uvm_random_seed_table_lookup["__global__"];

@@ -32,6 +32,7 @@ module uvm_object_unit_test;
     svunit_ut.setup();
 
     uut = new("object_name");
+    uut.use_uvm_seeding = 1;
   endtask
 
 
@@ -59,6 +60,11 @@ module uvm_object_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  //-----------------------------
+  //-----------------------------
+  // get/set_name tests
+  //-----------------------------
+  //-----------------------------
   `SVTEST(getname_set_by_constructor)
     string n = "object_name";
     `FAIL_IF(uut.get_name() != n); 
@@ -75,6 +81,38 @@ module uvm_object_unit_test;
   `SVTEST(get_full_name_returns_get_name)
     `FAIL_IF(uut.get_name() != uut.get_full_name()); 
   `SVTEST_END(get_full_name_returns_get_name)
+
+
+  //-----------------------------
+  //-----------------------------
+  // reseed tests
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(enabled_obj_is_reseeded)
+    test_uvm_object other = new("other");
+
+    uut.srandom(0);
+    other.srandom(0);
+    uut.reseed();
+    void'(uut.randomize());
+    void'(other.randomize());
+
+    `FAIL_IF(uut.rand_property == other.rand_property);
+  `SVTEST_END(enabled_obj_is_reseeded)
+
+
+  `SVTEST(disabled_obj_is_not_reseeded)
+    test_uvm_object other = new("other");
+
+    uut.srandom(0);
+    other.srandom(0);
+    uut.use_uvm_seeding = 0;
+    uut.reseed();
+    void'(uut.randomize());
+    void'(other.randomize());
+
+    `FAIL_IF(uut.rand_property != other.rand_property);
+  `SVTEST_END(disabled_obj_is_not_reseeded)
 
   `SVUNIT_TESTS_END
 
