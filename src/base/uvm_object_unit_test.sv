@@ -1,13 +1,8 @@
 `include "svunit_defines.svh"
+`include "test_uvm_object.sv"
 
 import uvm_pkg::*;
 import svunit_pkg::*;
-
-class test_uvm_object extends uvm_object;
-  function new(string name);
-    super.new(name);
-  endfunction
-endclass
 
 module uvm_object_unit_test;
 
