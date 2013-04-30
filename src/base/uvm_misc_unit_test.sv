@@ -83,11 +83,18 @@ module uvm_misc_unit_test;
   `SVTEST_END(crc_polynomial_is_const)
 
 
-  `SVTEST(calc_crc_out)
-    string s = "123456789abcdef";
+  `SVTEST(default_calc_crc_out)
+    string s = "tst_obj::tst_inst";
 
     `FAIL_IF(uvm_oneway_hash(s) - uvm_global_random_seed != crc32('hffff_ffff, crc_polynomial, s));
-  `SVTEST_END(calc_crc_out)
+  `SVTEST_END(default_calc_crc_out)
+
+
+  `SVTEST(calc_crc_out_w_seed)
+    string s = "tst_obj::tst_inst";
+
+    `FAIL_IF(uvm_oneway_hash(s, 10) - 10 != crc32('hffff_ffff, crc_polynomial, s));
+  `SVTEST_END(calc_crc_out_w_seed)
 
 
   //-----------------------------
@@ -169,6 +176,73 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(cnt != 4);
   `SVTEST_END(count_incremented_for_each_reseed)
+
+
+  `SVTEST(seed_table_init_to_oneway_hash)
+    uvm_seed_map sm;
+    int unsigned exp, act;
+
+    exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst");
+
+    uvm_create_random_seed("tst_obj", "tst_inst");
+    sm = uvm_random_seed_table_lookup["tst_inst"];
+    act = sm.seed_table["uvm_pkg.tst_obj"];
+
+    `FAIL_IF(act != exp);
+  `SVTEST_END(seed_table_init_to_oneway_hash)
+
+
+  `SVTEST(table_init_to_oneway_hash_plus1_for_reseed)
+    uvm_seed_map sm;
+    int unsigned exp, act;
+
+    exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst") + 1;
+
+    repeat (2) uvm_create_random_seed("tst_obj", "tst_inst");
+
+    sm = uvm_random_seed_table_lookup["tst_inst"];
+    act = sm.seed_table["uvm_pkg.tst_obj"];
+
+    `FAIL_IF(act != exp);
+  `SVTEST_END(table_init_to_oneway_hash_plus1_for_reseed)
+
+
+  `SVTEST(count_incremented_for_each_reseed_with_multiple_tables)
+    uvm_seed_map sm0, sm1;
+    int unsigned cnt0, cnt1;
+
+    repeat (3) uvm_create_random_seed("tst_obj0");
+    repeat (5) uvm_create_random_seed("tst_obj1", "tst_inst");
+
+    sm0 = uvm_random_seed_table_lookup["__global__"];
+    sm1 = uvm_random_seed_table_lookup["tst_inst"];
+    cnt0 = sm0.count["uvm_pkg.tst_obj0"];
+    cnt1 = sm1.count["uvm_pkg.tst_obj1"];
+
+    `FAIL_IF(cnt0 != 3);
+    `FAIL_IF(cnt1 != 5);
+  `SVTEST_END(count_incremented_for_each_reseed_with_multiple_tables)
+
+
+  `SVTEST(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
+    uvm_seed_map sm0, sm1;
+    int unsigned exp0, act0;
+    int unsigned exp1, act1;
+
+    exp0 = uvm_oneway_hash("uvm_pkg.tst_obj0::tst_inst") + 1;
+    exp1 = uvm_oneway_hash("uvm_pkg.tst_obj1::__global__") + 1;
+
+    repeat (2) uvm_create_random_seed("tst_obj0", "tst_inst");
+    repeat (2) uvm_create_random_seed("tst_obj1");
+
+    sm0 = uvm_random_seed_table_lookup["tst_inst"];
+    sm1 = uvm_random_seed_table_lookup["__global__"];
+    act0 = sm0.seed_table["uvm_pkg.tst_obj0"];
+    act1 = sm1.seed_table["uvm_pkg.tst_obj1"];
+
+    `FAIL_IF(act0 != exp0);
+    `FAIL_IF(act1 != exp1);
+  `SVTEST_END(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
 
 
   `SVUNIT_TESTS_END
