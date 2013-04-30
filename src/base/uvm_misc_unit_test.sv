@@ -56,6 +56,8 @@ module uvm_misc_unit_test;
   //     <test code>
   //   `SVTEST_END(mytest)
   //===================================
+  const bit [31:0] crc_polynomial = 'h04c11db6;
+
   `SVUNIT_TESTS_BEGIN
 
 
@@ -69,6 +71,23 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(uvm_instance_scope() != top_name);
   `SVTEST_END(top_uvm_instance_scope_is_uvm_pkg)
+
+
+  //-----------------------------
+  //-----------------------------
+  // uvm_oneway_hash tests
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(crc_polynomial_is_const)
+    `FAIL_IF(UVM_STR_CRC_POLYNOMIAL != crc_polynomial);
+  `SVTEST_END(crc_polynomial_is_const)
+
+
+  `SVTEST(calc_crc_out)
+    string s = "123456789abcdef";
+
+    `FAIL_IF(uvm_oneway_hash(s) - uvm_global_random_seed != crc32('hffff_ffff, crc_polynomial, s));
+  `SVTEST_END(calc_crc_out)
 
 
   //-----------------------------
@@ -140,6 +159,40 @@ module uvm_misc_unit_test;
   `SVTEST_END(count_hash_key_is_type_id)
 
 
+  `SVTEST(count_incremented_for_each_reseed)
+    uvm_seed_map sm;
+    int unsigned cnt;
+
+    repeat (4) uvm_create_random_seed("tst_obj", "tst_inst");
+    sm = uvm_random_seed_table_lookup["tst_inst"];
+    cnt = sm.count["uvm_pkg.tst_obj"];
+
+    `FAIL_IF(cnt != 4);
+  `SVTEST_END(count_incremented_for_each_reseed)
+
+
   `SVUNIT_TESTS_END
+
+  function bit[31:0] crc32(bit[31:0] init,
+                           bit[31:0] polynomial,
+                           string string_in);
+    bit          msb;
+    bit [7:0]    current_byte;
+
+    crc32 = init;
+    for (int _byte=0; _byte < string_in.len(); _byte++) begin
+       current_byte = string_in[_byte];
+       if (current_byte == 0) break;
+       for (int _bit=0; _bit < 8; _bit++) begin
+          msb = crc32[31];
+          crc32 <<= 1;
+          if (msb ^ current_byte[_bit]) begin
+             crc32 ^=  polynomial;
+             crc32[0] = 1;
+          end
+       end
+    end
+    crc32 = ~{crc32[7:0], crc32[15:8], crc32[23:16], crc32[31:24]};
+  endfunction
 
 endmodule
