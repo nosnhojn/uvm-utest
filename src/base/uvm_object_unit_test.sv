@@ -140,6 +140,10 @@ module uvm_object_unit_test;
 // `SVTEST(get_type_is_an_error)
 // `SVTEST_END(get_type_is_an_error)
 
+  `SVTEST(create_returns_null)
+    `FAIL_IF(uut.create() != null);
+  `SVTEST_END(create_returns_null)
+
 
   //-----------------------------
   //-----------------------------

@@ -245,7 +245,41 @@ module uvm_misc_unit_test;
   `SVTEST_END(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
 
 
+  //-----------------------------
+  //-----------------------------
+  // conversion function tests
+  //
+  // (all are overflowed to test
+  // the size arg properly)
+  //-----------------------------
+  //-----------------------------
+
+  `SVTEST(bin_vector_to_string)
+    string s_exp = "b10101";
+
+    string s_act = uvm_vector_to_string (910101, 5, UVM_BIN, "b");
+
+    `FAIL_IF(s_act != s_exp);
+  `SVTEST_END(bin_vector_to_string)
+
+
+  `SVTEST(oct_vector_to_string)
+    string s_exp = "o1037";
+
+    string s_act = uvm_vector_to_string (1567, 10, UVM_OCT, "o");
+
+    `FAIL_IF(s_act != s_exp);
+  `SVTEST_END(oct_vector_to_string)
+
+
   `SVUNIT_TESTS_END
+
+
+  //------------------
+  //------------------
+  // HELPER METHODS
+  //------------------
+  //------------------
 
   function bit[31:0] crc32(bit[31:0] init,
                            bit[31:0] polynomial,
