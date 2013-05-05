@@ -4,6 +4,14 @@
 import uvm_pkg::*;
 import svunit_pkg::*;
 
+`define UVM_VECTOR_TO_STRING(TESTNAME,EXP,VECTOR,SIZE,RADIX,RADIXSTR) \
+`SVTEST(TESTNAME) \
+  string s_exp = `"EXP`"; \
+  string s_act = uvm_vector_to_string (VECTOR, SIZE, RADIX, `"RADIXSTR`"); \
+/*$display("%s %s", s_act, s_exp);*/ \
+  `FAIL_IF(s_act != s_exp); \
+`SVTEST_END(TESTNAME)
+
 module uvm_misc_unit_test;
 
   string name = "uvm_misc_ut";
@@ -253,23 +261,18 @@ module uvm_misc_unit_test;
   // the size arg properly)
   //-----------------------------
   //-----------------------------
-
-  `SVTEST(bin_vector_to_string)
-    string s_exp = "b10101";
-
-    string s_act = uvm_vector_to_string (910101, 5, UVM_BIN, "b");
-
+  `SVTEST(signed_vector_to_string)
+    string s_exp = "-1";
+    string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");
     `FAIL_IF(s_act != s_exp);
-  `SVTEST_END(bin_vector_to_string)
-
-
-  `SVTEST(oct_vector_to_string)
-    string s_exp = "o1037";
-
-    string s_act = uvm_vector_to_string (1567, 10, UVM_OCT, "o");
-
-    `FAIL_IF(s_act != s_exp);
-  `SVTEST_END(oct_vector_to_string)
+  `SVTEST_END(signed_vector_to_string)
+  `UVM_VECTOR_TO_STRING(bin_vector_to_string,b11001,121,5,UVM_BIN,b);
+  `UVM_VECTOR_TO_STRING(oct_vector_to_string,o1037,1567,10,UVM_OCT,o);
+  `UVM_VECTOR_TO_STRING(unsigned_vector_to_string,d15,31,4,UVM_UNSIGNED,d);
+  `UVM_VECTOR_TO_STRING(string_vector_to_string,s<Z,'h3c5a,16,UVM_STRING,s);
+  `UVM_VECTOR_TO_STRING(time_vector_to_string,t58,58,16,UVM_TIME,t);
+  `UVM_VECTOR_TO_STRING(dec_vector_to_string,d7,7,4,UVM_DEC,d);
+  `UVM_VECTOR_TO_STRING(hex_vector_to_string,h7e,254,7,UVM_HEX,h);
 
 
   `SVUNIT_TESTS_END
