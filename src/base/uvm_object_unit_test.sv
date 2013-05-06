@@ -177,6 +177,13 @@ module uvm_object_unit_test;
   `SVTEST_END(disabled_obj_is_not_reseeded)
 
 
+  //-----------------------------
+  //-----------------------------
+  // sprint tests
+  //-----------------------------
+  //-----------------------------
+  // TBD based on uvm_printer
+
   `SVUNIT_TESTS_END
 
 endmodule

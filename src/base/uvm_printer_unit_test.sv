@@ -64,14 +64,9 @@ module uvm_printer_unit_test;
   `SVTEST_END(printer_knobs_at_construction)
 
 
-// `SVTEST(print_int_with_all_fields)
-//   uut.print("name",
-//             uvm_bitstream_t value,
-//             1,,
-//             UVM_NORADIX,
-//             ".",
-//             "type_name");
-// `SVTEST_END(print_int_with_all_fields)
+// `SVTEST(print_object_header)
+//   TBD based on uvm_scope_stack
+// `SVTEST_END(print_object_header)
 
 
   `SVUNIT_TESTS_END
