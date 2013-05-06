@@ -172,6 +172,47 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END(down_elements_are_concatenated_to_elements)
 
 
+  `SVTEST(WARNING_elements_can_be_empty_strings)
+    string s_exp = "..";
+    uut.down("");
+    uut.down("");
+    uut.down("");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(WARNING_elements_can_be_empty_strings)
+
+
+  `SVTEST(set_initialized_the_stack)
+    string s_exp = "element1";
+    uut.set("element0");
+    uut.set("element1");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(set_initialized_the_stack)
+
+
+  `SVTEST(up_element_removes_a_down_element)
+    string s_exp = "element0";
+    uut.down("element0");
+    uut.down_element(8);
+    uut.up_element();
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(up_element_removes_a_down_element)
+
+
+  `SVTEST(up_element_doesnt_remove_a_down)
+    string s_exp = "element0";
+    uut.down("element0");
+    uut.up_element();
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(up_element_doesnt_remove_a_down)
+
+
+  `SVTEST(WARNING_up_element_removes_a_down_that_starts_with_square_bracket)
+    string s_exp = "";
+    uut.down("[element0");
+    uut.up_element();
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(WARNING_up_element_removes_a_down_that_starts_with_square_bracket)
+
 
   `SVUNIT_TESTS_END
 
