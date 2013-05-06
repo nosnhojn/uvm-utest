@@ -124,16 +124,16 @@ module uvm_scope_stack_unit_test;
 
   `SVTEST(get_from_empty_stack_returns_set_arg)
     string s_exp = "set_arg";
-    uut.set(s_exp);
+    uut.set_arg(s_exp);
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(get_from_empty_stack_returns_set_arg)
 
 
-  `SVTEST(get_with_1_element_in_stack)
+  `SVTEST(get_with_1_element_in_stack_and_no_set_arg)
     string s_exp = "element0";
     uut.set(s_exp);
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(get_with_1_element_in_stack)
+  `SVTEST_END(get_with_1_element_in_stack_and_no_set_arg)
 
 
   `SVTEST(get_with_1_element_in_stack_and_set_arg)
@@ -142,6 +142,36 @@ module uvm_scope_stack_unit_test;
     uut.set_arg("set_arg");
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(get_with_1_element_in_stack_and_set_arg)
+
+
+  `SVTEST(down_appends_to_stack)
+    string s_exp = "element0";
+    uut.down("element0");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(down_appends_to_stack)
+
+
+  `SVTEST(multiple_elements_on_stack_are_concatenated)
+    string s_exp = "element0.element1.element2";
+    uut.down("element0");
+    uut.down("element1");
+    uut.down("element2");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(multiple_elements_on_stack_are_concatenated)
+
+
+  `SVTEST(down_elements_are_concatenated_to_elements)
+    string s_exp = "element0[1].element1[0].element2[55]";
+    uut.down("element0");
+    uut.down_element(1);
+    uut.down("element1");
+    uut.down_element(0);
+    uut.down("element2");
+    uut.down_element(55);
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(down_elements_are_concatenated_to_elements)
+
+
 
   `SVUNIT_TESTS_END
 
