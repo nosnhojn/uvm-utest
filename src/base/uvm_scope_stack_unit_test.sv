@@ -172,21 +172,23 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END(down_elements_are_concatenated_to_elements)
 
 
-  `SVTEST(WARNING_set_can_start_with_square_bracket)
+  `SVTEST(WARNING_set_can_start_with_a_bracket)
     string s_exp = "[element0";
     uut.down("[element0");
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(WARNING_set_can_start_with_square_bracket)
+  `SVTEST_END(WARNING_set_can_start_with_a_bracket)
 
 
-  `SVTEST(WARNING_down_can_start_with_square_bracket)
-    string s_exp = "[element0[55][element1[33]";
+  `SVTEST(WARNING_down_can_start_with_any_bracket)
+    string s_exp = "[element0[55](element1[33]{element2[44]";
     uut.down("[element0");
     uut.down_element(55);
-    uut.down("[element1");
+    uut.down("(element1");
     uut.down_element(33);
+    uut.down("{element2");
+    uut.down_element(44);
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(WARNING_down_can_start_with_square_bracket)
+  `SVTEST_END(WARNING_down_can_start_with_any_bracket)
 
 
   `SVTEST(WARNING_elements_can_be_empty_strings)
@@ -223,12 +225,12 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END(up_element_doesnt_remove_a_down)
 
 
-  `SVTEST(WARNING_up_element_removes_a_down_that_starts_with_square_bracket)
+  `SVTEST(WARNING_up_element_removes_a_down_that_starts_with_a_bracket)
     string s_exp = "";
     uut.down("[element0");
     uut.up_element();
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(WARNING_up_element_removes_a_down_that_starts_with_square_bracket)
+  `SVTEST_END(WARNING_up_element_removes_a_down_that_starts_with_a_bracket)
 
 
   `SVTEST(up_element_has_no_effect_on_empty_stack)
@@ -267,14 +269,29 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END(up_removes_empty_strings)
 
 
-  `SVTEST(WARNING_up_treats_elements_starting_with_square_bracket_as_down_elements)
+  `SVTEST(WARNING_up_treats_elements_starting_with_any_bracket_as_down_elements)
     string s_exp = "";
     uut.down("element0");
     uut.down("[element1");
+    uut.down("(element2");
+    uut.down("{element3");
     uut.down_element("20");
     uut.up();
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(WARNING_up_treats_elements_starting_with_square_bracket_as_down_elements)
+  `SVTEST_END(WARNING_up_treats_elements_starting_with_any_bracket_as_down_elements)
+
+
+  `SVTEST(WARNING_up_removes_multiple_down_elements)
+    string s_exp = "";
+    uut.down_element("20");
+    uut.down_element("30");
+    uut.down_element("40");
+    uut.down_element("50");
+    uut.down_element("60");
+    uut.down_element("70");
+    uut.up();
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(WARNING_up_removes_multiple_down_elements)
 
 
   `SVTEST(WARNING_a_separator_other_than_period_makes_no_sense)
