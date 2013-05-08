@@ -120,13 +120,6 @@ module uvm_printer_knobs_unit_test;
   `GET_RADIX_TEST(UVM_UNSIGNED,uut.unsigned_radix)
   `GET_RADIX_TEST(UVM_NORADIX,uut.default_radix)
 
-
-  `SVTEST(dont_show_radix)
-    uut.show_radix = 0;
-
-    `FAIL_IF(uut.get_radix_str(UVM_HEX) != _NULL_STRING);
-  `SVTEST_END(dont_show_radix)
-
   `GET_RADIX_TEST(UVM_UNFORMAT2,_NULL_STRING);
   `GET_RADIX_TEST(UVM_UNFORMAT4,_NULL_STRING);
   `GET_RADIX_TEST(UVM_STRING,_NULL_STRING);
@@ -134,6 +127,31 @@ module uvm_printer_knobs_unit_test;
   `GET_RADIX_TEST(UVM_ENUM,_NULL_STRING);
   `GET_RADIX_TEST(UVM_REAL,_NULL_STRING);
   `GET_RADIX_TEST(UVM_REAL_DEC ,_NULL_STRING);
+
+
+  `SVTEST(dont_show_radix)
+    uut.show_radix = 0;
+
+    `FAIL_IF(uut.get_radix_str(UVM_HEX) != _NULL_STRING);
+  `SVTEST_END(dont_show_radix)
+
+
+  `SVTEST(undefined_enum_returns_null_string)
+    int invalid_enum = 99;
+    `FAIL_IF(uut.get_radix_str(uvm_radix_enum'(invalid_enum)) != _NULL_STRING);
+  `SVTEST_END(undefined_enum_returns_null_string)
+
+
+  `SVTEST(table_printer_knob_typedefed_to_printer_knob)
+    uvm_table_printer_knobs tdef;
+    `FAIL_IF($cast(tdef, uut) != 1);
+  `SVTEST_END(table_printer_knob_typedefed_to_printer_knob)
+
+
+  `SVTEST(tree_printer_knob_typedefed_to_printer_knob)
+    uvm_tree_printer_knobs tdef;
+    `FAIL_IF($cast(tdef, uut) != 1);
+  `SVTEST_END(tree_printer_knob_typedefed_to_printer_knob)
 
 
   `SVUNIT_TESTS_END
