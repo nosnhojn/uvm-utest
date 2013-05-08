@@ -3,6 +3,12 @@
 import uvm_pkg::*;
 import svunit_pkg::*;
 
+`define SET_CAN_START_WITH_BRACKET(NAME,CHAR) \
+  `SVTEST(WARNING_set_can_start_with_a_``NAME``bracket) \
+    string s_exp = {CHAR,"element0"}; \
+    uut.set({CHAR,"element0"}); \
+    `FAIL_IF(uut.get() != s_exp); \
+  `SVTEST_END(WARNING_set_can_start_with_a_``NAME``bracket)
 
 module uvm_scope_stack_unit_test;
 
@@ -62,21 +68,72 @@ module uvm_scope_stack_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  //-----------------------------
+  //-----------------------------
+  // depth tests
+  //-----------------------------
+  //-----------------------------
+
+  `SVTEST(depth_at_construction_is_empty)
+    `FAIL_IF(uut.depth() != 0);
+  `SVTEST_END(depth_at_construction_is_empty)
+
+  //-----------------------------
+  //-----------------------------
+  // get arg tests
+  //-----------------------------
+  //-----------------------------
+
   `SVTEST(scope_arg_null_at_construction)
     `FAIL_IF(uut.get_arg() != _NULL_STRING);
   `SVTEST_END(scope_arg_null_at_construction)
 
-
-  `SVTEST(stack_empty_at_construction)
-    `FAIL_IF(uut.depth() != 0);
-  `SVTEST_END(stack_empty_at_construction)
-
-
-  `SVTEST(set_arg)
+  `SVTEST(get_arg)
     string s_exp = "jokes";
     uut.set_arg(s_exp);
+    `FAIL_IF(uut.get_arg() != s_exp);
+  `SVTEST_END(get_arg)
+
+  //-----------------------------
+  //-----------------------------
+  // get tests
+  //-----------------------------
+  //-----------------------------
+
+  `SVTEST(get_from_empty_stack_and_no_arg_returns_null)
+    `FAIL_IF(uut.get() != _NULL_STRING);
+  `SVTEST_END(get_from_empty_stack_and_no_arg_returns_null)
+
+
+  `SVTEST(get_from_empty_stack_returns_set_arg)
+    string s_exp = "set_arg";
+    uut.set_arg(s_exp);
     `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(set_arg)
+  `SVTEST_END(get_from_empty_stack_returns_set_arg)
+
+
+  `SVTEST(get_with_1_element_in_stack_and_no_set_arg)
+    string s_exp = "element0";
+    uut.set(s_exp);
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(get_with_1_element_in_stack_and_no_set_arg)
+
+
+  `SVTEST(get_with_1_element_in_stack_and_set_arg)
+    string s_exp = "element0.set_arg";
+    uut.set("element0");
+    uut.set_arg("set_arg");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(get_with_1_element_in_stack_and_set_arg)
+
+
+  `SVTEST(get_with_null_string_in_stack_and_set_arg)
+    string s_exp = "set_arg";
+    uut.set(_NULL_STRING);
+    uut.set_arg("set_arg");
+    `FAIL_IF(uut.get() != s_exp);
+  `SVTEST_END(get_with_null_string_in_stack_and_set_arg)
+
 
 
   `SVTEST(cannot_set_arg_to_null)
@@ -116,33 +173,11 @@ module uvm_scope_stack_unit_test;
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(WARNING_can_set_arg_element_without_arg)
 
-
-  `SVTEST(get_from_empty_stack_and_no_arg_returns_null)
-    `FAIL_IF(uut.get() != _NULL_STRING);
-  `SVTEST_END(get_from_empty_stack_and_no_arg_returns_null)
-
-
-  `SVTEST(get_from_empty_stack_returns_set_arg)
-    string s_exp = "set_arg";
-    uut.set_arg(s_exp);
-    `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(get_from_empty_stack_returns_set_arg)
-
-
-  `SVTEST(get_with_1_element_in_stack_and_no_set_arg)
-    string s_exp = "element0";
-    uut.set(s_exp);
-    `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(get_with_1_element_in_stack_and_no_set_arg)
-
-
-  `SVTEST(get_with_1_element_in_stack_and_set_arg)
-    string s_exp = "element0.set_arg";
-    uut.set("element0");
-    uut.set_arg("set_arg");
-    `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(get_with_1_element_in_stack_and_set_arg)
-
+  //-----------------------------
+  //-----------------------------
+  // down tests
+  //-----------------------------
+  //-----------------------------
 
   `SVTEST(down_appends_to_stack)
     string s_exp = "element0";
@@ -159,6 +194,11 @@ module uvm_scope_stack_unit_test;
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(multiple_elements_on_stack_are_concatenated)
 
+  `SET_CAN_START_WITH_BRACKET(square,"[")
+  `SET_CAN_START_WITH_BRACKET(para,"(")
+  `SET_CAN_START_WITH_BRACKET(curly,"{")
+
+// STOPPED HERE
 
   `SVTEST(down_elements_are_concatenated_to_elements)
     string s_exp = "element0[1].element1[0].element2[55]";
@@ -170,13 +210,6 @@ module uvm_scope_stack_unit_test;
     uut.down_element(55);
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(down_elements_are_concatenated_to_elements)
-
-
-  `SVTEST(WARNING_set_can_start_with_a_bracket)
-    string s_exp = "[element0";
-    uut.down("[element0");
-    `FAIL_IF(uut.get() != s_exp);
-  `SVTEST_END(WARNING_set_can_start_with_a_bracket)
 
 
   `SVTEST(WARNING_down_can_start_with_any_bracket)
@@ -199,6 +232,11 @@ module uvm_scope_stack_unit_test;
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(WARNING_elements_can_be_empty_strings)
 
+  //-----------------------------
+  //-----------------------------
+  // set tests
+  //-----------------------------
+  //-----------------------------
 
   `SVTEST(set_initialized_the_stack)
     string s_exp = "element1";
@@ -207,6 +245,11 @@ module uvm_scope_stack_unit_test;
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(set_initialized_the_stack)
 
+  //-----------------------------
+  //-----------------------------
+  // down tests
+  //-----------------------------
+  //-----------------------------
 
   `SVTEST(up_element_removes_a_down_element)
     string s_exp = "element0";

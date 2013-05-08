@@ -24,6 +24,10 @@ class test_uvm_object extends uvm_object;
     else
       return super.get_type_name();
   endfunction
+
+  static function void set_inst_count(int cnt);
+    m_inst_count = cnt;
+  endfunction
 endclass
 
 `endif
