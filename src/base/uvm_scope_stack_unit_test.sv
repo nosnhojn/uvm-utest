@@ -302,6 +302,12 @@ module uvm_scope_stack_unit_test;
     `FAIL_IF(uut.get() != s_exp);
   `SVTEST_END(WARNING_a_separator_other_than_period_makes_no_sense)
 
+  `SVTEST(depth_returns_stack_depth)
+    uut.down("element");
+    uut.down_element("20");
+    `FAIL_IF(uut.depth() != 2);
+  `SVTEST_END(depth_returns_stack_depth)
+
 
   `SVUNIT_TESTS_END
 
