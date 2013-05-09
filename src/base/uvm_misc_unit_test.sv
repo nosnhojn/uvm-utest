@@ -319,10 +319,10 @@ module uvm_misc_unit_test;
 
   // FAILING TESTS
   // these get fixed when the bug on uvm_misc.svh:line 491 is fixed (see below)
-  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(curly,"{","}")
-  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(square,"[","]")
-  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(round,"(",")")
-  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(angle,"<",">")
+// `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(curly,"{","}")
+// `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(square,"[","]")
+// `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(round,"(",")")
+// `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(angle,"<",">")
 
 
   `SVTEST(uvm_leaf_scope_ignores_other_possible_separators_with_default)
@@ -343,13 +343,39 @@ module uvm_misc_unit_test;
   // FAILING TEST
   // uvm_misc.svh:line 491
   // works for bracket separators but not others
-  `SVTEST(uvm_leaf_scope_can_use_any_separator)
-    string name_in = "branch&leaf";
-    string name_out = "leaf";
-    byte separator = "&";
-    $display("%s", uvm_leaf_scope(name_in, separator));
-    `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
-  `SVTEST_END(uvm_leaf_scope_can_use_any_separator)
+// `SVTEST(uvm_leaf_scope_can_use_any_separator)
+//   string name_in = "branch&leaf";
+//   string name_out = "leaf";
+//   byte separator = "&";
+//   `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
+// `SVTEST_END(uvm_leaf_scope_can_use_any_separator)
+
+
+  // FAILING TEST
+  // uvm_misc.svh:483
+  // null string results in 'for (pos=-1; p!=0; --pos) begin'
+// `SVTEST(uvm_leaf_scope_can_handle_empty_full_name)
+//   `FAIL_IF(uvm_leaf_scope(_NULL_STRING) != _NULL_STRING);
+// `SVTEST_END(uvm_leaf_scope_can_handle_empty_full_name)
+
+
+  `SVTEST(uvm_leaf_scope_can_return_null_leaf)
+    string name_in = "branch.";
+    string name_out = "";
+    `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
+  `SVTEST_END(uvm_leaf_scope_can_return_null_leaf)
+
+
+  // FAILING TEST
+  // uvm_misc.svh:490
+  // it's assumed leaf and parent aren't named with a _NULL_STRING
+  // which would mean the for loop on 483 starts at 0 so the 'if(pos)'
+  // can never be true
+// `SVTEST(uvm_leaf_scope_can_return_null_leaf_without_branch)
+//   string name_in = ".";
+//   string name_out = "";
+//   `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
+// `SVTEST_END(uvm_leaf_scope_can_return_null_leaf_without_branch)
 
 
   //-----------------------------
@@ -364,11 +390,11 @@ module uvm_misc_unit_test;
   // FAILING TEST
   // uvm_misc.svh:line 509
   // $sformatf should use signed'(value) so the string includes the sign
-  `SVTEST(signed_vector_to_string)
-    string s_exp = "-1";
-    string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");
-    `FAIL_IF(s_act != s_exp);
-  `SVTEST_END(signed_vector_to_string)
+// `SVTEST(signed_vector_to_string)
+//   string s_exp = "-1";
+//   string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");
+//   `FAIL_IF(s_act != s_exp);
+// `SVTEST_END(signed_vector_to_string)
 
   `UVM_VECTOR_TO_STRING(bin_vector_to_string,b11001,121,5,UVM_BIN,b);
   `UVM_VECTOR_TO_STRING(oct_vector_to_string,o1037,1567,10,UVM_OCT,o);

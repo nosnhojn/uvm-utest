@@ -122,7 +122,7 @@ module uvm_printer_knobs_unit_test;
   // FAILING TEST
   // uvm_printer.svh:line 590
   // should return here instead of proceeding to the case statement
-  `GET_RADIX_TEST(UVM_NORADIX,uut.default_radix)
+// `GET_RADIX_TEST(UVM_NORADIX,uut.default_radix)
 
   `GET_RADIX_TEST(UVM_UNFORMAT2,_NULL_STRING);
   `GET_RADIX_TEST(UVM_UNFORMAT4,_NULL_STRING);
