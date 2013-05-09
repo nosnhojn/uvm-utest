@@ -150,7 +150,7 @@ module uvm_printer_unit_test;
   `SVTEST_END(print_object_header_name_override_with_show_root)
 
 
-  `SVTEST(print_object_header_name_with_scope)
+  `SVTEST(print_object_header_name_from_scope)
     string obj_name = "name";
 
     uut.m_scope.down("scope");
@@ -158,7 +158,52 @@ module uvm_printer_unit_test;
     info = uut.get_last_row();
 
     `FAIL_IF(info.name != obj_name);
-  `SVTEST_END(print_object_header_name_with_scope)
+  `SVTEST_END(print_object_header_name_from_scope)
+
+
+  // FAILING TEST
+  // uvm_printer.svh:line 138
+  // scope_separator can't be specified by user b/c scope_stack can
+  // only handle a '.' as separator
+// `SVTEST(print_object_header_name_from_scope_with_scope_separator)
+//   string obj_name = "scopeJname";
+//   string adjusted_name = "name";
+//
+//   uut.print_object_header("name", test_obj, "J");
+//   info = uut.get_last_row();
+//
+//   `FAIL_IF(info.name != obj_name);
+// `SVTEST_END(print_object_header_name_from_scope_with_scope_separator)
+
+  `SVTEST(print_object_header_sets_row_level_to_depth0)
+    uut.print_object_header("", null);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.level != 0);
+  `SVTEST_END(print_object_header_sets_row_level_to_depth0)
+
+
+  `SVTEST(print_object_header_sets_row_level_to_depthN)
+    uut.m_scope.down("");
+    uut.m_scope.down("");
+    uut.m_scope.down("");
+    uut.print_object_header("", null);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.level != 3);
+  `SVTEST_END(print_object_header_sets_row_level_to_depthN)
+
+
+  `SVTEST(print_object_header_sets_val_to_hyphen_without_reference)
+    string s_val = "-";
+    uut.knobs.reference = 0;
+    uut.print_object_header("", null);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.val != s_val);
+  `SVTEST_END(print_object_header_sets_val_to_hyphen_without_reference)
+
+  // Another info.val test is TBD once the uvm_object_value_str is done
 
   //-----------------------------
   //-----------------------------
