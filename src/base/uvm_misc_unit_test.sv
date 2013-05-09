@@ -12,6 +12,30 @@ import svunit_pkg::*;
   `FAIL_IF(s_act != s_exp); \
 `SVTEST_END(TESTNAME)
 
+`define UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(TYPE,OPEN,CLOSED) \
+`SVTEST(uvm_leaf_scope_can_have_``TYPE``_bracket_separator) \
+  string name_in = { OPEN , "branch" , CLOSED , OPEN , "leaf" , CLOSED }; \
+  string name_out = { OPEN , "leaf" , CLOSED }; \
+  byte separator = OPEN; \
+  `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
+`SVTEST_END(uvm_leaf_scope_can_have_``TYPE``_bracket_separator) \
+
+`define UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(TYPE,OPEN,CLOSED) \
+`SVTEST(uvm_leaf_scope_can_have_``TYPE``_bracket_separator_and_array) \
+  string name_in = { OPEN , "branch" , CLOSED , OPEN , "leaf" , OPEN , 55 , CLOSED , CLOSED }; \
+  string name_out = { OPEN , "leaf" , OPEN , 55 , CLOSED , CLOSED }; \
+  byte separator = OPEN; \
+  `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
+`SVTEST_END(uvm_leaf_scope_can_have_``TYPE``_bracket_separator_and_array) \
+
+`define UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(TYPE,OPEN,CLOSED) \
+`SVTEST(uvm_leaf_scope_ignores_``TYPE``_bracket_separator_if_not_msbyte) \
+  string name_in = { OPEN , "branch" , CLOSED , OPEN , "leaf" }; \
+  string name_out = { "leaf" }; \
+  byte separator = OPEN; \
+  `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
+`SVTEST_END(uvm_leaf_scope_ignores_``TYPE``_bracket_separator_if_not_msbyte)
+
 module uvm_misc_unit_test;
 
   string name = "uvm_misc_ut";
@@ -259,12 +283,73 @@ module uvm_misc_unit_test;
   //-----------------------------
   // TBD
 
-  //-----------------------------
-  //-----------------------------
+  //---------------------------------------------------------------
+  //---------------------------------------------------------------
   // uvm_leaf_scope tests
-  //-----------------------------
-  //-----------------------------
-  // TBD
+  //---------------------------------------------------------------
+  //---------------------------------------------------------------
+  // WARNING: seems uvm_leaf_scope is meant to be compatible with
+  //          the scope stack. I don't think that's the case. plus
+  //          b/c all the functionality seems to be covered by the
+  //          scope stack up*, this seems be supplying redundant
+  //          functionality
+  //---------------------------------------------------------------
+
+  `SVTEST(uvm_leaf_scope_with_leaf)
+    string name = "leaf";
+    `FAIL_IF(uvm_leaf_scope(name) != name);
+  `SVTEST_END(uvm_leaf_scope_with_leaf)
+
+
+  `SVTEST(uvm_leaf_scope_with_branch_n_leaf)
+    string name_in = "branch.leaf";
+    string name_out = "leaf";
+    `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
+  `SVTEST_END(uvm_leaf_scope_with_branch_n_leaf)
+
+
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(curly,"{","}")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(square,"[","]")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(round,"(",")")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(angle,"<",">")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(curly,"{","}")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(square,"[","]")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(round,"(",")")
+  `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(angle,"<",">")
+
+  // FAILING TESTS
+  // these get fixed when the bug on uvm_misc.svh:line 491 is fixed (see below)
+  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(curly,"{","}")
+  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(square,"[","]")
+  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(round,"(",")")
+  `UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(angle,"<",">")
+
+
+  `SVTEST(uvm_leaf_scope_ignores_other_possible_separators_with_default)
+    string name_in = "branch[{<(]}>).leaf[{<(]}>)";
+    string name_out = "leaf[{<(]}>)";
+    `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
+  `SVTEST_END(uvm_leaf_scope_ignores_other_possible_separators_with_default)
+
+
+  `SVTEST(uvm_leaf_scope_ignores_default_with_other_possible_separators)
+    string name_in = "(.b.ranc.h.)(.lea.f.(.l)(.e).)";
+    string name_out = "(.lea.f.(.l)(.e).)";
+    byte separator = "(";
+    `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
+  `SVTEST_END(uvm_leaf_scope_ignores_default_with_other_possible_separators)
+
+
+  // FAILING TEST
+  // uvm_misc.svh:line 491
+  // works for bracket separators but not others
+  `SVTEST(uvm_leaf_scope_can_use_any_separator)
+    string name_in = "branch&leaf";
+    string name_out = "leaf";
+    byte separator = "&";
+    $display("%s", uvm_leaf_scope(name_in, separator));
+    `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
+  `SVTEST_END(uvm_leaf_scope_can_use_any_separator)
 
 
   //-----------------------------
@@ -275,11 +360,16 @@ module uvm_misc_unit_test;
   // the size arg properly)
   //-----------------------------
   //-----------------------------
+
+  // FAILING TEST
+  // uvm_misc.svh:line 509
+  // $sformatf should use signed'(value) so the string includes the sign
   `SVTEST(signed_vector_to_string)
     string s_exp = "-1";
     string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");
     `FAIL_IF(s_act != s_exp);
   `SVTEST_END(signed_vector_to_string)
+
   `UVM_VECTOR_TO_STRING(bin_vector_to_string,b11001,121,5,UVM_BIN,b);
   `UVM_VECTOR_TO_STRING(oct_vector_to_string,o1037,1567,10,UVM_OCT,o);
   `UVM_VECTOR_TO_STRING(unsigned_vector_to_string,d15,31,4,UVM_UNSIGNED,d);

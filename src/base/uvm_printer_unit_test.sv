@@ -151,7 +151,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_with_scope)
-    string obj_name = "scope.name";
+    string obj_name = "name";
 
     uut.m_scope.down("scope");
     uut.print_object_header("name", test_obj);
@@ -241,6 +241,13 @@ module uvm_printer_unit_test;
     uut.knobs.show_root = 1;
     `FAIL_IF(uut.test_adjust_name(id) != id);
   `SVTEST_END(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
+
+
+  `SVTEST(adjust_name_returns_leaf_scope_otherwise)
+    string id_in = "no.change.expected";
+    string id_out = "expected";
+    `FAIL_IF(uut.test_adjust_name(id_in) != id_out);
+  `SVTEST_END(adjust_name_returns_leaf_scope_otherwise)
 
   //-----------------------------
   //-----------------------------
