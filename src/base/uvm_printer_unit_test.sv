@@ -67,31 +67,42 @@ module uvm_printer_unit_test;
   `SVUNIT_TESTS_BEGIN
 
 
+  //-----------------------------
+  //-----------------------------
+  // constructor tests
+  //-----------------------------
+  //-----------------------------
+
   `SVTEST(printer_knobs_at_construction)
     `FAIL_IF(uut.knobs == null);
   `SVTEST_END(printer_knobs_at_construction)
 
+  //-----------------------------
+  //-----------------------------
+  // print_int tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
-  `SVTEST(adjust_name_returns_id_if_full_name_specified)
-    string id = "no.change.expected";
-    uut.knobs.full_name = 1;
-    `FAIL_IF(uut.test_adjust_name(id) != id);
-  `SVTEST_END(adjust_name_returns_id_if_full_name_specified)
+  //-----------------------------
+  //-----------------------------
+  // print_field tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
+  //-----------------------------
+  //-----------------------------
+  // print_object tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
-  `SVTEST(adjust_name_returns_id_if_id_is_dot_dot_dot)
-    string id = "...";
-    `FAIL_IF(uut.test_adjust_name(id) != id);
-  `SVTEST_END(adjust_name_returns_id_if_id_is_dot_dot_dot)
-
-
-  `SVTEST(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
-    string id = "id";
-    while (uut.m_scope.depth() > 0) uut.m_scope.up();
-    uut.knobs.show_root = 1;
-    `FAIL_IF(uut.test_adjust_name(id) != id);
-  `SVTEST_END(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
-
+  //-----------------------------
+  //-----------------------------
+  // print_object_header tests
+  //-----------------------------
+  //-----------------------------
 
   `SVTEST(print_object_header_sets_row_name)
     string obj_name = "name";
@@ -145,11 +156,126 @@ module uvm_printer_unit_test;
     uut.m_scope.down("scope");
     uut.print_object_header("name", test_obj);
     info = uut.get_last_row();
-$display("%s", uut.m_scope.get());
 
     `FAIL_IF(info.name != obj_name);
   `SVTEST_END(print_object_header_name_with_scope)
 
+  //-----------------------------
+  //-----------------------------
+  // print_string tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // print_time tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // print_real tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // print_generic tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // emit tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // format_row tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // format_header tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // format_footer tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // adjust_name tests
+  //-----------------------------
+  //-----------------------------
+
+  `SVTEST(adjust_name_returns_id_if_full_name_specified)
+    string id = "no.change.expected";
+    uut.knobs.full_name = 1;
+    `FAIL_IF(uut.test_adjust_name(id) != id);
+  `SVTEST_END(adjust_name_returns_id_if_full_name_specified)
+
+
+  `SVTEST(adjust_name_returns_id_if_id_is_dot_dot_dot)
+    string id = "...";
+    `FAIL_IF(uut.test_adjust_name(id) != id);
+  `SVTEST_END(adjust_name_returns_id_if_id_is_dot_dot_dot)
+
+
+  `SVTEST(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
+    string id = "id";
+    while (uut.m_scope.depth() > 0) uut.m_scope.up();
+    uut.knobs.show_root = 1;
+    `FAIL_IF(uut.test_adjust_name(id) != id);
+  `SVTEST_END(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
+
+  //-----------------------------
+  //-----------------------------
+  // print_array_header tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // print_array_range tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // print_array_footer tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // istop tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // index_string tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
   `SVUNIT_TESTS_END
 

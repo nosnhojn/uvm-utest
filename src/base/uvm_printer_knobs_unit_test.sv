@@ -131,7 +131,6 @@ module uvm_printer_knobs_unit_test;
 
   `SVTEST(dont_show_radix)
     uut.show_radix = 0;
-
     `FAIL_IF(uut.get_radix_str(UVM_HEX) != _NULL_STRING);
   `SVTEST_END(dont_show_radix)
 
