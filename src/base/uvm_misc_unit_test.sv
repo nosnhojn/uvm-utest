@@ -107,7 +107,7 @@ module uvm_misc_unit_test;
 
   //-----------------------------
   //-----------------------------
-  // uvm_random_seed_table tests
+  // uvm_create_random_seed tests
   //-----------------------------
   //-----------------------------
 
@@ -252,10 +252,24 @@ module uvm_misc_unit_test;
     `FAIL_IF(act1 != exp1);
   `SVTEST_END(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
 
+  //-----------------------------
+  //-----------------------------
+  // uvm_object_value_str tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
   //-----------------------------
   //-----------------------------
-  // conversion function tests
+  // uvm_leaf_scope tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+
+  //-----------------------------
+  //-----------------------------
+  // uvm_vector_to_string tests
   //
   // (all are overflowed to test
   // the size arg properly)
@@ -273,6 +287,34 @@ module uvm_misc_unit_test;
   `UVM_VECTOR_TO_STRING(time_vector_to_string,t58,58,16,UVM_TIME,t);
   `UVM_VECTOR_TO_STRING(dec_vector_to_string,d7,7,4,UVM_DEC,d);
   `UVM_VECTOR_TO_STRING(hex_vector_to_string,h7e,254,7,UVM_HEX,h);
+
+  //------------------------------
+  //------------------------------
+  // uvm_get_array_index_int tests
+  //------------------------------
+  //------------------------------
+  // TBD
+
+  //---------------------------------
+  //---------------------------------
+  // uvm_get_array_index_string tests
+  //---------------------------------
+  //---------------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // uvm_is_array tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
+
+  //-----------------------------
+  //-----------------------------
+  // uvm_has_wildcard tests
+  //-----------------------------
+  //-----------------------------
+  // TBD
 
 
   `SVUNIT_TESTS_END

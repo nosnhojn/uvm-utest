@@ -1,4 +1,5 @@
 `include "svunit_defines.svh"
+`include "test_defines.sv"
 
 import svunit_pkg::*;
 import uvm_pkg::*;
@@ -19,7 +20,6 @@ module uvm_printer_knobs_unit_test;
   // running the Unit Tests on
   //===================================
   uvm_printer_knobs uut;
-  string _NULL_STRING = "";
 
 
   //===================================

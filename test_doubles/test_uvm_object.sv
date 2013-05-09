@@ -28,6 +28,11 @@ class test_uvm_object extends uvm_object;
   static function void set_inst_count(int cnt);
     m_inst_count = cnt;
   endfunction
+
+  function uvm_report_object test_get_report_object();
+    return m_get_report_object();
+  endfunction
+    
 endclass
 
 `endif
