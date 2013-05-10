@@ -281,7 +281,23 @@ module uvm_misc_unit_test;
   // uvm_object_value_str tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(uvm_object_value_str_is_null_when_null)
+    string s_exp = "<null>";
+    test_uvm_object obj;
+    `FAIL_IF(uvm_object_value_str(obj) != s_exp);
+  `SVTEST_END(uvm_object_value_str_is_null_when_null)
+
+
+  `SVTEST(uvm_object_value_str_returns_at_inst_id)
+    string s_exp = "@99";
+    test_uvm_object obj;
+
+    test_uvm_object::set_inst_count(99);
+    obj = new("");
+
+    `FAIL_IF(uvm_object_value_str(obj) != s_exp);
+  `SVTEST_END(uvm_object_value_str_returns_at_inst_id)
 
   //---------------------------------------------------------------
   //---------------------------------------------------------------
