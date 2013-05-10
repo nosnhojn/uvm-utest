@@ -219,6 +219,35 @@ module uvm_printer_unit_test;
   `SVTEST_END(print_object_header_sets_row_val_to_object_value_str_with_reference)
 
 
+  `SVTEST(print_object_header_sets_row_size_to_hyphen)
+    string s_size = "-";
+
+    uut.print_object_header("", null);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.size != s_size);
+  `SVTEST_END(print_object_header_sets_row_size_to_hyphen)
+
+
+  `SVTEST(print_object_header_sets_row_type_name_to_object_if_null)
+    string s_type_name = "object";
+
+    uut.print_object_header("", null);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != s_type_name);
+  `SVTEST_END(print_object_header_sets_row_type_name_to_object_if_null)
+
+
+  `SVTEST(print_object_header_sets_row_type_name_to_type_name_otherwise)
+    test_uvm_object obj = new("");
+
+    uut.print_object_header("", obj);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != obj.get_type_name());
+  `SVTEST_END(print_object_header_sets_row_type_name_to_type_name_otherwise)
+
   //-----------------------------
   //-----------------------------
   // print_string tests
