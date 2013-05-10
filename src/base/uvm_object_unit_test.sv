@@ -283,6 +283,9 @@ module uvm_object_unit_test;
     `FAIL_IF(uut.sprint(mock_printer) != mock_printer.emit());
   `SVTEST_END(sprint_returns_emit_if_printer_returns_empty_string)
 
+  // verify uvm_default_printer is assigned
+  // travel down if !istop
+
   //-----------------------------
   //-----------------------------
   // do_print tests
