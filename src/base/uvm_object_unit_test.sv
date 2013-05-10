@@ -1,5 +1,6 @@
 `include "svunit_defines.svh"
 `include "test_uvm_object.sv"
+`include "mock_uvm_printer.sv"
 `include "test_defines.sv"
 
 import uvm_pkg::*;
@@ -17,6 +18,7 @@ module uvm_object_unit_test;
   //===================================
   test_uvm_object uut;
   test_uvm_object_wrapper uut_wrapper;
+  mock_uvm_printer mock_printer;
 
 
   //===================================
@@ -36,6 +38,7 @@ module uvm_object_unit_test;
   task setup();
     svunit_ut.setup();
 
+    mock_printer = new();
     uut = new("object_name");
     uut.use_uvm_seeding = 1;
 
@@ -258,7 +261,27 @@ module uvm_object_unit_test;
   // sprint tests
   //-----------------------------
   //-----------------------------
-  // TBD based on uvm_printer
+  `SVTEST(sprint_returns_m_string)
+    string s_exp = { uut.get_name() , "::" , uut.get_inst_id };;
+    mock_printer.set_istop(1);
+    `FAIL_IF(uut.sprint(mock_printer) != s_exp);
+  `SVTEST_END(sprint_returns_m_string)
+
+
+  `SVTEST(sprint_uses_default_scope_separator)
+    string _DOT = ".";
+    mock_printer.set_istop(1);
+    void'(uut.sprint(mock_printer));
+    `FAIL_IF(mock_printer.get_scope_separator() != _DOT);
+  `SVTEST_END(sprint_uses_default_scope_separator)
+
+
+  `SVTEST(sprint_returns_emit_if_printer_returns_empty_string)
+    mock_printer.set_istop(1);
+    mock_printer.override_m_string(1);
+    mock_printer.set_m_string("");
+    `FAIL_IF(uut.sprint(mock_printer) != mock_printer.emit());
+  `SVTEST_END(sprint_returns_emit_if_printer_returns_empty_string)
 
   //-----------------------------
   //-----------------------------
