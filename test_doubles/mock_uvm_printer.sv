@@ -16,16 +16,16 @@ class mock_uvm_printer extends uvm_printer();
     m_string = s;
   endfunction
 
+  // need manipulate the m_scope b/c istop isn't
+  // virtual and therefore this is the only way
+  // to manually decide the return value
   function void set_istop(bit i);
-    m_istop = i;
+    if (i) m_scope.up();
+    else m_scope.down("element");
   endfunction
 
   function string emit();
     return "emit";
-  endfunction
-
-  function bit istop();
-    return m_istop;
   endfunction
 
   function void override_m_string(bit o);

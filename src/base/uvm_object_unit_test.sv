@@ -261,6 +261,8 @@ module uvm_object_unit_test;
   // sprint tests
   //-----------------------------
   //-----------------------------
+
+  // s_exp is faked in mock_printer.print_object(...)
   `SVTEST(sprint_returns_m_string)
     string s_exp = { uut.get_name() , "::" , uut.get_inst_id };;
     mock_printer.set_istop(1);
@@ -283,8 +285,47 @@ module uvm_object_unit_test;
     `FAIL_IF(uut.sprint(mock_printer) != mock_printer.emit());
   `SVTEST_END(sprint_returns_emit_if_printer_returns_empty_string)
 
-  // verify uvm_default_printer is assigned
-  // travel down if !istop
+
+  `SVTEST(sprint_assigns_the_status_container_printer)
+    mock_printer.set_istop(0);
+    uut.__m_uvm_status_container.printer = null;
+    void'(uut.sprint(mock_printer));
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
+    `FAIL_IF(uut.__m_uvm_status_container.printer == null);
+  `SVTEST_END(sprint_assigns_the_status_container_printer)
+
+
+  `SVTEST(sprint_calls_field_automation)
+    mock_printer.set_istop(0);
+    uut.fake_field_automation = 1;
+    void'(uut.sprint(mock_printer));
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_PRINT);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+  `SVTEST_END(sprint_calls_field_automation)
+
+
+  `SVTEST(sprint_invokes_do_print_when_not_top)
+    mock_printer.set_istop(0);
+    uut.fake_field_automation = 1;
+    void'(uut.sprint(mock_printer));
+    `FAIL_IF(!uut.called_do_print);
+  `SVTEST_END(sprint_invokes_do_print_when_not_top)
+
+
+  `SVTEST(sprint_returns_null_string_when_not_top)
+    mock_printer.set_istop(0);
+    uut.fake_field_automation = 1;
+    `FAIL_IF(uut.sprint(mock_printer) != _NULL_STRING);
+  `SVTEST_END(sprint_returns_null_string_when_not_top)
+
+
+  `SVTEST(sprint_assigns_default_printer_if_null)
+    mock_printer.set_istop(0);
+    uvm_default_printer = mock_printer;
+    void'(uut.sprint());
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
+  `SVTEST_END(sprint_assigns_default_printer_if_null)
 
   //-----------------------------
   //-----------------------------
@@ -444,7 +485,14 @@ module uvm_object_unit_test;
   // __m_uvm_field_automation tests
   //-------------------------------
   //-------------------------------
-  // TBD
+
+  `SVTEST(__m_uvm_field_automation_is_empty)
+    const test_uvm_object tmp_data__ = new("");
+    const int what__ = 99;
+    const string str__ = "66";
+    uut.__m_uvm_field_automation(tmp_data__, what__, str__);
+    `FAIL_IF(0);
+  `SVTEST_END(__m_uvm_field_automation_is_empty)
 
   //-----------------------------
   //-----------------------------
