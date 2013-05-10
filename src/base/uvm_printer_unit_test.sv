@@ -194,16 +194,30 @@ module uvm_printer_unit_test;
   `SVTEST_END(print_object_header_sets_row_level_to_depthN)
 
 
-  `SVTEST(print_object_header_sets_val_to_hyphen_without_reference)
+  `SVTEST(print_object_header_sets_row_val_to_hyphen_without_reference)
     string s_val = "-";
+
     uut.knobs.reference = 0;
     uut.print_object_header("", null);
     info = uut.get_last_row();
 
     `FAIL_IF(info.val != s_val);
-  `SVTEST_END(print_object_header_sets_val_to_hyphen_without_reference)
+  `SVTEST_END(print_object_header_sets_row_val_to_hyphen_without_reference)
 
-  // Another info.val test is TBD once the uvm_object_value_str is done
+
+  `SVTEST(print_object_header_sets_row_val_to_object_value_str_with_reference)
+    string s_val = "@99";
+    test_uvm_object obj;
+
+    uut.knobs.reference = 1;
+    test_uvm_object::set_inst_count(99);
+    obj = new("");
+    uut.print_object_header("", obj);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.val != s_val);
+  `SVTEST_END(print_object_header_sets_row_val_to_object_value_str_with_reference)
+
 
   //-----------------------------
   //-----------------------------
