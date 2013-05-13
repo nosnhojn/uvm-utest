@@ -254,7 +254,31 @@ module uvm_object_unit_test;
   // print tests
   //-----------------------------
   //-----------------------------
-  // TBD based on sprint
+
+  // we can't automate checking of stdout so we're
+  // changing the destination to somewhere else via
+  // mcd
+  `SVTEST(print_destination_is_knobs_mcd)
+    string s_act = print_test_simple_sprint_emit(uut, mock_printer);
+    `FAIL_IF(s_act != mock_printer.emit());
+  `SVTEST_END(print_destination_is_knobs_mcd)
+
+
+  `SVTEST(print_assign_default_printer_if_null)
+    string s_act;
+
+    uvm_default_printer = mock_printer;
+    s_act = print_test_simple_sprint_emit(uut, null);
+
+    `FAIL_IF(s_act != mock_printer.emit());
+  `SVTEST_END(print_assign_default_printer_if_null)
+
+
+  // can't check the null printer error b/c the fwrite
+  // is called regardless of null (i.e. we can check the message
+  // but we die with a null object access right after)
+  // `SVTEST(print_with_default_null_printer_is_error)
+  // `SVTEST_END(print_with_default_null_printer_is_error)
 
   //-----------------------------
   //-----------------------------
@@ -506,5 +530,23 @@ module uvm_object_unit_test;
   `SVTEST_END(get_report_object_returns_null)
 
   `SVUNIT_TESTS_END
+
+
+
+  function automatic string print_test_simple_sprint_emit(uvm_object my_uut,
+                                                          uvm_printer p);
+    int PRINT_FILE = $fopen("/tmp/.uvm_object.print", "w+");
+    string s_act;
+
+    mock_printer.knobs.mcd = PRINT_FILE;
+    mock_printer.set_istop(1);
+    mock_printer.override_m_string(1);
+    mock_printer.set_m_string("");
+
+    my_uut.print(p);
+    void'($rewind(PRINT_FILE));
+    void'($fscanf(PRINT_FILE, "%s\n", print_test_simple_sprint_emit));
+    void'($fclose(PRINT_FILE));
+  endfunction
 
 endmodule
