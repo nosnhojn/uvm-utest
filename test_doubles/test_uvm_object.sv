@@ -13,8 +13,8 @@ class test_uvm_object extends uvm_object;
   rand int rand_property;
 
   bit fake_test_type_name = 0;
-  bit fake_field_automation = 0;
   uvm_printer do_print_printer;
+  string create_name;
 
   uvm_object tmp_data__;
   int what__;
@@ -42,24 +42,27 @@ class test_uvm_object extends uvm_object;
   function void __m_uvm_field_automation(uvm_object tmp_data__,
                                          int what__,
                                          string str__);
-    if (fake_field_automation) begin
-      this.tmp_data__ = tmp_data__;
-      this.what__ = what__;
-      this.str__ = str__;
-    end
-    else super.__m_uvm_field_automation(tmp_data__, what__, str__);
+    this.tmp_data__ = tmp_data__;
+    this.what__ = what__;
+    this.str__ = str__;
+
+    super.__m_uvm_field_automation(tmp_data__, what__, str__);
   endfunction
 
   function void do_print(uvm_printer printer);
-    super.do_print(printer);
     $cast(do_print_printer, printer);
+    super.do_print(printer);
   endfunction
 
   function string sprint(uvm_printer printer=null);
     do_print_printer = null;
     return super.sprint(printer);
   endfunction
-    
+
+  function uvm_object create (string name="");
+    create_name = name;
+    return super.create(name);
+  endfunction
 endclass
 
 `endif

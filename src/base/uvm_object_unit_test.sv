@@ -5,6 +5,7 @@
 
 import uvm_pkg::*;
 import svunit_pkg::*;
+import svunit_uvm_mock_pkg::*;
 
 module uvm_object_unit_test;
 
@@ -43,6 +44,8 @@ module uvm_object_unit_test;
     uut.use_uvm_seeding = 1;
 
     uut.fake_test_type_name = 0;
+
+    uvm_report_mock::setup();
   endtask
 
 
@@ -244,10 +247,33 @@ module uvm_object_unit_test;
     `FAIL_IF(uut.clone() != null);
   `SVTEST_END(clone_returns_null)
 
-  // relies on the copy
-  //`SVTEST(clone_returns_null)
-  //  `FAIL_IF(uut.clone() != null);
-  //`SVTEST_END(clone_returns_null)
+
+  `SVTEST(clone_asserts_warning_for_null_object)
+    uvm_report_mock::expect_warning("CRFLD",
+                                    { "The create method failed for " , uut.get_name() , ",  object cannot be cloned" }
+                                   );
+    void'(uut.clone());
+ 
+    `FAIL_IF(!uvm_report_mock::verify_complete());
+  `SVTEST_END(clone_asserts_warning_for_null_object)
+
+
+  `SVTEST(clone_is_created_with_get_name)
+    uut.clone();
+    `FAIL_IF(uut.create_name != uut.get_name());
+  `SVTEST_END(clone_is_created_with_get_name)
+
+
+  // copy isn't virtual so we're going to need to find a
+  // different way here
+// `SVTEST(clone_returns_a_new_copy)
+//   test_uvm_object o;
+//   uut.fake_create = 1;
+//   uut.fake_copy = 1;
+//   $cast(o, uut.clone());
+//   `FAIL_IF(o.get_name() != uut.fake_create_name() ||
+//            o.copied_object.get_name() != uut.fake_copy_name());
+// `SVTEST_END(clone_returns_a_new_copy)
 
   //-----------------------------
   //-----------------------------
@@ -288,7 +314,7 @@ module uvm_object_unit_test;
 
   // s_exp is faked in mock_printer.print_object(...)
   `SVTEST(sprint_returns_m_string)
-    string s_exp = { uut.get_name() , "::" , uut.get_inst_id };;
+    string s_exp = { uut.get_name() , "::" , uut.get_inst_id };
     mock_printer.set_istop(1);
     `FAIL_IF(uut.sprint(mock_printer) != s_exp);
   `SVTEST_END(sprint_returns_m_string)
@@ -321,7 +347,6 @@ module uvm_object_unit_test;
 
   `SVTEST(sprint_calls_field_automation)
     mock_printer.set_istop(0);
-    uut.fake_field_automation = 1;
     void'(uut.sprint(mock_printer));
     `FAIL_IF(uut.tmp_data__ != null);
     `FAIL_IF(uut.what__ != UVM_PRINT);
@@ -331,7 +356,6 @@ module uvm_object_unit_test;
 
   `SVTEST(sprint_invokes_do_print_when_not_top)
     mock_printer.set_istop(0);
-    uut.fake_field_automation = 1;
     void'(uut.sprint(mock_printer));
     `FAIL_IF(!$cast(mock_printer, uut.do_print_printer) ||
              uut.do_print_printer == null);
@@ -340,7 +364,6 @@ module uvm_object_unit_test;
 
   `SVTEST(sprint_returns_null_string_when_not_top)
     mock_printer.set_istop(0);
-    uut.fake_field_automation = 1;
     `FAIL_IF(uut.sprint(mock_printer) != _NULL_STRING);
   `SVTEST_END(sprint_returns_null_string_when_not_top)
 
