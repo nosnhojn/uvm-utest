@@ -290,8 +290,8 @@ module uvm_object_unit_test;
     mock_printer.set_istop(0);
     uut.__m_uvm_status_container.printer = null;
     void'(uut.sprint(mock_printer));
-    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
-    `FAIL_IF(uut.__m_uvm_status_container.printer == null);
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer) ||
+             uut.__m_uvm_status_container.printer == null);
   `SVTEST_END(sprint_assigns_the_status_container_printer)
 
 
@@ -309,7 +309,8 @@ module uvm_object_unit_test;
     mock_printer.set_istop(0);
     uut.fake_field_automation = 1;
     void'(uut.sprint(mock_printer));
-    `FAIL_IF(!uut.called_do_print);
+    `FAIL_IF(!$cast(mock_printer, uut.do_print_printer) ||
+             uut.do_print_printer == null);
   `SVTEST_END(sprint_invokes_do_print_when_not_top)
 
 
@@ -324,7 +325,8 @@ module uvm_object_unit_test;
     mock_printer.set_istop(0);
     uvm_default_printer = mock_printer;
     void'(uut.sprint());
-    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer) ||
+             uut.__m_uvm_status_container.printer == null);
   `SVTEST_END(sprint_assigns_default_printer_if_null)
 
   //-----------------------------

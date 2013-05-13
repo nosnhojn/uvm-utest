@@ -14,7 +14,7 @@ class test_uvm_object extends uvm_object;
 
   bit fake_test_type_name = 0;
   bit fake_field_automation = 0;
-  bit called_do_print = 0;
+  uvm_printer do_print_printer;
 
   uvm_object tmp_data__;
   int what__;
@@ -52,11 +52,11 @@ class test_uvm_object extends uvm_object;
 
   function void do_print(uvm_printer printer);
     super.do_print(printer);
-    called_do_print = 1;
+    $cast(do_print_printer, printer);
   endfunction
 
   function string sprint(uvm_printer printer=null);
-    called_do_print = 0;
+    do_print_printer = null;
     return super.sprint(printer);
   endfunction
     
