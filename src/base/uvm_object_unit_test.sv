@@ -415,7 +415,37 @@ module uvm_object_unit_test;
   // copy tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(copy_rhs_null)
+    uvm_object rhs=null;
+    uvm_report_mock::expect_warning("NULLCP", "A null object was supplied to copy; copy is ignored");
+    void'(uut.copy(rhs));
+    `FAIL_IF(!uvm_report_mock::verify_complete());
+  `SVTEST_END(copy_rhs_null)
+  
+  
+  // WARNING
+  // We decided to skip the cycle checking code as
+  // this seems to refer to the time when functions
+  // could consume time. Therefore we didn't test
+  // the uvm_global_copy_map.
+
+  `SVTEST(copy_rhs_not_null_field_automation)
+    string s_exp = "name";
+    test_uvm_object rhs=new("name");
+    void'(uut.copy(rhs));
+    `FAIL_IF(uut.tmp_data__.get_name() != s_exp);
+    `FAIL_IF(uut.what__ != UVM_COPY);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+  `SVTEST_END(copy_rhs_not_null_field_automation)
+
+
+  `SVTEST(copy_rhs_not_null_do_copy)
+    uvm_callback rhs=new("name");
+    void'(uut.copy(rhs));
+    `FAIL_IF(!$cast(rhs, uut.do_copy_copy) ||
+             uut.do_copy_copy == null);
+  `SVTEST_END(copy_rhs_not_null_do_copy)
+  
 
   //-----------------------------
   //-----------------------------
@@ -558,7 +588,7 @@ module uvm_object_unit_test;
 
   function automatic string print_test_simple_sprint_emit(uvm_object my_uut,
                                                           uvm_printer p);
-    int PRINT_FILE = $fopen("/tmp/.uvm_object.print", "w+");
+    int PRINT_FILE = $fopen(".uvm_object.print", "w+");
     string s_act;
 
     mock_printer.knobs.mcd = PRINT_FILE;
