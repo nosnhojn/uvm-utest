@@ -66,6 +66,12 @@ module uvm_printer_knobs_unit_test;
   `SVUNIT_TESTS_BEGIN
 
 
+  //-----------------------------
+  //-----------------------------
+  // constructor tests
+  //-----------------------------
+  //-----------------------------
+
   `SVTEST(defaults_at_construction)
     string s_prefix = "";
     string s_separator = "{}";
@@ -112,6 +118,11 @@ module uvm_printer_knobs_unit_test;
     `FAIL_IF(uut.sprint != 1);
   `SVTEST_END(deprecated_defaults)
 
+  //-----------------------------
+  //-----------------------------
+  // get_radix_str tests
+  //-----------------------------
+  //-----------------------------
 
   `GET_RADIX_TEST(UVM_BIN,uut.bin_radix)
   `GET_RADIX_TEST(UVM_OCT,uut.oct_radix)

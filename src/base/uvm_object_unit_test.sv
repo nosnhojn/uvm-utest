@@ -76,7 +76,7 @@ module uvm_object_unit_test;
 
   //-----------------------------
   //-----------------------------
-  // constructor related tests
+  // constructor tests
   //-----------------------------
   //-----------------------------
   `SVTEST(inst_cnt_is_static)
