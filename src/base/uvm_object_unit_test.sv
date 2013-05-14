@@ -79,6 +79,7 @@ module uvm_object_unit_test;
   // constructor tests
   //-----------------------------
   //-----------------------------
+
   `SVTEST(inst_cnt_is_static)
     test_uvm_object other;
     int new_test_objs = 50;
