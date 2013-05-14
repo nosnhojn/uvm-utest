@@ -36,11 +36,18 @@ import svunit_pkg::*;
   `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
 `SVTEST_END(uvm_leaf_scope_ignores_``TYPE``_bracket_separator_if_not_msbyte)
 
+`define UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(RADIX,IDX) \
+`SVTEST(get_array_index_handles_index_with_``RADIX``_radix) \
+  string s_in = `"double_trouble[IDX]`"; \
+  int i_exp = IDX; \
+  `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != i_exp); \
+`SVTEST_END(get_array_index_handles_index_with_``RADIX``_radix)
+
 module uvm_misc_unit_test;
 
   string name = "uvm_misc_ut";
   svunit_testcase svunit_ut;
-
+  bit get_array_index_is_wildcard;
 
   //===================================
   // This is the UUT that we're 
@@ -425,7 +432,85 @@ module uvm_misc_unit_test;
   // uvm_get_array_index_int tests
   //------------------------------
   //------------------------------
-  // TBD
+
+  // a more appropriate return value would be -1 since 0 makes
+  // no array indistigunishable from <array_name>[0]
+  `SVTEST(WARNING_get_array_index_returns_0_for_no_array)
+    string s_in = "double_trouble";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
+  `SVTEST_END(WARNING_get_array_index_returns_0_for_no_array)
+
+
+  `SVTEST(get_array_index_returns_N_for_idx_with_single_digit)
+    string s_in = "double_trouble[9]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 9);
+  `SVTEST_END(get_array_index_returns_N_for_idx_with_single_digit)
+
+
+  `SVTEST(get_array_index_returns_N_for_idx_with_multi_digit)
+    string s_in = "double_trouble[9988]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 9988);
+  `SVTEST_END(get_array_index_returns_N_for_idx_with_multi_digit)
+
+
+  `SVTEST(get_array_index_returns_minus1_for_non_numeric_idx)
+    string s_in = "double_trouble[a]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != -1);
+  `SVTEST_END(get_array_index_returns_minus1_for_non_numeric_idx)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 539
+  // radix ('h/'o/'d/'b) are treated as illegal characters
+// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(bin,'b1);
+// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(oct,'o7);
+// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(dec,'d8);
+// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(hex,'h8);
+
+
+  `SVTEST(WARNING_get_array_index_returns_0_for_incomplete_array_string)
+    string s_in = "99]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
+  `SVTEST_END(WARNING_get_array_index_returns_0_for_incomplete_array_string)
+
+
+  `SVTEST(WARNING_get_array_index_is_not_wild_for_no_array)
+    string s_in = "double_trouble";
+    uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+    `FAIL_IF(get_array_index_is_wildcard != 0);
+  `SVTEST_END(WARNING_get_array_index_is_not_wild_for_no_array)
+
+
+  `SVTEST(WARNING_get_array_index_is_not_wild_for_array)
+    string s_in = "double_trouble[99]";
+    uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+    `FAIL_IF(get_array_index_is_wildcard != 0);
+  `SVTEST_END(WARNING_get_array_index_is_not_wild_for_array)
+
+
+  `SVTEST(get_array_index_star_is_wild)
+    string s_in = "double_trouble[*]";
+    uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+    `FAIL_IF(get_array_index_is_wildcard != 1);
+  `SVTEST_END(get_array_index_star_is_wild)
+
+
+  `SVTEST(get_array_index_question_mark_is_wild)
+    string s_in = "double_trouble[?]";
+    uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+    `FAIL_IF(get_array_index_is_wildcard != 1);
+  `SVTEST_END(get_array_index_question_mark_is_wild)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 536
+  // going through the while loop with a string that includes no "["
+  // means the is_wildcard is left in an erroneous state
+// `SVTEST(WARNING_incomplete_strings_are_not_wild)
+//   string s_in = "double_trouble]";
+//   uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+//   `FAIL_IF(get_array_index_is_wildcard != 0);
+// `SVTEST_END(WARNING_incomplete_strings_are_not_wild)
 
   //---------------------------------
   //---------------------------------
