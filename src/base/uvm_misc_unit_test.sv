@@ -443,7 +443,7 @@ module uvm_misc_unit_test;
 
   `SVTEST(get_array_index_returns_N_for_idx_with_single_digit)
     string s_in = "double_trouble[5]";
-    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 9);
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 5);
   `SVTEST_END(get_array_index_returns_N_for_idx_with_single_digit)
 
 

@@ -13,6 +13,7 @@ class test_uvm_object extends uvm_object;
   rand int rand_property;
 
   bit fake_test_type_name = 0;
+  bit fake_create = 0;
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
   string create_name;
@@ -67,7 +68,16 @@ class test_uvm_object extends uvm_object;
 
   function uvm_object create (string name="");
     create_name = name;
-    return super.create(name);
+    if (fake_create) begin
+      test_uvm_object o = new(fake_create_name());
+      return o;
+    end
+    else
+      return super.create(name);
+  endfunction
+
+  function string fake_create_name();
+    return { get_name() , "::create" };
   endfunction
 endclass
 

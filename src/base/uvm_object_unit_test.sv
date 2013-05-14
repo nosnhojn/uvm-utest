@@ -267,14 +267,14 @@ module uvm_object_unit_test;
 
   // copy isn't virtual so we're going to need to find a
   // different way here
-// `SVTEST(clone_returns_a_new_copy)
-//   test_uvm_object o;
-//   uut.fake_create = 1;
-//   uut.fake_copy = 1;
-//   $cast(o, uut.clone());
-//   `FAIL_IF(o.get_name() != uut.fake_create_name() ||
-//            o.copied_object.get_name() != uut.fake_copy_name());
-// `SVTEST_END(clone_returns_a_new_copy)
+  `SVTEST(clone_returns_a_new_copy)
+    test_uvm_object o;
+    uut.fake_create = 1;
+    $cast(o, uut.clone());
+    `FAIL_IF(o.get_name() != uut.fake_create_name())
+    `FAIL_IF(o.do_copy_copy == null)
+  `SVTEST_END(clone_returns_a_new_copy)
+
 
   //-----------------------------
   //-----------------------------
