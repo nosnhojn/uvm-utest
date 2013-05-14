@@ -1,5 +1,6 @@
 `include "svunit_defines.svh"
 `include "test_uvm_object.sv"
+`include "test_defines.sv"
 
 import uvm_pkg::*;
 import svunit_pkg::*;
@@ -441,6 +442,12 @@ module uvm_misc_unit_test;
   `SVTEST_END(WARNING_get_array_index_returns_0_for_no_array)
 
 
+  `SVTEST(WARNING_get_array_index_returns_0_for_nothing_in_brackets)
+    string s_in = "double_trouble[]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
+  `SVTEST_END(WARNING_get_array_index_returns_0_for_nothing_in_brackets)
+
+
   `SVTEST(get_array_index_returns_N_for_idx_with_single_digit)
     string s_in = "double_trouble[5]";
     `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 5);
@@ -492,18 +499,18 @@ module uvm_misc_unit_test;
   `SVTEST_END(WARNING_get_array_index_returns_0_for_incomplete_array_string)
 
 
-  `SVTEST(WARNING_get_array_index_is_not_wild_for_no_array)
+  `SVTEST(get_array_index_is_not_wild_for_no_array)
     string s_in = "double_trouble";
     uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
     `FAIL_IF(get_array_index_is_wildcard != 0);
-  `SVTEST_END(WARNING_get_array_index_is_not_wild_for_no_array)
+  `SVTEST_END(get_array_index_is_not_wild_for_no_array)
 
 
-  `SVTEST(WARNING_get_array_index_is_not_wild_for_array)
+  `SVTEST(get_array_index_is_not_wild_for_array)
     string s_in = "double_trouble[99]";
     uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
     `FAIL_IF(get_array_index_is_wildcard != 0);
-  `SVTEST_END(WARNING_get_array_index_is_not_wild_for_array)
+  `SVTEST_END(get_array_index_is_not_wild_for_array)
 
 
   `SVTEST(get_array_index_star_is_wild)
@@ -520,22 +527,99 @@ module uvm_misc_unit_test;
   `SVTEST_END(get_array_index_question_mark_is_wild)
 
 
+  `SVTEST(get_array_index_nothing_in_brackets_is_not_wildcart)
+    string s_in = "double_trouble[]";
+    uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+    `FAIL_IF(get_array_index_is_wildcard != 0);
+  `SVTEST_END(get_array_index_nothing_in_brackets_is_not_wildcart)
+
+
+  `SVTEST(WARNING_get_array_index_returns_0_for_wildcard_index)
+    string s_in = "double_trouble[?]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
+  `SVTEST_END(WARNING_get_array_index_returns_0_for_wildcard_index)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 533
+  // default of wildcard not valid for non-happy-path strings
+// `SVTEST(get_array_index_no_string_nothing_in_brackets_is_not_wildcart)
+//   string s_in = "[]";
+//   uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
+//   `FAIL_IF(get_array_index_is_wildcard != 0);
+// `SVTEST_END(get_array_index_no_string_nothing_in_brackets_is_not_wildcart)
+
+
   // FAILING TEST
   // uvm_misc.sv:line 536
   // going through the while loop with a string that includes no "["
   // means the is_wildcard is left in an erroneous state
-// `SVTEST(WARNING_incomplete_strings_are_not_wild)
+// `SVTEST(incomplete_strings_are_not_wild)
 //   string s_in = "double_trouble]";
 //   uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
 //   `FAIL_IF(get_array_index_is_wildcard != 0);
-// `SVTEST_END(WARNING_incomplete_strings_are_not_wild)
+// `SVTEST_END(incomplete_strings_are_not_wild)
 
   //---------------------------------
   //---------------------------------
   // uvm_get_array_index_string tests
   //---------------------------------
   //---------------------------------
-  // TBD
+
+// `SVTEST(get_array_index_string_returns_null_string_for_no_array)
+//   string s_in = "double_trouble";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != _NULL_STRING);
+// `SVTEST_END(get_array_index_string_returns_null_string_for_no_array)
+//
+//
+// `SVTEST(get_array_index_string_returns_N_for_idx_with_single_digit)
+//   string s_in = "double_trouble[5]";
+//   string s_exp = "5";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_N_for_idx_with_single_digit)
+//
+//
+// `SVTEST(get_array_index_string_returns_N_for_idx_with_multi_digit)
+//   string s_in = "double_trouble[9988]";
+//   string s_exp = "9988";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_N_for_idx_with_multi_digit)
+//
+//
+// `SVTEST(get_array_index_string_returns_lower_boundary_zero)
+//   string s_in = "double_trouble[0]";
+//   string s_exp = "0";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_lower_boundary_zero)
+//
+//
+// `SVTEST(get_array_index_string_returns_upper_boundary_nine)
+//   string s_in = "double_trouble[9]";
+//   string s_exp = "9";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_upper_boundary_nine)
+//
+//
+// // FAILING TEST
+// // uvm_misc.svh:line 567
+// // there's no effort here to limit to numeric indecies like is done in the
+// // uvm_get_array_index_int (this test would limit the lower bound i.e. 0)
+// `SVTEST(get_array_index_string_returns_minus1_for_char_lt_0)
+//   string s_in = "double_trouble[/]";
+//   string s_exp = "-1";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_minus1_for_char_lt_0)
+//
+//
+// // FAILING TEST
+// // uvm_misc.svh:line 567
+// // there's no effort here to limit to numeric indecies like is done in the
+// // uvm_get_array_index_int (this test would limit the upper bound i.e. 0)
+// `SVTEST(get_array_index_string_returns_minus1_for_char_gt_9)
+//   string s_in = "double_trouble[:]";
+//   string s_exp = "-1";
+//   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
+// `SVTEST_END(get_array_index_string_returns_minus1_for_char_gt_9)
 
   //-----------------------------
   //-----------------------------
