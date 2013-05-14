@@ -442,7 +442,7 @@ module uvm_misc_unit_test;
 
 
   `SVTEST(get_array_index_returns_N_for_idx_with_single_digit)
-    string s_in = "double_trouble[9]";
+    string s_in = "double_trouble[5]";
     `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 9);
   `SVTEST_END(get_array_index_returns_N_for_idx_with_single_digit)
 
@@ -453,10 +453,28 @@ module uvm_misc_unit_test;
   `SVTEST_END(get_array_index_returns_N_for_idx_with_multi_digit)
 
 
-  `SVTEST(get_array_index_returns_minus1_for_non_numeric_idx)
-    string s_in = "double_trouble[a]";
+  `SVTEST(get_array_index_returns_lower_boundary_zero)
+    string s_in = "double_trouble[0]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
+  `SVTEST_END(get_array_index_returns_lower_boundary_zero)
+
+
+  `SVTEST(get_array_index_returns_upper_boundary_nine)
+    string s_in = "double_trouble[9]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 9);
+  `SVTEST_END(get_array_index_returns_upper_boundary_nine)
+
+
+  `SVTEST(get_array_index_returns_minus1_for_char_lt_0)
+    string s_in = "double_trouble[/]";
     `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != -1);
-  `SVTEST_END(get_array_index_returns_minus1_for_non_numeric_idx)
+  `SVTEST_END(get_array_index_returns_minus1_for_char_lt_0)
+
+
+  `SVTEST(get_array_index_returns_minus1_for_char_gt_9)
+    string s_in = "double_trouble[:]";
+    `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != -1);
+  `SVTEST_END(get_array_index_returns_minus1_for_char_gt_9)
 
 
   // FAILING TEST
