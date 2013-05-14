@@ -14,6 +14,7 @@ class test_uvm_object extends uvm_object;
 
   bit fake_test_type_name = 0;
   uvm_printer do_print_printer;
+  uvm_object do_copy_copy;
   string create_name;
 
   uvm_object tmp_data__;
@@ -52,6 +53,11 @@ class test_uvm_object extends uvm_object;
   function void do_print(uvm_printer printer);
     $cast(do_print_printer, printer);
     super.do_print(printer);
+  endfunction
+
+  function void do_copy(uvm_object rhs);
+    $cast(do_copy_copy, rhs);
+    super.do_copy(rhs);
   endfunction
 
   function string sprint(uvm_printer printer=null);
