@@ -83,6 +83,13 @@ import svunit_pkg::*;
   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp); \
 `SVTEST_END(get_array_index_string_``NAME)
 
+`define HAS_WILDCARD_RETURNS(NAME,STRING_IN,EXP) \
+`SVTEST(has_wildcard_returns_``NAME) \
+  string s_in = `"STRING_IN`"; \
+  `FAIL_IF(uvm_has_wildcard(s_in) != EXP); \
+`SVTEST_END(has_wildcard_returns_``NAME)
+
+
 module uvm_misc_unit_test;
 
   string name = "uvm_misc_ut";
@@ -510,6 +517,14 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,is_not_wild_for_array,double_trouble[99],0);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,star_is_wild,double_trouble[*],1);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,question_mark_is_wild,double_trouble[?],1);
+  `UVM_GET_ARRAY_INDEX_FOR_WILD(int,plus_sign_is_wild,double_trouble[+],1);
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 539
+  // default of wildcard not valid for illegal indecies strings
+// `UVM_GET_ARRAY_INDEX_FOR_WILD(int,illegal_index_is_not_wild,double_trouble[>],0);
+
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,nothing_in_brackets_is_not_wildcart,double_trouble[],0);
 
 
@@ -585,6 +600,14 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,is_not_wild_for_array,double_trouble[99],0);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,star_is_wild,double_trouble[*],1);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,question_mark_is_wild,double_trouble[?],1);
+
+  // FAILING TEST
+  // uvm_misc.svh:line 567
+  // the '+' sign is considered a wildcard in uvm_is_wildcard but not
+  // here making the 2 functions incompatible.
+// `UVM_GET_ARRAY_INDEX_FOR_WILD(string,plus_sign_is_wild,double_trouble[+],1);
+
+  `UVM_GET_ARRAY_INDEX_FOR_WILD(string,illegal_index_is_not_wild,double_trouble[>],0);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,nothing_in_brackets_is_not_wildcart,double_trouble[],0);
 
 
@@ -663,8 +686,39 @@ module uvm_misc_unit_test;
   // uvm_has_wildcard tests
   //-----------------------------
   //-----------------------------
-  // TBD
 
+  `SVTEST(WARNING_has_wildcard_returns_true_for_any_regex)
+    string s_in = "/silly billy/";
+    `FAIL_IF(uvm_has_wildcard(s_in) != 1);
+  `SVTEST_END(WARNING_has_wildcard_returns_true_for_any_regex)
+
+
+  `SVTEST(WARNING_has_wildcard_returns_true_for_empty_regex)
+    string s_in = "//";
+    `FAIL_IF(uvm_has_wildcard(s_in) != 1);
+  `SVTEST_END(WARNING_has_wildcard_returns_true_for_empty_regex)
+
+  `HAS_WILDCARD_RETURNS(true_for_star_at_end_of_string,*junk,1);
+  `HAS_WILDCARD_RETURNS(true_for_star_at_beginning_of_string,junk*,1);
+  `HAS_WILDCARD_RETURNS(true_for_star_in_middle_of_string,ju*nk,1);
+
+  `HAS_WILDCARD_RETURNS(true_for_question_mark_at_end_of_string,?junk,1);
+  `HAS_WILDCARD_RETURNS(true_for_question_mark_at_beginning_of_string,junk?,1);
+  `HAS_WILDCARD_RETURNS(true_for_question_mark_in_middle_of_string,ju?nk,1);
+
+  `HAS_WILDCARD_RETURNS(true_for_plus_sign_at_end_of_string,+junk,1);
+  `HAS_WILDCARD_RETURNS(true_for_plus_sign_at_beginning_of_string,junk+,1);
+  `HAS_WILDCARD_RETURNS(true_for_plus_sign_in_middle_of_string,ju+nk,1);
+
+  `SVTEST(has_wildcard_returns_false_for_all_other_puncuation)
+    string s_in = "`~!@#$%^&()-_=[]{}\|;:'\",<.>//";
+    `FAIL_IF(uvm_has_wildcard(s_in) != 0);
+  `SVTEST_END(has_wildcard_returns_false_for_all_other_puncuation)
+
+  `SVTEST(has_wildcard_returns_false_for_alpha_numeric)
+    string s_in = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
+    `FAIL_IF(uvm_has_wildcard(s_in) != 0);
+  `SVTEST_END(has_wildcard_returns_false_for_alpha_numeric)
 
   `SVUNIT_TESTS_END
 
