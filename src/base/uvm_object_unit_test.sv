@@ -402,14 +402,50 @@ module uvm_object_unit_test;
   // record tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(record_default_recorder_tr_handle_null)
+    uvm_default_recorder.tr_handle = 0;
+    uut.record();
+    `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
+  `SVTEST_END(record_default_recorder_tr_handle_null)
+
+  `SVTEST(record_recorder_tr_handle_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 0;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
+  `SVTEST_END(record_recorder_tr_handle_null)
+
+  `SVTEST(record_recorder_tr_handle_not_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 1;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_RECORD);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_IF(dummy_rec.tr_handle != 0);
+  `SVTEST_END(record_recorder_tr_handle_not_null)
+
+  `SVTEST(record_recorder_recording_depth_not_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 1;
+    dummy_rec.recording_depth++;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_RECORD);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_IF(dummy_rec.tr_handle != 1);
+  `SVTEST_END(record_recorder_recording_depth_not_null)
 
   //-----------------------------
   //-----------------------------
   // do_record tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(do_record_is_empty)
+    uvm_recorder dummy_rec = new("rec");
+    uut.do_record(dummy_rec);
+    `FAIL_IF(0)
+  `SVTEST_END(do_record_is_empty)
 
   //-----------------------------
   //-----------------------------
