@@ -146,6 +146,20 @@ module uvm_misc_unit_test;
 
   `SVUNIT_TESTS_BEGIN
 
+  //-----------------------------
+  //-----------------------------
+  // uvm_instance_scope tests
+  //-----------------------------
+  //-----------------------------
+
+  // this test is not entirely accurate b/c technically,
+  // the global seed could randomize to 0. slim chance of
+  // that happening though which is why I've chosen to
+  // verify it gets some value >0 (for unsigned).
+  `SVTEST(global_random_seed_is_randomized)
+    `FAIL_IF(uvm_global_random_seed <= 0);
+  `SVTEST_END(global_random_seed_is_randomized)
+
 
   //-----------------------------
   //-----------------------------
