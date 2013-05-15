@@ -1,8 +1,17 @@
 `include "svunit_defines.svh"
 `include "test_defines.sv"
+`include "test_uvm_object.sv"
 
 import uvm_pkg::*;
 import svunit_pkg::*;
+import svunit_uvm_mock_pkg::*;
+
+
+`define GET_FUNCTION_TYPE_RETURNS(RET,TYPE) \
+`SVTEST(get_function_type_returns_``RET) \
+  string s_exp = `"RET`"; \
+  `FAIL_IF(uut.get_function_type(TYPE) != s_exp); \
+`SVTEST_END(get_function_type_returns_``RET)
 
 
 module uvm_status_container_unit_test;
@@ -103,6 +112,69 @@ module uvm_status_container_unit_test;
     `FAIL_IF(other.field_array.num() != 1);
     `FAIL_IF(other.print_matches != 1);
   `SVTEST_END(statics_are_static)
+
+  //-----------------------------
+  //-----------------------------
+  // do_field_check tests
+  //-----------------------------
+  //-----------------------------
+
+  // Issue here with pre-compiled questa version. can't spec UVM_ENABLE_FIELD_CHECKS
+  // so while the test is valid, we can't run it.
+// `SVTEST(do_field_check_asserts_error_for_existing_field)
+//   test_uvm_object o = new("test_do_field_check_object");
+//   uvm_report_mock::expect_error
+//         (
+//          "MLTFLD",
+//          { "Field done_field_check is defined multiple times in type ", o.get_type_name() }
+//         );
+//   uut.do_field_check("done_field_check", o);
+//   uut.do_field_check("done_field_check", o);
+//   `FAIL_IF(!uvm_report_mock::verify_complete());
+// `SVTEST_END(do_field_check_asserts_error_for_existing_field)
+
+
+  `SVTEST(do_field_check_loads_field_array)
+    test_uvm_object o = new("test_do_field_check_object");
+    uut.do_field_check("done_field_check", o);
+    `FAIL_IF(uut.field_array.num() != 1);
+  `SVTEST_END(do_field_check_loads_field_array)
+
+
+  `SVTEST(do_field_check_ignores_duplicate_entries)
+    test_uvm_object o = new("test_do_field_check_object");
+    uut.do_field_check("done_field_check", o);
+    uut.do_field_check("done_field_check", o);
+    uut.do_field_check("another_done_field_check", o);
+    `FAIL_IF(uut.field_array.num() != 2);
+  `SVTEST_END(do_field_check_ignores_duplicate_entries)
+
+  //-----------------------------
+  //-----------------------------
+  // get_function_type tests
+  //-----------------------------
+  //-----------------------------
+
+  `GET_FUNCTION_TYPE_RETURNS(copy, UVM_COPY);
+  `GET_FUNCTION_TYPE_RETURNS(compare, UVM_COMPARE);
+  `GET_FUNCTION_TYPE_RETURNS(print, UVM_PRINT);
+  `GET_FUNCTION_TYPE_RETURNS(record, UVM_RECORD);
+  `GET_FUNCTION_TYPE_RETURNS(pack, UVM_PACK);
+  `GET_FUNCTION_TYPE_RETURNS(unpack, UVM_UNPACK);
+
+
+  //-----------------------------
+  //-----------------------------
+  // get_full_scope_arg tests
+  //-----------------------------
+  //-----------------------------
+
+
+  //-----------------------------
+  //-----------------------------
+  // m_uvm_cycle_scopes tests
+  //-----------------------------
+  //-----------------------------
 
   `SVUNIT_TESTS_END
 
