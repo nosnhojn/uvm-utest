@@ -613,7 +613,50 @@ module uvm_misc_unit_test;
   // uvm_is_array tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(is_array_returns_true_for_array_select)
+    string s_in = "a[o]";
+    `FAIL_IF(uvm_is_array(s_in) != 1);
+  `SVTEST_END(is_array_returns_true_for_array_select)
+
+
+  `SVTEST(is_array_returns_false_for_no_array)
+    string s_in = "x";
+    `FAIL_IF(uvm_is_array(s_in) != 0);
+  `SVTEST_END(is_array_returns_false_for_no_array)
+
+
+  `SVTEST(is_array_returns_false_for_null_string)
+    string s_in = "";
+    `FAIL_IF(uvm_is_array(s_in) != 0);
+  `SVTEST_END(is_array_returns_false_for_null_string)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 581
+  // malformed array string is interpretted as an array
+// `SVTEST(is_array_square_bracket_is_not_array)
+//   string s_in = "]";
+//   `FAIL_IF(uvm_is_array(s_in) != 0);
+// `SVTEST_END(is_array_square_bracket_is_not_array)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 581
+  // malformed array string is interpretted as an array
+// `SVTEST(is_array_only_brackets_is_not_array)
+//   string s_in = "[]";
+//   `FAIL_IF(uvm_is_array(s_in) != 0);
+// `SVTEST_END(is_array_only_brackets_is_not_array)
+
+
+  // FAILING TEST
+  // uvm_misc.sv:line 581
+  // malformed array string is interpretted as an array
+// `SVTEST(is_array_only_index_is_not_array)
+//   string s_in = "[x]";
+//   `FAIL_IF(uvm_is_array(s_in) != 0);
+// `SVTEST_END(is_array_only_index_is_not_array)
 
   //-----------------------------
   //-----------------------------
