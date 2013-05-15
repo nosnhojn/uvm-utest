@@ -698,6 +698,7 @@ module uvm_misc_unit_test;
     `FAIL_IF(uvm_has_wildcard(s_in) != 1);
   `SVTEST_END(WARNING_has_wildcard_returns_true_for_empty_regex)
 
+
   `HAS_WILDCARD_RETURNS(true_for_star_at_end_of_string,*junk,1);
   `HAS_WILDCARD_RETURNS(true_for_star_at_beginning_of_string,junk*,1);
   `HAS_WILDCARD_RETURNS(true_for_star_in_middle_of_string,ju*nk,1);
@@ -710,15 +711,23 @@ module uvm_misc_unit_test;
   `HAS_WILDCARD_RETURNS(true_for_plus_sign_at_beginning_of_string,junk+,1);
   `HAS_WILDCARD_RETURNS(true_for_plus_sign_in_middle_of_string,ju+nk,1);
 
+
   `SVTEST(has_wildcard_returns_false_for_all_other_puncuation)
     string s_in = "`~!@#$%^&()-_=[]{}\|;:'\",<.>//";
     `FAIL_IF(uvm_has_wildcard(s_in) != 0);
   `SVTEST_END(has_wildcard_returns_false_for_all_other_puncuation)
 
+
   `SVTEST(has_wildcard_returns_false_for_alpha_numeric)
     string s_in = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
     `FAIL_IF(uvm_has_wildcard(s_in) != 0);
   `SVTEST_END(has_wildcard_returns_false_for_alpha_numeric)
+
+
+  `SVTEST(has_wildcard_returns_false_for_null_string)
+    string s_in = "";
+    `FAIL_IF(uvm_has_wildcard(s_in) != 0);
+  `SVTEST_END(has_wildcard_returns_false_for_null_string)
 
   `SVUNIT_TESTS_END
 
