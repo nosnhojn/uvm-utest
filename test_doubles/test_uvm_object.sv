@@ -17,6 +17,7 @@ class test_uvm_object extends uvm_object;
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
   uvm_recorder do_record_record;
+  uvm_packer do_pack_pack;
   string create_name;
 
   uvm_object tmp_data__;
@@ -84,6 +85,11 @@ class test_uvm_object extends uvm_object;
   function void do_record (uvm_recorder recorder);
     $cast(do_record_record, recorder);
     super.do_record(recorder);
+  endfunction
+
+  function void do_pack (uvm_packer packer );
+    $cast(do_pack_pack, packer);
+    super.do_pack(packer);
   endfunction
 endclass
 
