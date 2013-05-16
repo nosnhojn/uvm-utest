@@ -1,7 +1,8 @@
 `include "svunit_defines.svh"
+`include "test_defines.sv"
 `include "test_uvm_object.sv"
 `include "mock_uvm_printer.sv"
-`include "test_defines.sv"
+`include "mock_uvm_packer.svh"
 
 import uvm_pkg::*;
 import svunit_pkg::*;
@@ -21,6 +22,10 @@ module uvm_object_unit_test;
   test_uvm_object_wrapper uut_wrapper;
   mock_uvm_printer mock_printer;
 
+  bit  unsigned  bitstream[];
+  byte unsigned  bytestream[];
+  int  unsigned  intstream[];
+  mock_uvm_packer packer = null;
 
   //===================================
   // Build
@@ -44,6 +49,7 @@ module uvm_object_unit_test;
     uut.use_uvm_seeding = 1;
 
     uut.fake_test_type_name = 0;
+    packer = new;
 
     uvm_report_mock::setup();
   endtask
@@ -402,14 +408,50 @@ module uvm_object_unit_test;
   // record tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(record_default_recorder_tr_handle_null)
+    uvm_default_recorder.tr_handle = 0;
+    uut.record();
+    `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
+  `SVTEST_END(record_default_recorder_tr_handle_null)
+
+  `SVTEST(record_recorder_tr_handle_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 0;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
+  `SVTEST_END(record_recorder_tr_handle_null)
+
+  `SVTEST(record_recorder_tr_handle_not_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 1;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_RECORD);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_IF(dummy_rec.tr_handle != 0);
+  `SVTEST_END(record_recorder_tr_handle_not_null)
+
+  `SVTEST(record_recorder_recording_depth_not_null)
+    uvm_recorder dummy_rec = new("rec");
+    dummy_rec.tr_handle = 1;
+    dummy_rec.recording_depth++;
+    uut.record(dummy_rec);
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_RECORD);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_IF(dummy_rec.tr_handle != 1);
+  `SVTEST_END(record_recorder_recording_depth_not_null)
 
   //-----------------------------
   //-----------------------------
   // do_record tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(do_record_is_empty)
+    uvm_recorder dummy_rec = new("rec");
+    uut.do_record(dummy_rec);
+    `FAIL_IF(0)
+  `SVTEST_END(do_record_is_empty)
 
   //-----------------------------
   //-----------------------------
@@ -480,21 +522,100 @@ module uvm_object_unit_test;
   // pack tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(m_pack_use_default_packer)
+    void'(uut.pack(bitstream, null));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
+  `SVTEST_END(m_pack_use_default_packer)
+
+
+  `SVTEST(m_pack_custom_packer)
+    void'(uut.pack(bitstream, packer));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != packer)
+  `SVTEST_END(m_pack_custom_packer)
+
+
+  `SVTEST(m_pack_packer_is_initialized)
+    void'(uut.pack(bitstream, null));
+    `FAIL_IF(uvm_default_packer.count != 0);
+    `FAIL_IF(uvm_default_packer.m_bits != 0);
+    `FAIL_IF(uvm_default_packer.m_packed_size != 0);
+  `SVTEST_END(m_pack_packer_is_initialized)
+
+
+  `SVTEST(m_pack_field_automation)
+    void'(uut.pack(bitstream, null));
+    `FAIL_IF(uut.tmp_data__ != null);
+    `FAIL_IF(uut.what__ != UVM_PACK);
+    `FAIL_IF(uut.str__ != _NULL_STRING);
+  `SVTEST_END(m_pack_field_automation)
+
+
+  `SVTEST(m_pack_do_pack)
+    uvm_default_packer = packer;
+    void'(uut.pack(bitstream, null));
+    `FAIL_IF(packer != uut.do_pack_pack)
+  `SVTEST_END(m_pack_do_pack)
+
+
+  `SVTEST(m_pack_packer_scope)
+    string myscope = "whatever";
+    packer.scope.down(myscope);
+    void'(uut.pack(bitstream, packer));
+    `FAIL_IF(packer.scope.get() != myscope);
+  `SVTEST_END(m_pack_packer_scope)
+
+
+  // NOTE we are not interesting into testing the uvm_packer
+  // functionality. So we won't be trying to send in a non-
+  // empty bit stream
+  `SVTEST(pack_bitstream)
+    int rval = uut.pack(bitstream, packer);
+    `FAIL_IF($size(bitstream) != 8);
+    `FAIL_IF(bitstream != '{1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1});
+  `SVTEST_END(pack_bitstream)
+
+
+  `SVTEST(pack_returns_size_of_bitstream)
+    int rval = uut.pack(bitstream, packer);
+    `FAIL_IF(rval != 51);
+  `SVTEST_END(pack_returns_size_of_bitstream)
+
 
   //-----------------------------
   //-----------------------------
   // pack_bytes tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(pack_bytestream)
+    int rval = uut.pack_bytes(bytestream, packer);
+    `FAIL_IF($size(bytestream) != 8);
+    `FAIL_IF(bytestream != '{8{8'hef}});
+  `SVTEST_END(pack_bytestream)
+
+
+  `SVTEST(pack_returns_size_of_bytestream)
+    int rval = uut.pack_bytes(bytestream, packer);
+    `FAIL_IF(rval != 51);
+  `SVTEST_END(pack_returns_size_of_bytestream)
+
 
   //-----------------------------
   //-----------------------------
   // pack_ints tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(pack_intstream)
+    int rval = uut.pack_ints(intstream, packer);
+    `FAIL_IF($size(intstream) != 8);
+    `FAIL_IF(intstream != '{8{32'hdeadbeef}});
+  `SVTEST_END(pack_intstream)
+
+
+  `SVTEST(pack_returns_size_of_intstream)
+    int rval = uut.pack_ints(intstream, packer);
+    `FAIL_IF(rval != 51);
+  `SVTEST_END(pack_returns_size_of_intstream)
+
 
   //-----------------------------
   //-----------------------------
