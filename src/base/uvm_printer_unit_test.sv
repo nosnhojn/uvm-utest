@@ -3,6 +3,7 @@
 `include "test_uvm_object.sv"
 `include "test_uvm_component.sv"
 `include "test_uvm_agent.sv"
+`include "test_defines.sv"
 
 import svunit_pkg::*;
 
@@ -82,7 +83,131 @@ module uvm_printer_unit_test;
   // print_int tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  // FAILING TEST because of the uvm_leaf_scope infinite loop
+// `SVTEST(print_int_can_return_row_name_as_empty_string)
+//   uut.print_int("", 0, 0);
+//   info = uut.get_last_row();
+//   `FAIL_IF(info.name != _NULL_STRING);
+// `SVTEST_END(print_int_can_return_row_name_as_empty_string)
+
+  `SVTEST(print_int_can_return_row_name_as_full_scope)
+    string s_exp = "branch.leaf";
+
+    uut.knobs.full_name = 1;
+    uut.m_scope.down("branch");
+
+    uut.print_int("leaf", 0, 0);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.name != s_exp);
+  `SVTEST_END(print_int_can_return_row_name_as_full_scope)
+
+
+  `SVTEST(print_int_can_return_row_name_as_leaf_scope)
+    string s_exp = "leaf";
+
+    uut.m_scope.down("branch");
+
+    uut.print_int("leaf", 0, 0);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.name != s_exp);
+  `SVTEST_END(print_int_can_return_row_name_as_leaf_scope)
+
+
+  `SVTEST(print_int_returns_row_level_as_scope_depth)
+    uut.m_scope.down("branch0");
+    uut.m_scope.down("branch1");
+
+    uut.print_int("leaf", 0, 0);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.level != 2);
+  `SVTEST_END(print_int_returns_row_level_as_scope_depth)
+
+
+  `SVTEST(print_int_returns_row_type_name_if_specified)
+    string s_exp = "silly_billy";
+    uut.print_int("leaf", 0, 0, UVM_NORADIX, ".", s_exp);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != s_exp);
+  `SVTEST_END(print_int_returns_row_type_name_if_specified)
+
+
+  `SVTEST(print_int_can_return_row_type_name_as_time)
+    string s_exp = "time";
+    uut.print_int("leaf", 0, 0, UVM_TIME);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != s_exp);
+  `SVTEST_END(print_int_can_return_row_type_name_as_time)
+
+
+  `SVTEST(print_int_can_return_row_type_name_as_string)
+    string s_exp = "string";
+    uut.print_int("leaf", 0, 0, UVM_STRING);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != s_exp);
+  `SVTEST_END(print_int_can_return_row_type_name_as_string)
+
+
+  `SVTEST(print_int_returns_row_type_name_as_integral_by_default)
+    string s_exp = "integral";
+    uut.print_int("leaf", 0, 0);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.type_name != s_exp);
+  `SVTEST_END(print_int_returns_row_type_name_as_integral_by_default)
+
+
+  `SVTEST(print_int_returns_row_size_as_string)
+    string s_exp = "-1";
+    uut.print_int("leaf", 0, -1);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.size != s_exp);
+  `SVTEST_END(print_int_returns_row_size_as_string)
+
+
+  // borrowed these values from the uvm_misc::uvm_vector_to_string test
+  `SVTEST(print_int_returns_val_as_uvm_vector_to_string)
+    string s_exp = "B11001";
+    uut.knobs.bin_radix = "B";
+    uut.print_int("leaf", 121, 5, UVM_BIN);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.val != s_exp);
+  `SVTEST_END(print_int_returns_val_as_uvm_vector_to_string)
+
+
+  // borrowed these values from the uvm_misc::uvm_vector_to_string test
+  `SVTEST(print_int_uses_default_radix_when_noradix_specified)
+    string s_exp = "'o1037";
+    uut.knobs.default_radix = UVM_OCT;
+    uut.print_int("leaf", 1567, 10);
+    info = uut.get_last_row();
+
+    `FAIL_IF(info.val != s_exp);
+  `SVTEST_END(print_int_uses_default_radix_when_noradix_specified)
+
+
+  `SVTEST(print_int_pushes_back_new_rows)
+    uvm_printer_row_info first_row, last_row;
+    string first_name = "leaf";
+    string last_name = "grief";
+
+    uut.print_int(first_name, 1567, 10);
+    uut.print_int(last_name, 1567, 10);
+
+    first_row = uut.get_first_row();
+    last_row = uut.get_last_row();
+
+    `FAIL_IF(first_row.name != first_name || last_row.name != last_name);
+  `SVTEST_END(print_int_pushes_back_new_rows)
+
 
   //-----------------------------
   //-----------------------------
@@ -240,6 +365,21 @@ module uvm_printer_unit_test;
 
     `FAIL_IF(info.type_name != obj.get_type_name());
   `SVTEST_END(print_object_header_sets_row_type_name_to_type_name_otherwise)
+
+
+  `SVTEST(print_object_header_pushes_back_new_rows)
+    uvm_printer_row_info first_row, last_row;
+    string first_name = "leaf";
+    string last_name = "grief";
+
+    uut.print_object_header(first_name, null);
+    uut.print_object_header(last_name, null);
+
+    first_row = uut.get_first_row();
+    last_row = uut.get_last_row();
+
+    `FAIL_IF(first_row.name != first_name || last_row.name != last_name);
+  `SVTEST_END(print_object_header_pushes_back_new_rows)
 
   //-----------------------------
   //-----------------------------

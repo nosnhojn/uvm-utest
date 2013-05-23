@@ -11,6 +11,10 @@ class test_uvm_printer extends uvm_printer();
   function uvm_printer_row_info get_last_row();
     return m_rows[m_rows.size()-1];
   endfunction
+
+  function uvm_printer_row_info get_first_row();
+    return m_rows[0];
+  endfunction
 endclass
 
 `endif
