@@ -174,12 +174,21 @@ module uvm_status_container_unit_test;
   //-----------------------------
   //-----------------------------
 
+  `SVTEST(get_full_scope_returns_scope_stack_get)
+    string s_exp = "just_joking.still_friends";
+    uut.scope.down("just_joking");
+    uut.scope.down("still_friends");
+    `FAIL_IF(uut.get_full_scope_arg() != s_exp);
+  `SVTEST_END(get_full_scope_returns_scope_stack_get)
 
   //-----------------------------
   //-----------------------------
   // m_uvm_cycle_scopes tests
   //-----------------------------
   //-----------------------------
+  // WARNING: I don't see why this cycle checking
+  //          is necessary so I'm ignoring it until
+  //          I know what it's for
 
   `SVUNIT_TESTS_END
 
