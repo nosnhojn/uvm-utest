@@ -721,7 +721,7 @@ module uvm_object_unit_test;
     my_uut.print(p);
     void'($rewind(PRINT_FILE));
     void'($fscanf(PRINT_FILE, "%s\n", print_test_simple_sprint_emit));
-    void'($fclose(PRINT_FILE));
+    $fclose(PRINT_FILE);
   endfunction
 
 endmodule
