@@ -161,6 +161,11 @@ module uvm_status_container_unit_test;
   `GET_FUNCTION_TYPE_RETURNS(record, UVM_RECORD);
   `GET_FUNCTION_TYPE_RETURNS(pack, UVM_PACK);
   `GET_FUNCTION_TYPE_RETURNS(unpack, UVM_UNPACK);
+  `GET_FUNCTION_TYPE_RETURNS(get_flags, UVM_FLAGS);
+  `GET_FUNCTION_TYPE_RETURNS(set, UVM_SETINT);
+  `GET_FUNCTION_TYPE_RETURNS(set_object, UVM_SETOBJ);
+  `GET_FUNCTION_TYPE_RETURNS(set_string, UVM_SETSTR);
+  `GET_FUNCTION_TYPE_RETURNS(unknown, UVM_DEFAULT);
 
 
   //-----------------------------

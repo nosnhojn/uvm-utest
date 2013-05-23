@@ -266,7 +266,7 @@ module uvm_object_unit_test;
 
 
   `SVTEST(clone_is_created_with_get_name)
-    uut.clone();
+    void'(uut.clone());
     `FAIL_IF(uut.create_name != uut.get_name());
   `SVTEST_END(clone_is_created_with_get_name)
 
@@ -347,8 +347,8 @@ module uvm_object_unit_test;
     mock_printer.set_istop(0);
     uut.__m_uvm_status_container.printer = null;
     void'(uut.sprint(mock_printer));
-    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer) ||
-             uut.__m_uvm_status_container.printer == null);
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
+    `FAIL_IF(uut.__m_uvm_status_container.printer == null);
   `SVTEST_END(sprint_assigns_the_status_container_printer)
 
 
@@ -364,8 +364,8 @@ module uvm_object_unit_test;
   `SVTEST(sprint_invokes_do_print_when_not_top)
     mock_printer.set_istop(0);
     void'(uut.sprint(mock_printer));
-    `FAIL_IF(!$cast(mock_printer, uut.do_print_printer) ||
-             uut.do_print_printer == null);
+    `FAIL_IF(!$cast(mock_printer, uut.do_print_printer));
+    `FAIL_IF(uut.do_print_printer == null);
   `SVTEST_END(sprint_invokes_do_print_when_not_top)
 
 
@@ -379,8 +379,8 @@ module uvm_object_unit_test;
     mock_printer.set_istop(0);
     uvm_default_printer = mock_printer;
     void'(uut.sprint());
-    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer) ||
-             uut.__m_uvm_status_container.printer == null);
+    `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
+    `FAIL_IF(uut.__m_uvm_status_container.printer == null);
   `SVTEST_END(sprint_assigns_default_printer_if_null)
 
   //-----------------------------
@@ -485,8 +485,8 @@ module uvm_object_unit_test;
   `SVTEST(copy_rhs_not_null_do_copy)
     uvm_callback rhs=new("name");
     void'(uut.copy(rhs));
-    `FAIL_IF(!$cast(rhs, uut.do_copy_copy) ||
-             uut.do_copy_copy == null);
+    `FAIL_IF(!$cast(rhs, uut.do_copy_copy));
+    `FAIL_IF(uut.do_copy_copy == null);
   `SVTEST_END(copy_rhs_not_null_do_copy)
   
 

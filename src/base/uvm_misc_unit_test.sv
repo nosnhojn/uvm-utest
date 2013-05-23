@@ -59,7 +59,7 @@ import svunit_pkg::*;
 `define UVM_GET_ARRAY_INDEX_FOR_WILD(TYPE,NAME,STRING_IN,EXP_WILD) \
 `SVTEST(get_array_index_``TYPE``_``NAME) \
   string s_in = `"STRING_IN`"; \
-  uvm_get_array_index_``TYPE(s_in, get_array_index_is_wildcard); \
+  void'(uvm_get_array_index_``TYPE(s_in, get_array_index_is_wildcard)); \
   `FAIL_IF(get_array_index_is_wildcard != EXP_WILD); \
 `SVTEST_END(get_array_index_``TYPE``_``NAME)
 
