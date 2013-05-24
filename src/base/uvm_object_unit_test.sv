@@ -355,9 +355,7 @@ module uvm_object_unit_test;
   `SVTEST(sprint_calls_field_automation)
     mock_printer.set_istop(0);
     void'(uut.sprint(mock_printer));
-    `FAIL_IF(uut.tmp_data__ != null);
-    `FAIL_IF(uut.what__ != UVM_PRINT);
-    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PRINT, _NULL_STRING));
   `SVTEST_END(sprint_calls_field_automation)
 
 
@@ -425,9 +423,7 @@ module uvm_object_unit_test;
     uvm_recorder dummy_rec = new("rec");
     dummy_rec.tr_handle = 1;
     uut.record(dummy_rec);
-    `FAIL_IF(uut.tmp_data__ != null);
-    `FAIL_IF(uut.what__ != UVM_RECORD);
-    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_RECORD, _NULL_STRING));
     `FAIL_IF(dummy_rec.tr_handle != 0);
   `SVTEST_END(record_recorder_tr_handle_not_null)
 
@@ -436,9 +432,7 @@ module uvm_object_unit_test;
     dummy_rec.tr_handle = 1;
     dummy_rec.recording_depth++;
     uut.record(dummy_rec);
-    `FAIL_IF(uut.tmp_data__ != null);
-    `FAIL_IF(uut.what__ != UVM_RECORD);
-    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_RECORD, _NULL_STRING));
     `FAIL_IF(dummy_rec.tr_handle != 1);
   `SVTEST_END(record_recorder_recording_depth_not_null)
 
@@ -476,9 +470,7 @@ module uvm_object_unit_test;
     string s_exp = "name";
     test_uvm_object rhs=new("name");
     void'(uut.copy(rhs));
-    `FAIL_IF(uut.tmp_data__.get_name() != s_exp);
-    `FAIL_IF(uut.what__ != UVM_COPY);
-    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(rhs, UVM_COPY, _NULL_STRING));
   `SVTEST_END(copy_rhs_not_null_field_automation)
 
 
@@ -544,9 +536,7 @@ module uvm_object_unit_test;
 
   `SVTEST(m_pack_field_automation)
     void'(uut.pack(bitstream, null));
-    `FAIL_IF(uut.tmp_data__ != null);
-    `FAIL_IF(uut.what__ != UVM_PACK);
-    `FAIL_IF(uut.str__ != _NULL_STRING);
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
   `SVTEST_END(m_pack_field_automation)
 
 

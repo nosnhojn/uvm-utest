@@ -9,9 +9,16 @@ class test_uvm_object_wrapper extends uvm_object_wrapper;
   endfunction
 endclass
 
+typedef struct {
+  uvm_object tmp_data__;
+  int what__;
+  string str__;
+} __m_uvm_field_automation_t;
+
 class test_uvm_object extends uvm_object;
   rand int rand_property;
 
+  __m_uvm_field_automation_t fa_args;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
   uvm_printer do_print_printer;
@@ -19,10 +26,6 @@ class test_uvm_object extends uvm_object;
   uvm_recorder do_record_record;
   uvm_packer do_pack_pack;
   string create_name;
-
-  uvm_object tmp_data__;
-  int what__;
-  string str__;
 
   function new(string name);
     super.new(name);
@@ -46,11 +49,19 @@ class test_uvm_object extends uvm_object;
   function void __m_uvm_field_automation(uvm_object tmp_data__,
                                          int what__,
                                          string str__);
-    this.tmp_data__ = tmp_data__;
-    this.what__ = what__;
-    this.str__ = str__;
+    fa_args.tmp_data__ = tmp_data__;
+    fa_args.what__ = what__;
+    fa_args.str__ = str__;
 
     super.__m_uvm_field_automation(tmp_data__, what__, str__);
+  endfunction
+
+  function bit __m_uvm_field_automation_was_called_with(uvm_object tmp_data__,
+                                                        int what__,
+                                                        string str__);
+    return fa_args.tmp_data__ == tmp_data__ &&
+           fa_args.what__ == what__ &&
+           fa_args.str__ == str__;
   endfunction
 
   function void do_print(uvm_printer printer);
