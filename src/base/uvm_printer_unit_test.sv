@@ -214,7 +214,11 @@ module uvm_printer_unit_test;
   // print_field tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(print_field_is_an_alies_for_print_int)
+    string my_name = "my_name";
+    uut.print_field(my_name, 99, 66);
+    `FAIL_UNLESS(uut.print_int_was_called_with(my_name, 99, 66, UVM_NORADIX, _DOT, _NULL_STRING));
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
