@@ -424,7 +424,7 @@ module uvm_misc_unit_test;
   `SVTEST_END(uvm_leaf_scope_ignores_default_with_other_possible_separators)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED
   // uvm_misc.svh:line 491
   // works for bracket separators but not others
 // `SVTEST(uvm_leaf_scope_can_use_any_separator)
@@ -435,7 +435,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END(uvm_leaf_scope_can_use_any_separator)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED
   // uvm_misc.svh:483
   // null string results in 'for (pos=-1; p!=0; --pos) begin'
 // `SVTEST(uvm_leaf_scope_can_handle_empty_full_name)
@@ -450,7 +450,7 @@ module uvm_misc_unit_test;
   `SVTEST_END(uvm_leaf_scope_can_return_null_leaf)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED
   // uvm_misc.svh:490
   // it's assumed leaf and parent aren't named with a _NULL_STRING
   // which would mean the for loop on 483 starts at 0 so the 'if(pos)'
@@ -471,9 +471,10 @@ module uvm_misc_unit_test;
   //-----------------------------
   //-----------------------------
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED
   // uvm_misc.svh:line 509
-  // $sformatf should use signed'(value) so the string includes the sign
+  // $sformatf should use signed'(value) so the string includes the sign. the
+  // output in this case is 15 instead of -1
 // `SVTEST(signed_vector_to_string)
 //   string s_exp = "-1";
 //   string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");

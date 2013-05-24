@@ -269,29 +269,31 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_from_scope)
-    string obj_name = "name";
+    string name_in = "my_name";
 
-    uut.m_scope.down("scope");
-    uut.print_object_header("name", test_obj);
+    uut.m_scope.down("my_scope");
+    uut.print_object_header(name_in, null);
     info = uut.get_last_row();
 
-    `FAIL_IF(info.name != obj_name);
+    `FAIL_IF(info.name != name_in);
   `SVTEST_END(print_object_header_name_from_scope)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED
   // uvm_printer.svh:line 138
   // scope_separator can't be specified by user b/c scope_stack can
-  // only handle a '.' as separator
-// `SVTEST(print_object_header_name_from_scope_with_scope_separator)
-//   string obj_name = "scopeJname";
-//   string adjusted_name = "name";
+  // only handle a '.' as separator. info.name in this case is set to
+  // "my_scope.my_name" instead of "my_name" as I expect.
+// `SVTEST(print_object_header_name_from_scope_with_different_scope_separator)
+//   string name_in = "my_name";
 //
-//   uut.print_object_header("name", test_obj, "J");
+//   uut.m_scope.down("my_scope");
+//   uut.print_object_header(name_in, null, "J");
 //   info = uut.get_last_row();
 //
-//   `FAIL_IF(info.name != obj_name);
-// `SVTEST_END(print_object_header_name_from_scope_with_scope_separator)
+//   `FAIL_IF(info.name != name_in);
+// `SVTEST_END(print_object_header_name_from_scope_with_different_scope_separator)
+
 
   `SVTEST(print_object_header_sets_row_level_to_depth0)
     uut.print_object_header("", null);
