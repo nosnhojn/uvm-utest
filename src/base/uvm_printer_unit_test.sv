@@ -90,7 +90,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   // FAILING TEST because of the uvm_leaf_scope infinite loop
-// `SVTEST(print_int_can_reand_turn_the_row_name_as_empty_string)
+// `SVTEST(print_int_can_reand_i_turn_the_row_name_as_empty_string)
 //   when_i_call_print_int_with("", 0, 0);
 //   get_last_row();
 //   `FAIL_IF(last_row.name != _NULL_STRING);
@@ -98,17 +98,17 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_can_return_the_row_name_as_full_scope)
-    given_i_set_my_expected_result_to("branch.leaf");
-          and_turn_the_full_name_knob_to(1);
+    given_i_have_a_new_uvm_printer();
+          and_i_turn_the_full_name_knob_to(1);
           and_push_this_level_to_the_scope_stack("branch");
 
     when_i_call_print_int_with("leaf", 0, 0);
 
-    then_the_last_row_name_should_equal(my_expected_result());
+    then_the_last_row_name_should_equal("branch.leaf");
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_turn_the_row_name_as_leaf_scope)
+  `SVTEST(print_int_can_reand_i_turn_the_row_name_as_leaf_scope)
     given_i_set_my_expected_result_to("leaf");
     and_push_this_level_to_the_scope_stack("branch");
 
@@ -137,7 +137,7 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_turn_the_row_type_name_as_time)
+  `SVTEST(print_int_can_reand_i_turn_the_row_type_name_as_time)
     given_i_set_my_expected_result_to("time");
 
     when_i_call_print_int_with(arbitrary_name(), 0, 0, UVM_TIME);
@@ -146,7 +146,7 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_turn_the_row_type_name_as_string)
+  `SVTEST(print_int_can_reand_i_turn_the_row_type_name_as_string)
     given_i_set_my_expected_result_to("string");
 
     when_i_call_print_int_with(arbitrary_name(), 0, 0, UVM_STRING);
@@ -176,7 +176,7 @@ module uvm_printer_unit_test;
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_returns_val_as_uvm_vector_to_string)
     given_i_set_my_expected_result_to("B11001");
-    and_turn_the_bin_radix_knob_to("B");
+    and_i_turn_the_bin_radix_knob_to("B");
 
     when_i_call_print_int_with(arbitrary_name(), 121, 5, UVM_BIN);
 
@@ -187,7 +187,7 @@ module uvm_printer_unit_test;
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_uses_default_radix_when_noradix_specified)
     given_i_set_my_expected_result_to("'o1037");
-    and_turn_the_default_radix_knob_to(UVM_OCT);
+    and_i_turn_the_default_radix_knob_to(UVM_OCT);
 
     when_i_call_print_int_with(arbitrary_name(), 1567, 10);
 
@@ -256,7 +256,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_is_overridden_with_show_root)
-    and_turn_the_show_root_knob_to(1);
+    and_i_turn_the_show_root_knob_to(1);
 
     call_print_object_header_with(arbitrary_name(), test_obj);
 
@@ -309,7 +309,7 @@ module uvm_printer_unit_test;
 
   `SVTEST(print_object_header_sets_row_val_to_hyphen_without_reference)
     given_i_set_my_expected_result_to("-");
-    and_turn_the_reference_knob_to(0);
+    and_i_turn_the_reference_knob_to(0);
 
     call_print_object_header_with("", null);
 
@@ -319,7 +319,7 @@ module uvm_printer_unit_test;
 
   `SVTEST(print_object_header_sets_row_val_to_object_value_str_with_reference)
     given_i_set_my_expected_result_to("@99");
-    and_turn_the_reference_knob_to(1);
+    and_i_turn_the_reference_knob_to(1);
     test_uvm_object::set_inst_count(99);
     test_obj = new("");
 
@@ -443,7 +443,7 @@ module uvm_printer_unit_test;
 
   `SVTEST(adjust_name_returns_id_if_full_name_specified)
     given_i_set_my_expected_result_to("no.change.expected");
-    and_turn_the_full_name_knob_to(1);
+    and_i_turn_the_full_name_knob_to(1);
 
     `FAIL_IF(uut.test_adjust_name(my_expected_result()) != my_expected_result());
   `SVTEST_END()
@@ -458,7 +458,7 @@ module uvm_printer_unit_test;
 
   `SVTEST(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
     given_i_set_my_expected_result_to("id");
-    and_turn_the_show_root_knob_to(1);
+    and_i_turn_the_show_root_knob_to(1);
 
     `FAIL_IF(uut.test_adjust_name(my_expected_result()) != my_expected_result());
   `SVTEST_END()
@@ -515,6 +515,10 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
+  function void given_i_have_a_new_uvm_printer();
+    test_obj = new("obj_name"); 
+  endfunction
+
   function void given_i_set_my_expected_result_to(string s);
     s_exp = s;
   endfunction
@@ -554,23 +558,23 @@ module uvm_printer_unit_test;
     uut.m_scope.down(b);
   endfunction
 
-  function void and_turn_the_full_name_knob_to(bit k);
+  function void and_i_turn_the_full_name_knob_to(bit k);
     uut.knobs.full_name = k;
   endfunction
 
-  function void and_turn_the_bin_radix_knob_to(string k);
+  function void and_i_turn_the_bin_radix_knob_to(string k);
     uut.knobs.bin_radix = k;
   endfunction
 
-  function void and_turn_the_default_radix_knob_to(uvm_radix_enum r);
+  function void and_i_turn_the_default_radix_knob_to(uvm_radix_enum r);
     uut.knobs.default_radix = r;
   endfunction
 
-  function void and_turn_the_show_root_knob_to(bit k);
+  function void and_i_turn_the_show_root_knob_to(bit k);
     uut.knobs.show_root = k;
   endfunction
 
-  function void and_turn_the_reference_knob_to(bit k);
+  function void and_i_turn_the_reference_knob_to(bit k);
     uut.knobs.reference = k;
   endfunction
 
