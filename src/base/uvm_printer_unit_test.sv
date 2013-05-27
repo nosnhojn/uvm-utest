@@ -90,7 +90,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   // FAILING TEST because of the uvm_leaf_scope infinite loop
-// `SVTEST(print_int_can_reand_i_turn_the_row_name_as_empty_string)
+// `SVTEST(print_int_can_return_the_row_name_as_empty_string)
 //   when_i_call_print_int_with("", 0, 0);
 //   get_last_row();
 //   `FAIL_IF(last_row.name != _NULL_STRING);
@@ -99,107 +99,111 @@ module uvm_printer_unit_test;
 
   `SVTEST(print_int_can_return_the_row_name_as_full_scope)
     given_i_have_a_new_uvm_printer();
-          and_i_turn_the_full_name_knob_to(1);
-          and_push_this_level_to_the_scope_stack("branch");
+      and_i_turn_the_full_name_knob_to(1);
+      and_i_push_this_level_to_the_scope_stack("branch");
 
     when_i_call_print_int_with("leaf", 0, 0);
 
-    then_the_last_row_name_should_equal("branch.leaf");
+    then_the_row_name_is_assigned_to("branch.leaf");
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_i_turn_the_row_name_as_leaf_scope)
-    given_i_set_my_expected_result_to("leaf");
-    and_push_this_level_to_the_scope_stack("branch");
+  `SVTEST(print_int_can_return_the_row_name_as_leaf_scope)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch");
 
-    when_i_call_print_int_with(my_expected_result(), 0, 0);
+    when_i_call_print_int_with("leaf", 0, 0);
 
-    then_the_last_row_name_should_equal(my_expected_result());
+    then_the_row_name_is_assigned_to("leaf");
   `SVTEST_END()
 
 
   `SVTEST(print_int_returns_row_level_as_scope_depth)
-    and_push_this_level_to_the_scope_stack("branch0");
-    and_push_this_level_to_the_scope_stack("branch1");
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
 
-    when_i_call_print_int_with(arbitrary_name(), 0, 0);
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0);
 
-    `FAIL_IF(last_row.level != 2);
+    then_the_row_level_is_assigned_to(2);
   `SVTEST_END()
 
 
   `SVTEST(print_int_returns_row_type_name_if_specified)
-    given_i_set_my_expected_result_to("silly_billy");
+    given_i_have_a_new_uvm_printer();
 
-    when_i_call_print_int_with(arbitrary_name(), 0, 0, UVM_NORADIX, ".", my_expected_result());
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0, UVM_NORADIX, ".", an_arbitrary_type_name());
 
-    `FAIL_IF(last_row.type_name != my_expected_result());
+    then_the_row_type_name_is_assigned_to(an_arbitrary_type_name());
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_i_turn_the_row_type_name_as_time)
-    given_i_set_my_expected_result_to("time");
+  `SVTEST(print_int_can_return_the_row_type_name_as_time)
+    given_i_have_a_new_uvm_printer();
 
-    when_i_call_print_int_with(arbitrary_name(), 0, 0, UVM_TIME);
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0, UVM_TIME);
 
-    `FAIL_IF(last_row.type_name != my_expected_result());
+    then_the_row_type_name_is_assigned_to("time");
   `SVTEST_END()
 
 
-  `SVTEST(print_int_can_reand_i_turn_the_row_type_name_as_string)
-    given_i_set_my_expected_result_to("string");
+  `SVTEST(print_int_can_return_the_row_type_name_as_string)
+    given_i_have_a_new_uvm_printer();
 
-    when_i_call_print_int_with(arbitrary_name(), 0, 0, UVM_STRING);
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0, UVM_STRING);
 
-    `FAIL_IF(last_row.type_name != my_expected_result());
+    then_the_row_type_name_is_assigned_to("string");
   `SVTEST_END()
 
 
   `SVTEST(print_int_returns_row_type_name_as_integral_by_default)
-    given_i_set_my_expected_result_to("integral");
+    given_i_have_a_new_uvm_printer();
 
-    when_i_call_print_int_with(arbitrary_name(), 0, 0);
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0);
 
-    `FAIL_IF(last_row.type_name != my_expected_result());
+    then_the_row_type_name_is_assigned_to("integral");
   `SVTEST_END()
 
 
   `SVTEST(print_int_returns_row_size_as_string)
-    given_i_set_my_expected_result_to("-1");
+    given_i_have_a_new_uvm_printer();
 
-    when_i_call_print_int_with(arbitrary_name(), 0, -1);
+    when_i_call_print_int_with(an_arbitrary_name(), 0, -1);
 
-    `FAIL_IF(last_row.size != my_expected_result());
+    then_the_row_size_is_assigned_to("-1");
   `SVTEST_END()
 
 
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_returns_val_as_uvm_vector_to_string)
-    given_i_set_my_expected_result_to("B11001");
-    and_i_turn_the_bin_radix_knob_to("B");
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_bin_radix_knob_to("B");
 
-    when_i_call_print_int_with(arbitrary_name(), 121, 5, UVM_BIN);
+    when_i_call_print_int_with(an_arbitrary_name(), 121, 5, UVM_BIN);
 
-    `FAIL_IF(last_row.val != my_expected_result());
+    then_the_row_val_is_assigned_to("B11001");
   `SVTEST_END()
 
 
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_uses_default_radix_when_noradix_specified)
-    given_i_set_my_expected_result_to("'o1037");
-    and_i_turn_the_default_radix_knob_to(UVM_OCT);
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_default_radix_knob_to(UVM_OCT);
 
-    when_i_call_print_int_with(arbitrary_name(), 1567, 10);
+    when_i_call_print_int_with(an_arbitrary_name(), 1567, 10);
 
-    `FAIL_IF(last_row.val != my_expected_result());
+    then_the_row_val_is_assigned_to("'o1037");
   `SVTEST_END()
 
 
   `SVTEST(print_int_pushes_back_new_rows)
-    when_i_call_print_int_with(arbitrary_name(), 1567, 10);
-    when_i_call_print_int_with(a_different_arbitrary_name(), 1567, 10);
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(first_row.name != arbitrary_name() || last_row.name != a_different_arbitrary_name());
+    when_i_call_print_int_with(an_arbitrary_name(), 0, 0);
+     and_i_call_print_int_with(a_different_arbitrary_name(), 0, 0);
+
+    then_the_new_row_name_is_assigned_to(a_different_arbitrary_name());
+     and_the_old_row_name_is_assigned_to(an_arbitrary_name());
   `SVTEST_END()
 
 
@@ -258,7 +262,7 @@ module uvm_printer_unit_test;
   `SVTEST(print_object_header_name_is_overridden_with_show_root)
     and_i_turn_the_show_root_knob_to(1);
 
-    call_print_object_header_with(arbitrary_name(), test_obj);
+    call_print_object_header_with(an_arbitrary_name(), test_obj);
 
     `FAIL_IF(last_row.name != test_obj.get_name());
   `SVTEST_END()
@@ -266,7 +270,7 @@ module uvm_printer_unit_test;
 
   `SVTEST(print_object_header_name_from_scope)
     given_i_set_my_expected_result_to("my_name");
-    and_push_this_level_to_the_scope_stack("my_scope");
+    and_i_push_this_level_to_the_scope_stack("my_scope");
     
     call_print_object_header_with(my_expected_result(), null);
 
@@ -281,7 +285,7 @@ module uvm_printer_unit_test;
   // "my_scope.my_name" instead of "my_name" as I expect.
 // `SVTEST(print_object_header_name_from_scope_with_different_scope_separator)
 //   given_i_set_my_expected_result_to("my_name");
-//   and_push_this_level_to_the_scope_stack("my_scope");
+//   and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   call_print_object_header_with(my_expected_result(), null, "J");
 //
@@ -297,9 +301,9 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_level_to_depthN)
-    and_push_this_level_to_the_scope_stack(_NULL_STRING);
-    and_push_this_level_to_the_scope_stack(_NULL_STRING);
-    and_push_this_level_to_the_scope_stack(_NULL_STRING);
+    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
+    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
+    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
 
     call_print_object_header_with("", null);
 
@@ -535,26 +539,7 @@ module uvm_printer_unit_test;
     first_row = uut.get_first_row();
   endfunction
 
-  function void when_i_call_print_int_with(string name,
-                                    uvm_bitstream_t value,
-                                    int size,
-                                    uvm_radix_enum radix=UVM_NORADIX,
-                                    byte scope_separator=".",
-                                    string type_name="");
-    uut.print_int(name, value, size, radix, scope_separator, type_name);
-    update_first_row();
-    update_last_row();
-  endfunction
-
-  function void call_print_object_header_with (string name,
-                                     uvm_object value,
-                                     byte scope_separator=".");
-    uut.print_object_header(name, value, scope_separator);
-    update_first_row();
-    update_last_row();
-  endfunction
-
-  function void and_push_this_level_to_the_scope_stack(string b);
+  function void and_i_push_this_level_to_the_scope_stack(string b);
     uut.m_scope.down(b);
   endfunction
 
@@ -578,15 +563,78 @@ module uvm_printer_unit_test;
     uut.knobs.reference = k;
   endfunction
 
-  function string arbitrary_name();
-    return "arbitrary_name";
+  function string an_arbitrary_name();
+    return "an_arbitrary_name";
+  endfunction
+
+  function string an_arbitrary_type_name();
+    return "an_arbitrary_type_name";
   endfunction
 
   function string a_different_arbitrary_name();
-    return "arbitrary_name";
+    return "a_different_arbitrary_name";
   endfunction
 
-  task then_the_last_row_name_should_equal(string s);
+  //----------
+  // WHENS...
+  //----------
+
+  function void when_i_call_print_int_with(string name,
+                                    uvm_bitstream_t value,
+                                    int size,
+                                    uvm_radix_enum radix=UVM_NORADIX,
+                                    byte scope_separator=".",
+                                    string type_name="");
+    and_i_call_print_int_with(name, value, size, radix, scope_separator, type_name);
+  endfunction
+
+  function void and_i_call_print_int_with(string name,
+                                    uvm_bitstream_t value,
+                                    int size,
+                                    uvm_radix_enum radix=UVM_NORADIX,
+                                    byte scope_separator=".",
+                                    string type_name="");
+    uut.print_int(name, value, size, radix, scope_separator, type_name);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  function void call_print_object_header_with (string name,
+                                     uvm_object value,
+                                     byte scope_separator=".");
+    uut.print_object_header(name, value, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  //----------
+  // THENS...
+  //----------
+  task then_the_row_name_is_assigned_to(string s);
+    then_the_new_row_name_is_assigned_to(s);
+  endtask
+
+  task then_the_new_row_name_is_assigned_to(string s);
     `FAIL_IF(last_row.name != s);
+  endtask
+
+  task and_the_old_row_name_is_assigned_to(string s);
+    `FAIL_IF(first_row.name != s);
+  endtask
+
+  task then_the_row_level_is_assigned_to(int i);
+    `FAIL_IF(last_row.level != i);
+  endtask
+
+  task then_the_row_type_name_is_assigned_to(string s);
+    `FAIL_IF(last_row.type_name != s);
+  endtask
+
+  task then_the_row_size_is_assigned_to(string s);
+    `FAIL_IF(last_row.size != s);
+  endtask
+
+  task then_the_row_val_is_assigned_to(string s);
+    `FAIL_IF(last_row.val != s);
   endtask
 endmodule
