@@ -21,10 +21,13 @@ class test_uvm_object extends uvm_object;
   __m_uvm_field_automation_t fa_args;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
+  bit fake_do_unpack = 0;
+
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
   uvm_recorder do_record_record;
   uvm_packer do_pack_pack;
+  uvm_packer do_unpack_unpack;
   string create_name;
 
   function new(string name);
@@ -101,6 +104,14 @@ class test_uvm_object extends uvm_object;
   function void do_pack (uvm_packer packer );
     $cast(do_pack_pack, packer);
     super.do_pack(packer);
+  endfunction
+
+  function void do_unpack (uvm_packer packer);
+    $cast(do_unpack_unpack, packer);
+    super.do_unpack(packer);
+    if(fake_do_unpack) begin
+      packer.m_packed_size = 33;
+    end
   endfunction
 endclass
 

@@ -61,6 +61,7 @@ module uvm_object_unit_test;
   //===================================
   task teardown();
     svunit_ut.teardown();
+    bitstream.delete();
   endtask
 
 
@@ -561,13 +562,16 @@ module uvm_object_unit_test;
   `SVTEST(pack_bitstream)
     int rval = uut.pack(bitstream, packer);
     `FAIL_IF($size(bitstream) != 8);
-    `FAIL_IF(bitstream != '{1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1});
+    `FAIL_IF(bitstream != '{8{1'b1}});
   `SVTEST_END(pack_bitstream)
 
 
   `SVTEST(pack_returns_size_of_bitstream)
-    int rval = uut.pack(bitstream, packer);
-    `FAIL_IF(rval != 51);
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.pack(bitstream, packer);
+      `FAIL_IF(rval != 51);
+    end
   `SVTEST_END(pack_returns_size_of_bitstream)
 
 
@@ -583,9 +587,18 @@ module uvm_object_unit_test;
   `SVTEST_END(pack_bytestream)
 
 
+  `SVTEST(pack_bytes_field_automation)
+    void'(uut.pack_bytes(bytestream, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
+  `SVTEST_END()
+
+
   `SVTEST(pack_returns_size_of_bytestream)
-    int rval = uut.pack_bytes(bytestream, packer);
-    `FAIL_IF(rval != 51);
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.pack_bytes(bytestream, packer);
+      `FAIL_IF(rval != 51);
+    end
   `SVTEST_END(pack_returns_size_of_bytestream)
 
 
@@ -601,9 +614,18 @@ module uvm_object_unit_test;
   `SVTEST_END(pack_intstream)
 
 
+  `SVTEST(pack_ints_field_automation)
+    void'(uut.pack_ints(intstream, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
+  `SVTEST_END()
+
+
   `SVTEST(pack_returns_size_of_intstream)
-    int rval = uut.pack_ints(intstream, packer);
-    `FAIL_IF(rval != 51);
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.pack_ints(intstream, packer);
+      `FAIL_IF(rval != 51);
+    end
   `SVTEST_END(pack_returns_size_of_intstream)
 
 
@@ -623,21 +645,137 @@ module uvm_object_unit_test;
   // unpack tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(m_unpack_pre_use_default_packer)
+    void'(uut.unpack(bitstream, null));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_pre_custom_packer)
+    void'(uut.unpack(bitstream, packer));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != packer)
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_pre_packer_is_initialized)
+    packer.fake_put_bits = 1;
+    void'(uut.unpack(bitstream, packer));
+    `FAIL_IF(packer.count != 0);
+    `FAIL_IF(packer.m_bits != 0);
+    `FAIL_IF(packer.m_packed_size != 0);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_pre_packer_with_bitstream)
+    bitstream = '{8{1'b1}};
+    void'(uut.unpack(bitstream, packer));
+    `FAIL_IF(packer.captured_m_packed_size != bitstream.size());
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_post_get_packed_size_warning_check)
+    uut.fake_do_unpack = 1;
+    void'(uut.unpack(bitstream, packer));
+    uvm_report_mock::expect_warning("BDUNPK", $sformatf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits",33,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_post_packer_scope)
+    string myscope = "whatever";
+    packer.scope.down(myscope);
+    void'(uut.unpack(bitstream, packer));
+    `FAIL_IF(packer.scope.get() != myscope);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_post_field_automation)
+    void'(uut.unpack(bitstream, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_do_unpack)
+    uvm_default_packer = packer;
+    void'(uut.unpack(bitstream, null));
+    `FAIL_IF(packer != uut.do_unpack_unpack)
+  `SVTEST_END()
+
+
+  `SVTEST(unpack_returns_size_of_bitstream)
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.unpack(bitstream, packer);
+      `FAIL_IF(rval != 51);
+    end
+  `SVTEST_END()
+
 
   //-----------------------------
   //-----------------------------
   // unpack_bytes tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(m_unpack_bytes_pre_use_default_packer)
+    void'(uut.unpack_bytes(bytestream, null));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_bytes_pre_packer_with_bytestream)
+    bytestream = '{8{8'h7d}};
+    void'(uut.unpack_bytes(bytestream, packer));
+    `FAIL_IF(packer.captured_m_packed_size != bytestream.size()*8);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_bytes_post_field_automation)
+    void'(uut.unpack_bytes(bytestream, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
+  `SVTEST_END()
+
+
+  `SVTEST(unpack_bytes_returns_size_of_bytestream)
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.unpack_bytes(bytestream, packer);
+      `FAIL_IF(rval != 51);
+    end
+  `SVTEST_END()
+
 
   //-----------------------------
   //-----------------------------
   // unpack_ints tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(m_unpack_ints_pre_use_default_packer)
+    void'(uut.unpack_ints(intstream, null));
+    `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_ints_pre_packer_with_intstream)
+    intstream = '{8{32'hdeadbeef}};
+    void'(uut.unpack_ints(intstream, packer));
+    `FAIL_IF(packer.captured_m_packed_size != intstream.size()*32);
+  `SVTEST_END()
+
+
+  `SVTEST(m_unpack_ints_post_field_automation)
+    void'(uut.unpack_ints(intstream, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
+  `SVTEST_END()
+
+
+  `SVTEST(unpack_ints_returns_size_of_intstream)
+    packer.fake_packed_size = 1;
+    begin
+      int rval = uut.unpack_ints(intstream, packer);
+      `FAIL_IF(rval != 51);
+    end
+  `SVTEST_END()
+
 
   //-----------------------------
   //-----------------------------
