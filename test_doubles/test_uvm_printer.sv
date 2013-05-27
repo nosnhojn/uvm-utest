@@ -13,9 +13,15 @@ typedef struct {
   string          type_name;
 } print_args_t;
 
+typedef struct {
+  string name;
+  uvm_object value;
+  byte scope_separator;
+} print_object_header_args_t;
 
 class test_uvm_printer extends uvm_printer();
   print_args_t p_args;
+  print_object_header_args_t poh_args;
 
   function string test_adjust_name(string id, byte scope_separator=".");
     return(adjust_name(id, scope_separator));
@@ -39,6 +45,13 @@ class test_uvm_printer extends uvm_printer();
     super.print_int(name, value, size, radix, scope_separator, type_name);
   endfunction
 
+  virtual function void print_object_header(string name,
+                                            uvm_object value,
+                                            byte scope_separator=".");
+    poh_args = '{ name, value, scope_separator };
+    super.print_object_header(name, value, scope_separator);
+  endfunction
+
   function bit print_int_was_called_with(string          name,
                                          uvm_bitstream_t value,
                                          int             size,
@@ -51,6 +64,14 @@ class test_uvm_printer extends uvm_printer();
            radix == p_args.radix &&
            scope_separator == p_args.scope_separator &&
            type_name == p_args.type_name;
+  endfunction
+  
+  function bit print_object_header_was_called_with(string name,
+                                                   uvm_object value,
+                                                   byte scope_separator);
+    return name == poh_args.name &&
+           value == poh_args.value &&
+           scope_separator == poh_args.scope_separator;
   endfunction
 endclass
 

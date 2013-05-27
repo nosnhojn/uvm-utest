@@ -86,7 +86,7 @@ module uvm_printer_unit_test;
 
   //-----------------------------
   //-----------------------------
-  // when_i_call_print_int_with tests
+  // print_int tests
   //-----------------------------
   //-----------------------------
 
@@ -387,28 +387,43 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
-// `SVTEST(print_object_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer();
-//     and_i_push_this_level_to_the_scope_stack("my_scope");
-//
-//   when_i_call_print_object(.name(some_name()), .scope_separator("J"));
-//
-//   then_the_row_name_is_assigned_to(some_name());
-// `SVTEST_END()
+  `SVTEST(print_object_calls_print_object_header)
+    given_i_have_a_new_uvm_printer();
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+ 
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // print_string tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_string_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_string_with();
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // print_time tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_time_is_an_alies_for_print_int)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_time_with(some_name(), 99, "F");
+
+    then_print_int_is_called_with(some_name(), 99, 64, UVM_TIME, "F", "");
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -531,7 +546,24 @@ module uvm_printer_unit_test;
   // istop tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(istop_is_true_when_the_depth_of_the_scope_stack_is_0)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_istop();
+
+    then_the_printer_is_the_top();
+  `SVTEST_END()
+
+
+  `SVTEST(istop_is_false_when_the_depth_of_the_scope_stack_is_gt_0)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("scope0");
+
+    when_i_call_istop();
+
+    then_the_printer_is_not_the_top();
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -671,8 +703,33 @@ module uvm_printer_unit_test;
     uut.print_field(name, value, size);
   endfunction
 
+  function void when_i_call_print_time_with(string name,
+                                            uvm_bitstream_t value,
+                                            byte scope_separator=".");
+    uut.print_time(name, value, scope_separator);
+  endfunction
+
   function void when_i_call_adjust_name_with(string s, byte scope_separator = ".");
     adjusted_name = uut.test_adjust_name(s, scope_separator);
+  endfunction
+
+  function void when_i_call_print_object_with(string name = some_name(),
+                                              uvm_object value = null,
+                                              byte scope_separator=".");
+    uut.print_object(name, value, scope_separator);
+  endfunction
+
+  function void when_i_call_print_string_with(string name = some_name(),
+                                              string value = "",
+                                              byte scope_separator=".");
+    uut.print_string(name, value, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  int istop;
+  function void when_i_call_istop();
+    istop = uut.istop();
   endfunction
 
 
@@ -720,4 +777,19 @@ module uvm_printer_unit_test;
   task then_the_adjusted_name_is(string s);
     `FAIL_IF(adjusted_name != s);
   endtask
+ 
+  task then_the_print_object_header_is_called_with(string name,
+                                                   uvm_object value,
+                                                   byte scope_separator);
+    `FAIL_UNLESS(uut.print_object_header_was_called_with(name, value, scope_separator));
+  endtask
+
+  task then_the_printer_is_the_top();
+    `FAIL_IF(istop == 0);
+  endtask
+
+  task then_the_printer_is_not_the_top();
+    `FAIL_IF(istop != 0);
+  endtask
+    
 endmodule
