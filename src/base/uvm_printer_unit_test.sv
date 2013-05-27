@@ -24,6 +24,7 @@ module uvm_printer_unit_test;
   test_uvm_component test_comp;
 
   string s_exp;
+  string adjusted_name;
 
 
   //===================================
@@ -167,7 +168,7 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
 
-  `SVTEST(print_int_returns_row_size_as_string)
+  `SVTEST(print_int_returns_row_numeric_size_as_string)
     given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(.size(-1));
@@ -216,11 +217,11 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_field_is_an_alies_for_print_int)
-    given_i_set_my_expected_result_to("my_name");
+    given_i_have_a_new_uvm_printer();
 
-    uut.print_field(my_expected_result(), 99, 66);
+    when_i_call_print_field_with(some_name(), 99, 66);
 
-    `FAIL_UNLESS(uut.print_int_was_called_with(my_expected_result(), 99, 66, UVM_NORADIX, _DOT, _NULL_STRING));
+    then_print_int_is_called_with(some_name(), 99, 66, UVM_NORADIX, _DOT, _NULL_STRING);
   `SVTEST_END()
 
   //-----------------------------
@@ -230,54 +231,60 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_object_header_sets_row_name_to_what_is_passed_in)
-    given_i_set_my_expected_result_to("name");
+    given_i_have_a_new_uvm_printer();
 
-    call_print_object_header_with(my_expected_result(), test_obj);
-
-    `FAIL_IF(last_row.name != my_expected_result());
+    when_i_call_print_object_header_with(some_name());
+    
+    then_the_row_name_is_assigned_to(some_name());
   `SVTEST_END()
 
 
-  `SVTEST(print_object_header_derives_name_from_value)
-    call_print_object_header_with("", test_obj);
+  `SVTEST(print_object_header_derives_name_from_value_when_null)
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(last_row.name != test_obj.get_name());
+    when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_obj));
+
+    then_the_row_name_is_assigned_to(test_obj.get_name());
   `SVTEST_END()
 
 
-  `SVTEST(print_object_header_derives_name_from_component)
-    call_print_object_header_with("", test_comp);
+  `SVTEST(print_object_header_derives_name_from_component_when_null)
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(last_row.name != test_comp.get_name());
+    when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_comp));
+
+    then_the_row_name_is_assigned_to(test_comp.get_name());
   `SVTEST_END()
 
 
-  `SVTEST(print_object_header_name_can_be_unnamed_for_object_with_no_name)
-    given_i_set_my_expected_result_to("<unnamed>");
-    test_obj = new("");
+  `SVTEST(print_object_header_name_is_unnamed_for_object_with_no_name)
+    given_i_have_a_new_uvm_printer();
+      and_i_set_my_test_obj_name_to(_NULL_STRING);
 
-    call_print_object_header_with("", test_obj);
+    when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_obj));
 
-    `FAIL_IF(last_row.name != my_expected_result());
+    then_the_row_name_is_assigned_to("<unnamed>");
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_name_is_overridden_with_show_root)
-    and_i_turn_the_show_root_knob_to(1);
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_show_root_knob_to(1);
 
-    call_print_object_header_with(some_name(), test_obj);
+    when_i_call_print_object_header_with(some_name(), .value(test_obj));
 
-    `FAIL_IF(last_row.name != test_obj.get_name());
+    then_the_row_name_is_assigned_to(test_obj.get_name());
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_name_from_scope)
-    given_i_set_my_expected_result_to("my_name");
-    and_i_push_this_level_to_the_scope_stack("my_scope");
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("my_scope");
+      and_i_turn_the_full_name_knob_to(1);
     
-    call_print_object_header_with(my_expected_result(), null);
+    when_i_call_print_object_header_with(some_name());
 
-    `FAIL_IF(last_row.name != my_expected_result());
+    then_the_row_name_is_assigned_to({ "my_scope." , some_name() });
   `SVTEST_END()
 
 
@@ -287,88 +294,91 @@ module uvm_printer_unit_test;
   // only handle a '.' as separator. last_row.name in this case is set to
   // "my_scope.my_name" instead of "my_name" as I expect.
 // `SVTEST(print_object_header_name_from_scope_with_different_scope_separator)
-//   given_i_set_my_expected_result_to("my_name");
-//   and_i_push_this_level_to_the_scope_stack("my_scope");
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
-//   call_print_object_header_with(my_expected_result(), null, "J");
+//   when_i_call_print_object_header_with(some_name(), null, "J");
 //
-//   `FAIL_IF(last_row.name != my_expected_result());
+//   then_the_row_name_is_assigned_to(some_name());
 // `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_level_to_depth0)
-    call_print_object_header_with("", null);
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(last_row.level != 0);
+    when_i_call_print_object_header_with();
+
+    then_the_row_level_is_assigned_to(0);
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_level_to_depthN)
-    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
-    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
-    and_i_push_this_level_to_the_scope_stack(_NULL_STRING);
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("scope0");
+      and_i_push_this_level_to_the_scope_stack("scope1");
+      and_i_push_this_level_to_the_scope_stack("scope2");
 
-    call_print_object_header_with("", null);
+    when_i_call_print_object_header_with();
 
-    `FAIL_IF(last_row.level != 3);
+    then_the_row_level_is_assigned_to(3);
   `SVTEST_END()
 
-
   `SVTEST(print_object_header_sets_row_val_to_hyphen_without_reference)
-    given_i_set_my_expected_result_to("-");
-    and_i_turn_the_reference_knob_to(0);
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_reference_knob_to(0);
 
-    call_print_object_header_with("", null);
+    when_i_call_print_object_header_with();
 
-    `FAIL_IF(last_row.val != my_expected_result());
+    then_the_row_val_is_assigned_to("-");
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_val_to_object_value_str_with_reference)
-    given_i_set_my_expected_result_to("@99");
-    and_i_turn_the_reference_knob_to(1);
-    test_uvm_object::set_inst_count(99);
-    test_obj = new("");
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_reference_knob_to(1);
+      and_i_set_the_inst_count_to(99);
 
-    call_print_object_header_with("", test_obj);
+    when_i_call_print_object_header_with(.value(test_obj));
 
-    `FAIL_IF(last_row.val != my_expected_result());
+    then_the_row_val_is_assigned_to("@99");
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_size_to_hyphen)
-    given_i_set_my_expected_result_to("-");
+    given_i_have_a_new_uvm_printer();
 
-    call_print_object_header_with("", null);
+    when_i_call_print_object_header_with();
 
-    `FAIL_IF(last_row.size != my_expected_result());
+    then_the_row_size_is_assigned_to("-");
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_type_name_to_object_if_null)
-    given_i_set_my_expected_result_to("object");
+    given_i_have_a_new_uvm_printer();
 
-    call_print_object_header_with("", null);
+    when_i_call_print_object_header_with();
 
-    `FAIL_IF(last_row.type_name != my_expected_result());
+    then_the_row_type_name_is_assigned_to("object");
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_sets_row_type_name_to_type_name_otherwise)
-    call_print_object_header_with("", test_obj);
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(last_row.type_name != test_obj.get_type_name());
+    when_i_call_print_object_header_with(.value(test_obj));
+
+    then_the_row_type_name_is_assigned_to(test_obj.get_type_name());
   `SVTEST_END()
 
 
   `SVTEST(print_object_header_pushes_back_new_rows)
-    string first_name = "leaf";
-    string last_name = "grief";
+    given_i_have_a_new_uvm_printer();
 
-    call_print_object_header_with(first_name, null);
-    call_print_object_header_with(last_name, null);
+    when_i_call_print_object_header_with(some_name(), null);
+     and_i_call_print_object_header_with(some_other_name(), null);
 
-    `FAIL_IF(first_row.name != first_name || last_row.name != last_name);
+    then_the_new_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
   `SVTEST_END()
 
   //-----------------------------
@@ -377,13 +387,13 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
-// `SVTEST(print_object_prints_an_object_header)
-//   string my_name = "my_name";
-//   byte ss = "J";
+// `SVTEST(print_object_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
-//   uut.print_object(my_name, test_obj, ss);
+//   when_i_call_print_object(.name(some_name()), .scope_separator("J"));
 //
-//   `FAIL_UNLESS(uut.print_object_header_was_called_with(my_name, test_obj, ss));
+//   then_the_row_name_is_assigned_to(some_name());
 // `SVTEST_END()
 
   //-----------------------------
@@ -449,34 +459,51 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(adjust_name_returns_id_if_full_name_specified)
-    given_i_set_my_expected_result_to("no.change.expected");
-    and_i_turn_the_full_name_knob_to(1);
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_full_name_knob_to(1);
 
-    `FAIL_IF(uut.test_adjust_name(my_expected_result()) != my_expected_result());
+    when_i_call_adjust_name_with("no.change.expected");
+
+    then_the_adjusted_name_is("no.change.expected");
   `SVTEST_END()
 
 
   `SVTEST(adjust_name_returns_id_if_id_is_dot_dot_dot)
-    given_i_set_my_expected_result_to("...");
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(uut.test_adjust_name(my_expected_result()) != my_expected_result());
+    when_i_call_adjust_name_with("...");
+
+    then_the_adjusted_name_is("...");
   `SVTEST_END()
 
 
   `SVTEST(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
-    given_i_set_my_expected_result_to("id");
-    and_i_turn_the_show_root_knob_to(1);
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_show_root_knob_to(1);
 
-    `FAIL_IF(uut.test_adjust_name(my_expected_result()) != my_expected_result());
+    when_i_call_adjust_name_with("my.id");
+
+    then_the_adjusted_name_is("my.id");
   `SVTEST_END()
 
 
-  `SVTEST(adjust_name_returns_leaf_scope_otherwise)
-    string id_in = "no.change.expected";
-    string id_out = "expected";
+  `SVTEST(adjust_name_returns_leaf_scope_otherwise_with_default_scope_separator)
+    given_i_have_a_new_uvm_printer();
 
-    `FAIL_IF(uut.test_adjust_name(id_in) != id_out);
+    when_i_call_adjust_name_with("expect.only.this");
+
+    then_the_adjusted_name_is("this");
   `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(adjust_name_returns_leaf_scope_otherwise_with_user_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_adjust_name_with("expectJonlyJthis", .scope_separator("J"));
+//
+//   then_the_adjusted_name_is("this");
+// `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -571,6 +598,10 @@ module uvm_printer_unit_test;
     uut.knobs.reference = k;
   endfunction
 
+  function void and_i_set_my_test_obj_name_to(string s);
+    test_obj.set_name(s);
+  endfunction
+
   function string some_name();
     return "some_name";
   endfunction
@@ -589,6 +620,11 @@ module uvm_printer_unit_test;
 
   function int some_size();
     return 0;
+  endfunction
+
+  function void and_i_set_the_inst_count_to(int i);
+    test_uvm_object::set_inst_count(i);
+    test_obj = new("obj_name");
   endfunction
 
   //----------
@@ -615,17 +651,35 @@ module uvm_printer_unit_test;
     update_last_row();
   endfunction
 
-  function void call_print_object_header_with (string name,
-                                     uvm_object value,
-                                     byte scope_separator=".");
+  function void when_i_call_print_object_header_with (string name = some_name(),
+                                                      uvm_object value = null,
+                                                      byte scope_separator=".");
     uut.print_object_header(name, value, scope_separator);
     update_first_row();
     update_last_row();
   endfunction
 
+  function void and_i_call_print_object_header_with (string name = some_name(),
+                                                     uvm_object value = null,
+                                                     byte scope_separator=".");
+    when_i_call_print_object_header_with (name, test_obj, scope_separator);
+  endfunction
+
+  function void when_i_call_print_field_with(string name,
+                                             uvm_bitstream_t value,
+                                             int size);
+    uut.print_field(name, value, size);
+  endfunction
+
+  function void when_i_call_adjust_name_with(string s, byte scope_separator = ".");
+    adjusted_name = uut.test_adjust_name(s, scope_separator);
+  endfunction
+
+
   //----------
   // THENS...
   //----------
+
   task then_the_row_name_is_assigned_to(string s);
     then_the_new_row_name_is_assigned_to(s);
   endtask
@@ -652,5 +706,18 @@ module uvm_printer_unit_test;
 
   task then_the_row_val_is_assigned_to(string s);
     `FAIL_IF(last_row.val != s);
+  endtask
+
+  task then_print_int_is_called_with(string name,
+                                     uvm_bitstream_t value,
+                                     int size,
+                                     uvm_radix_enum radix,
+                                     byte scope_separator,
+                                     string type_name);
+    `FAIL_UNLESS(uut.print_int_was_called_with(name, value, size, radix, scope_separator, type_name));
+  endtask
+
+  task then_the_adjusted_name_is(string s);
+    `FAIL_IF(adjusted_name != s);
   endtask
 endmodule
