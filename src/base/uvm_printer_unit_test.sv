@@ -105,7 +105,7 @@ module uvm_printer_unit_test;
       and_i_turn_the_full_name_knob_to(1);
       and_i_push_this_level_to_the_scope_stack("branch");
 
-    when_i_call_print_int_with(the_name("leaf"));
+    when_i_call_print_int_with(.name("leaf"));
 
     then_the_row_name_is_assigned_to("branch.leaf");
   `SVTEST_END()
@@ -115,7 +115,7 @@ module uvm_printer_unit_test;
     given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch");
 
-    when_i_call_print_int_with(the_name("leaf"));
+    when_i_call_print_int_with(.name("leaf"));
 
     then_the_row_name_is_assigned_to("leaf");
   `SVTEST_END()
@@ -610,49 +610,27 @@ module uvm_printer_unit_test;
     uut.m_scope.down(b);
   endfunction
 
-  function void and_i_turn_the_full_name_knob_to(bit k);
-    uut.knobs.full_name = k;
+  `define AND_I_TURN_THE_(KNOB,TYPE) \
+  function void and_i_turn_the_``KNOB``_knob_to(TYPE k); \
+    uut.knobs.KNOB = k; \
   endfunction
 
-  function void and_i_turn_the_bin_radix_knob_to(string k);
-    uut.knobs.bin_radix = k;
-  endfunction
-
-  function void and_i_turn_the_default_radix_knob_to(uvm_radix_enum r);
-    uut.knobs.default_radix = r;
-  endfunction
-
-  function void and_i_turn_the_show_root_knob_to(bit k);
-    uut.knobs.show_root = k;
-  endfunction
-
-  function void and_i_turn_the_reference_knob_to(bit k);
-    uut.knobs.reference = k;
-  endfunction
+  `AND_I_TURN_THE_(full_name,bit)
+  `AND_I_TURN_THE_(bin_radix,string)
+  `AND_I_TURN_THE_(default_radix,uvm_radix_enum)
+  `AND_I_TURN_THE_(show_root,bit)
+  `AND_I_TURN_THE_(reference,bit)
 
   function void and_i_set_my_test_obj_name_to(string s);
     test_obj.set_name(s);
   endfunction
 
-  function string some_name();
-    return "some_name";
-  endfunction
+  `define SOME_(NAME,TYPE,VALUE) function TYPE some_``NAME(); return VALUE; endfunction
 
-  function string some_other_name();
-    return "some_other_name";
-  endfunction
-
-  function string the_name(string s);
-    return s;
-  endfunction
-
-  function int some_value();
-    return 0;
-  endfunction
-
-  function int some_size();
-    return 0;
-  endfunction
+  `SOME_(value,int,0)
+  `SOME_(size,int,0)
+  `SOME_(name,string,"some_name")
+  `SOME_(other_name,string,"some_other_name")
 
   function void and_i_set_the_inst_count_to(int i);
     test_uvm_object::set_inst_count(i);
@@ -662,61 +640,51 @@ module uvm_printer_unit_test;
   //----------
   // WHENS...
   //----------
+  `define PRINT_INT_ARGS string name = some_name(), \
+                         uvm_bitstream_t value = some_value(), \
+                         int size = some_size(), \
+                         uvm_radix_enum radix=UVM_NORADIX, \
+                         byte scope_separator=".", \
+                         string type_name=""
 
-  function void when_i_call_print_int_with(string name = some_name(),
-                                    uvm_bitstream_t value = some_value(),
-                                    int size = some_size(),
-                                    uvm_radix_enum radix=UVM_NORADIX,
-                                    byte scope_separator=".",
-                                    string type_name="");
+  `define PRINT_OBJ_ARGS string name = some_name(), \
+                         uvm_object value = null, \
+                         byte scope_separator="."
+
+  function void when_i_call_print_int_with(`PRINT_INT_ARGS);
     and_i_call_print_int_with(name, value, size, radix, scope_separator, type_name);
   endfunction
 
-  function void and_i_call_print_int_with(string name = some_name(),
-                                    uvm_bitstream_t value = some_value(),
-                                    int size = some_size(),
-                                    uvm_radix_enum radix=UVM_NORADIX,
-                                    byte scope_separator=".",
-                                    string type_name="");
+  function void and_i_call_print_int_with(`PRINT_INT_ARGS);
     uut.print_int(name, value, size, radix, scope_separator, type_name);
     update_first_row();
     update_last_row();
   endfunction
 
-  function void when_i_call_print_object_header_with (string name = some_name(),
-                                                      uvm_object value = null,
-                                                      byte scope_separator=".");
+  function void when_i_call_print_object_header_with (`PRINT_OBJ_ARGS);
     uut.print_object_header(name, value, scope_separator);
     update_first_row();
     update_last_row();
   endfunction
 
-  function void and_i_call_print_object_header_with (string name = some_name(),
-                                                     uvm_object value = null,
-                                                     byte scope_separator=".");
+  function void and_i_call_print_object_header_with (`PRINT_OBJ_ARGS);
     when_i_call_print_object_header_with (name, test_obj, scope_separator);
   endfunction
 
-  function void when_i_call_print_field_with(string name,
-                                             uvm_bitstream_t value,
+  function void when_i_call_print_object_with(`PRINT_OBJ_ARGS);
+    uut.print_object(name, value, scope_separator);
+  endfunction
+
+  function void when_i_call_print_field_with(string name = some_name(),
+                                             uvm_bitstream_t value = 0,
                                              int size);
     uut.print_field(name, value, size);
   endfunction
 
-  function void when_i_call_print_time_with(string name,
-                                            uvm_bitstream_t value,
+  function void when_i_call_print_time_with(string name = some_name(),
+                                            uvm_bitstream_t value = 0,
                                             byte scope_separator=".");
     uut.print_time(name, value, scope_separator);
-  endfunction
-
-  function void when_i_call_adjust_name_with(string s, byte scope_separator = ".");
-    adjusted_name = uut.test_adjust_name(s, scope_separator);
-  endfunction
-
-  function void when_i_call_print_object_with(string name = some_name(),
-                                              uvm_object value = null,
-                                              byte scope_separator=".");
-    uut.print_object(name, value, scope_separator);
   endfunction
 
   function void when_i_call_print_string_with(string name = some_name(),
@@ -725,6 +693,11 @@ module uvm_printer_unit_test;
     uut.print_string(name, value, scope_separator);
     update_first_row();
     update_last_row();
+  endfunction
+
+  function void when_i_call_adjust_name_with(string s,
+                                             byte scope_separator = ".");
+    adjusted_name = uut.test_adjust_name(s, scope_separator);
   endfunction
 
   int istop;
