@@ -22,6 +22,9 @@ class test_uvm_object extends uvm_object;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
   bit fake_do_unpack = 0;
+  bit fake_status = 0;
+  bit fake_push_cycle_check = 0;
+  bit was_cycle_check_empty = 0;
 
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
@@ -29,6 +32,7 @@ class test_uvm_object extends uvm_object;
   uvm_packer do_pack_pack;
   uvm_packer do_unpack_unpack;
   string create_name;
+  test_uvm_object created_object;
 
   function new(string name);
     super.new(name);
@@ -55,6 +59,13 @@ class test_uvm_object extends uvm_object;
     fa_args.tmp_data__ = tmp_data__;
     fa_args.what__ = what__;
     fa_args.str__ = str__;
+    if(fake_status)
+      __m_uvm_status_container.status = 1;
+    if(fake_push_cycle_check) begin
+      test_uvm_object dummy=new("dummy");
+      __m_uvm_status_container.cycle_check[dummy] = 1;
+    end
+    was_cycle_check_empty = __m_uvm_status_container.cycle_check.size() == 0;
 
     super.__m_uvm_field_automation(tmp_data__, what__, str__);
   endfunction
@@ -85,8 +96,8 @@ class test_uvm_object extends uvm_object;
   function uvm_object create (string name="");
     create_name = name;
     if (fake_create) begin
-      test_uvm_object o = new(fake_create_name());
-      return o;
+      created_object = new(fake_create_name());
+      return created_object;
     end
     else
       return super.create(name);

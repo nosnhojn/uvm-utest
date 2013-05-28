@@ -26,6 +26,9 @@ module uvm_object_unit_test;
   byte unsigned  bytestream[];
   int  unsigned  intstream[];
   mock_uvm_packer packer = null;
+  uvm_bitstream_t uvm_bitstream;
+  test_uvm_object dummy_object;
+  string          dummy_str;
 
   //===================================
   // Build
@@ -50,6 +53,8 @@ module uvm_object_unit_test;
 
     uut.fake_test_type_name = 0;
     packer = new;
+    dummy_object = new("dummy");
+    dummy_str = "dummy";
 
     uvm_report_mock::setup();
   endtask
@@ -62,6 +67,9 @@ module uvm_object_unit_test;
   task teardown();
     svunit_ut.teardown();
     bitstream.delete();
+    uvm_bitstream = '{default:'0};
+    dummy_object = null;
+    dummy_str = "";
   endtask
 
 
@@ -788,26 +796,210 @@ module uvm_object_unit_test;
     `FAIL_IF(0);
   `SVTEST_END(do_unpack_is_empty)
 
+
   //-----------------------------
   //-----------------------------
   // set_int_local tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(set_int_local_status_container_warning_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s", "dummy"));
+    void'(uut.set_int_local("dummy",uvm_bitstream,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
 
-  //-----------------------------
-  //-----------------------------
-  // set_string_local tests
-  //-----------------------------
-  //-----------------------------
-  // TBD
+
+  `SVTEST(set_int_local_status_container_status_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uut.fake_status = 1;
+    void'(uut.set_int_local("dummy",uvm_bitstream,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+  
+
+  `SVTEST(set_int_local_status_container_status_properly_reset)
+    uut.__m_uvm_status_container.status = 1;
+    void'(uut.set_int_local("dummy",uvm_bitstream,0));
+    `FAIL_IF(uut.__m_uvm_status_container.status != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_int_local_status_container_bitstream_set_with_value)
+    uvm_bitstream[7:0] = '{8{1'b1}};
+    void'(uut.set_int_local("dummy",uvm_bitstream,0));
+    `FAIL_IF(uut.__m_uvm_status_container.bitstream != uvm_bitstream)
+  `SVTEST_END()
+
+
+  `SVTEST(set_int_local_field_automation)
+    string str = "dummy";
+    void'(uut.set_int_local(str, uvm_bitstream, 0));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETINT, str));
+  `SVTEST_END()
+
+
+  `SVTEST(set_int_local_cycle_check_empty_before_automation)
+    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
+    void'(uut.set_int_local("dummy", uvm_bitstream, 0));
+    `FAIL_IF(uut.was_cycle_check_empty != 1)
+  `SVTEST_END()
+
+
+  `SVTEST(set_int_local_m_uvm_cycle_scopes_empty)
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
+    void'(uut.set_int_local("dummy", uvm_bitstream, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_int_local_cycle_check_empty)
+    uut.fake_push_cycle_check = 1;
+    void'(uut.set_int_local("dummy", uvm_bitstream, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
+  `SVTEST_END()
+
 
   //-----------------------------
   //-----------------------------
   // set_object_local tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(set_object_local_status_container_warning_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s", "dummy"));
+    dummy_object = null;
+    void'(uut.set_object_local("dummy",dummy_object,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_status_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uut.fake_status = 1;
+    void'(uut.set_object_local("dummy",dummy_object,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_status_properly_reset)
+    uut.__m_uvm_status_container.status = 1;
+    void'(uut.set_object_local("dummy",dummy_object,0));
+    `FAIL_IF(uut.__m_uvm_status_container.status != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_object_set_with_value)
+    void'(uut.set_object_local("dummy",dummy_object,0));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object)
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_object_set_with_cloned_value)
+    dummy_object.fake_create = 1;
+    void'(uut.set_object_local("dummy",dummy_object,1));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object.created_object)
+    `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
+    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_object.created_object.get_name())
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_object_set_with_cloned_null_value)
+    test_uvm_object null_object;
+    void'(uut.set_object_local("dummy",null_object,1));
+    `FAIL_IF(uut.__m_uvm_status_container.object != null)
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_field_automation)
+    string str = "dummy";
+    void'(uut.set_object_local(str, dummy_object, 0));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETOBJ, str));
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_cycle_check_empty_before_automation)
+    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
+    void'(uut.set_object_local("dummy", dummy_object, 0));
+    `FAIL_IF(uut.was_cycle_check_empty != 1)
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_m_uvm_cycle_scopes_empty)
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
+    void'(uut.set_object_local("dummy", dummy_object, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_cycle_check_empty)
+    uut.fake_push_cycle_check = 1;
+    void'(uut.set_object_local("dummy", dummy_object, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
+  `SVTEST_END()
+
+
+  //-----------------------------
+  //-----------------------------
+  // set_string_local tests
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(set_string_local_status_container_warning_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", dummy_str,uut.get_inst_id()));
+    void'(uut.set_string_local("dummy",dummy_str,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_status_container_status_set)
+    uut.__m_uvm_status_container.warning = 1;
+    uut.fake_status = 1;
+    void'(uut.set_string_local("dummy",dummy_str,0));
+    `FAIL_IF(!uvm_report_mock::verify_complete())
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_status_container_status_properly_reset)
+    uut.__m_uvm_status_container.status = 1;
+    void'(uut.set_string_local("dummy",dummy_str,0));
+    `FAIL_IF(uut.__m_uvm_status_container.status != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_status_container_stringv_set_with_value)
+    void'(uut.set_string_local("dummy",dummy_str,0));
+    `FAIL_IF(uut.__m_uvm_status_container.stringv != dummy_str)
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_field_automation)
+    string str = "dummy";
+    void'(uut.set_string_local(str, dummy_str, 0));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETSTR, str));
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_cycle_check_empty_before_automation)
+    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
+    void'(uut.set_string_local("dummy", dummy_str, 0));
+    `FAIL_IF(uut.was_cycle_check_empty != 1)
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_m_uvm_cycle_scopes_empty)
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
+    void'(uut.set_string_local("dummy", dummy_str, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
+  `SVTEST_END()
+
+
+  `SVTEST(set_string_local_cycle_check_empty)
+    uut.fake_push_cycle_check = 1;
+    void'(uut.set_string_local("dummy", dummy_str, 0));
+    `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
+  `SVTEST_END()
+
 
   //-------------------------------
   //-------------------------------
