@@ -626,7 +626,31 @@ module uvm_printer_unit_test;
   // print_generic tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_generic_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_generic_with(some_name());
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_generic_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // NEIL IS HERE
 
   //-----------------------------
   //-----------------------------
@@ -897,6 +921,16 @@ module uvm_printer_unit_test;
                                             real value = 0,
                                             byte scope_separator=".");
     uut.print_real(name, value, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  function void when_i_call_print_generic_with(string name = some_name(),
+                                               string type_name = "",
+                                               int size = 0,
+                                               string value = "",
+                                               byte scope_separator=".");
+    uut.print_generic(name, type_name, size, value, scope_separator);
     update_first_row();
     update_last_row();
   endfunction
