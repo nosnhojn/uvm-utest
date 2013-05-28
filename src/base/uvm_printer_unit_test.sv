@@ -5,6 +5,11 @@
 `include "test_uvm_agent.sv"
 `include "test_defines.sv"
 
+`define and_i_call_print_string_with when_i_call_print_string_with
+`define and_i_call_print_int_with when_i_call_print_int_with
+`define and_i_call_print_real_with when_i_call_print_real_with
+`define and_i_call_print_object_header_with when_i_call_print_object_header_with
+
 import svunit_pkg::*;
 
 module uvm_printer_unit_test;
@@ -24,6 +29,7 @@ module uvm_printer_unit_test;
   test_uvm_component test_comp;
 
   string adjusted_name;
+  string string_index;
 
 
   //===================================
@@ -53,6 +59,7 @@ module uvm_printer_unit_test;
   task teardown();
     svunit_ut.teardown();
     adjusted_name = "";
+    string_index = "";
   endtask
 
 
@@ -202,7 +209,7 @@ module uvm_printer_unit_test;
     given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(some_name());
-     and_i_call_print_int_with(some_other_name());
+    `and_i_call_print_int_with(some_other_name());
 
     then_the_row_name_is_assigned_to(some_other_name());
      and_the_old_row_name_is_assigned_to(some_name());
@@ -287,7 +294,7 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
 
-  // FAILING TEST - REPORTED
+  // FAILING TEST - REPORTED IN MANTIS 4602
   // uvm_printer.svh:line 138
   // scope_separator can't be specified by user b/c scope_stack can
   // only handle a '.' as separator. last_row.name in this case is set to
@@ -374,7 +381,7 @@ module uvm_printer_unit_test;
     given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(some_name(), null);
-     and_i_call_print_object_header_with(some_other_name(), null);
+    `and_i_call_print_object_header_with(some_other_name(), null);
 
     then_the_row_name_is_assigned_to(some_other_name());
      and_the_old_row_name_is_assigned_to(some_name());
@@ -405,9 +412,97 @@ module uvm_printer_unit_test;
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
-    when_i_call_print_string_with();
+    when_i_call_print_string_with(some_name());
 
     then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_string_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_string_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_string_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_string_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_string_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+  `SVTEST(print_string_type_name_set_to_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with();
+  
+    then_the_row_type_name_is_assigned_to("string");
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_size_set_to_string_length)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with(.name(some_name()), .value(some_other_name()));
+  
+    then_the_row_size_is_assigned_to(the_size_of(some_other_name()));
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with(.value(some_other_name()));
+
+    then_the_row_val_is_assigned_to(some_other_name());
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_sets_val_to_quotes_for_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with(.value(_NULL_STRING));
+
+    then_the_row_val_is_assigned_to("\"\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_treats_quotes_in_the_value_field_as_any_other_character)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with(.value("\""));
+
+    then_the_row_val_is_assigned_to("\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_string_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_string_with(some_name());
+    `and_i_call_print_string_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
   `SVTEST_END()
 
   //-----------------------------
@@ -429,7 +524,102 @@ module uvm_printer_unit_test;
   // print_real tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_real_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_real_with(some_name());
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_real_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_real_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_real_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_real_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_real_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_real_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+
+  // FAILING TEST
+  // uvm_print.svh:line 909
+  // for some reason "..." is treated as a special name. however, the name is never actually
+  // assigned in the the case of "..." which means an empty scope stack gets passed to
+  // adjust_name. I think want to have the name passed into adjust_name on line 915 instead of
+  // m_scope.get() since it's done on 911
+// `SVTEST(WARNING_print_real_trys_to_treat_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_real_with(.name("..."));
+//
+//   then_the_row_name_is_assigned_to("...");
+// `SVTEST_END()
+
+
+  `SVTEST(print_real_type_name_set_to_real)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_real_with();
+  
+    then_the_row_type_name_is_assigned_to("real");
+  `SVTEST_END()
+
+
+  `SVTEST(print_real_size_set_to_64)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_real_with();
+  
+    then_the_row_size_is_assigned_to("64");
+  `SVTEST_END()
+
+
+  `SVTEST(print_real_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_real_with(.value(500.1234567));
+
+    then_the_row_val_is_assigned_to("500.123457");
+  `SVTEST_END()
+
+
+  `SVTEST(print_real_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_real_with(some_name());
+    `and_i_call_print_real_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -569,7 +759,32 @@ module uvm_printer_unit_test;
   // index_string tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(index_string_turns_name_and_index_into_an_array_select_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_index_string_with(.name("some_array"), .index(99));
+
+    then_the_return_string_is("some_array[99]");
+  `SVTEST_END()
+
+
+  `SVTEST(index_string_always_prints_radix_as_decimal)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_index_string_with(.name("some_array"), .index('hf));
+
+    then_the_return_string_is("some_array[15]");
+  `SVTEST_END()
+
+
+  `SVTEST(WARNING_index_string_accepts_default_name_of_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_index_string_with(.name(_NULL_STRING), .index('hf));
+
+    then_the_return_string_is("[15]");
+  `SVTEST_END()
 
   `SVUNIT_TESTS_END
 
@@ -643,10 +858,6 @@ module uvm_printer_unit_test;
                          byte scope_separator="."
 
   function void when_i_call_print_int_with(`PRINT_INT_ARGS);
-    and_i_call_print_int_with(name, value, size, radix, scope_separator, type_name);
-  endfunction
-
-  function void and_i_call_print_int_with(`PRINT_INT_ARGS);
     uut.print_int(name, value, size, radix, scope_separator, type_name);
     update_first_row();
     update_last_row();
@@ -656,10 +867,6 @@ module uvm_printer_unit_test;
     uut.print_object_header(name, value, scope_separator);
     update_first_row();
     update_last_row();
-  endfunction
-
-  function void and_i_call_print_object_header_with (`PRINT_OBJ_ARGS);
-    when_i_call_print_object_header_with (name, test_obj, scope_separator);
   endfunction
 
   function void when_i_call_print_object_with(`PRINT_OBJ_ARGS);
@@ -686,6 +893,14 @@ module uvm_printer_unit_test;
     update_last_row();
   endfunction
 
+  function void when_i_call_print_real_with(string name = some_name(),
+                                            real value = 0,
+                                            byte scope_separator=".");
+    uut.print_real(name, value, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
   function void when_i_call_adjust_name_with(string s,
                                              byte scope_separator = ".");
     adjusted_name = uut.test_adjust_name(s, scope_separator);
@@ -694,6 +909,10 @@ module uvm_printer_unit_test;
   int istop;
   function void when_i_call_istop();
     istop = uut.istop();
+  endfunction
+
+  function void when_i_call_index_string_with(string name, int index);
+    string_index = uut.index_string(index, name);
   endfunction
 
 
@@ -741,6 +960,14 @@ module uvm_printer_unit_test;
 
   task then_the_printer_is_not_the_top();
     `FAIL_IF(istop != 0);
+  endtask
+
+  function string the_size_of(string s);
+    return $sformatf("%0d", s.len());
+  endfunction
+
+  task  then_the_return_string_is(string s);
+    `FAIL_UNLESS(string_index == s);
   endtask
     
 endmodule
