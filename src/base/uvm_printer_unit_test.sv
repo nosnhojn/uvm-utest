@@ -23,7 +23,6 @@ module uvm_printer_unit_test;
   test_uvm_object test_obj;
   test_uvm_component test_comp;
 
-  string s_exp;
   string adjusted_name;
 
 
@@ -32,8 +31,6 @@ module uvm_printer_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-    test_obj = new("obj_name");
-    test_comp = new("comp_name");
   endfunction
 
 
@@ -44,6 +41,8 @@ module uvm_printer_unit_test;
     svunit_ut.setup();
 
     uut = new();
+    test_obj = new("obj_name");
+    test_comp = new("comp_name");
   endtask
 
 
@@ -53,7 +52,7 @@ module uvm_printer_unit_test;
   //===================================
   task teardown();
     svunit_ut.teardown();
-    given_i_set_my_expected_result_to("");
+    adjusted_name = "";
   endtask
 
 
@@ -205,7 +204,7 @@ module uvm_printer_unit_test;
     when_i_call_print_int_with(some_name());
      and_i_call_print_int_with(some_other_name());
 
-    then_the_new_row_name_is_assigned_to(some_other_name());
+    then_the_row_name_is_assigned_to(some_other_name());
      and_the_old_row_name_is_assigned_to(some_name());
   `SVTEST_END()
 
@@ -377,7 +376,7 @@ module uvm_printer_unit_test;
     when_i_call_print_object_header_with(some_name(), null);
      and_i_call_print_object_header_with(some_other_name(), null);
 
-    then_the_new_row_name_is_assigned_to(some_other_name());
+    then_the_row_name_is_assigned_to(some_other_name());
      and_the_old_row_name_is_assigned_to(some_name());
   `SVTEST_END()
 
@@ -585,14 +584,6 @@ module uvm_printer_unit_test;
     test_obj = new("obj_name"); 
   endfunction
 
-  function void given_i_set_my_expected_result_to(string s);
-    s_exp = s;
-  endfunction
-
-  function string my_expected_result();
-    return s_exp;
-  endfunction
-
   function automatic void update_last_row();
     last_row = uut.get_last_row();
   endfunction
@@ -710,32 +701,19 @@ module uvm_printer_unit_test;
   // THENS...
   //----------
 
-  task then_the_row_name_is_assigned_to(string s);
-    then_the_new_row_name_is_assigned_to(s);
+  `define THEN_THE_ROW_IS_ASSIGNED_TO(NAME,TYPE) \
+  task then_the_row_``NAME``_is_assigned_to(TYPE s); \
+    `FAIL_IF(last_row.NAME != s); \
   endtask
 
-  task then_the_new_row_name_is_assigned_to(string s);
-    `FAIL_IF(last_row.name != s);
-  endtask
+  `THEN_THE_ROW_IS_ASSIGNED_TO(name,string)
+  `THEN_THE_ROW_IS_ASSIGNED_TO(level,int)
+  `THEN_THE_ROW_IS_ASSIGNED_TO(type_name,string)
+  `THEN_THE_ROW_IS_ASSIGNED_TO(size,string)
+  `THEN_THE_ROW_IS_ASSIGNED_TO(val,string)
 
   task and_the_old_row_name_is_assigned_to(string s);
     `FAIL_IF(first_row.name != s);
-  endtask
-
-  task then_the_row_level_is_assigned_to(int i);
-    `FAIL_IF(last_row.level != i);
-  endtask
-
-  task then_the_row_type_name_is_assigned_to(string s);
-    `FAIL_IF(last_row.type_name != s);
-  endtask
-
-  task then_the_row_size_is_assigned_to(string s);
-    `FAIL_IF(last_row.size != s);
-  endtask
-
-  task then_the_row_val_is_assigned_to(string s);
-    `FAIL_IF(last_row.val != s);
   endtask
 
   task then_print_int_is_called_with(string name,
@@ -748,7 +726,7 @@ module uvm_printer_unit_test;
   endtask
 
   task then_the_adjusted_name_is(string s);
-    `FAIL_IF(adjusted_name != s);
+    `FAIL_UNLESS(adjusted_name == s);
   endtask
  
   task then_the_print_object_header_is_called_with(string name,
