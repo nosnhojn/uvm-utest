@@ -8,6 +8,7 @@
 `define and_i_call_print_string_with when_i_call_print_string_with
 `define and_i_call_print_int_with when_i_call_print_int_with
 `define and_i_call_print_real_with when_i_call_print_real_with
+`define and_i_call_print_generic_with when_i_call_print_generic_with
 `define and_i_call_print_object_header_with when_i_call_print_object_header_with
 
 import svunit_pkg::*;
@@ -574,7 +575,9 @@ module uvm_printer_unit_test;
   // for some reason "..." is treated as a special name. however, the name is never actually
   // assigned in the the case of "..." which means an empty scope stack gets passed to
   // adjust_name. I think want to have the name passed into adjust_name on line 915 instead of
-  // m_scope.get() since it's done on 911
+  // m_scope.get() since it's done on 911. I think this is a copy paste bug b/c the right
+  // functionality appears to be part of print_generic where on line 811, name is passed to
+  // adjust_name
 // `SVTEST(WARNING_print_real_trys_to_treat_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
 //   given_i_have_a_new_uvm_printer();
 //
@@ -650,7 +653,108 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
 
-  // NEIL IS HERE
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_generic_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_generic_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_generic_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_generic_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+
+  `SVTEST(WARNING_print_generic_treats_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
+    given_i_have_a_new_uvm_printer();
+  
+    when_i_call_print_generic_with(.name("..."));
+  
+    then_the_row_name_is_assigned_to("...");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_type_name_set_to_typename)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.type_name("gopher"));
+  
+    then_the_row_type_name_is_assigned_to("gopher");
+  `SVTEST_END()
+
+
+  `SVTEST(WARNING_print_generic_size_set_to_DOT_DOT_DOT_when_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-2));
+  
+    then_the_row_size_is_assigned_to("...");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_size_set_to_size_when_lt_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-3));
+  
+    then_the_row_size_is_assigned_to("-3");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_size_set_to_size_when_gt_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-1));
+  
+    then_the_row_size_is_assigned_to("-1");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value(some_other_name()));
+
+    then_the_row_val_is_assigned_to(some_other_name());
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_sets_val_to_quotes_for_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value(_NULL_STRING));
+
+    then_the_row_val_is_assigned_to("\"\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_treats_quotes_in_the_value_field_as_any_other_character)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value("\""));
+
+    then_the_row_val_is_assigned_to("\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(some_name());
+    `and_i_call_print_generic_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
