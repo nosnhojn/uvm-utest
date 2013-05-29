@@ -11,7 +11,15 @@
 `define and_i_call_print_generic_with when_i_call_print_generic_with
 `define and_i_call_print_object_header_with when_i_call_print_object_header_with
 
+`define OUTPUT_IS_NULL_STRING_FOR_FORMAT(NAME) \
+`SVTEST(format_``NAME``_returns_null_string) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_format_``NAME; \
+  then_the_formatted_output_is(_NULL_STRING); \
+`SVTEST_END()
+
 import svunit_pkg::*;
+import svunit_uvm_mock_pkg::*;
 
 module uvm_printer_unit_test;
 
@@ -31,6 +39,8 @@ module uvm_printer_unit_test;
 
   string adjusted_name;
   string string_index;
+  string emitted_string;
+  string formatted_output;
 
 
   //===================================
@@ -50,6 +60,8 @@ module uvm_printer_unit_test;
     uut = new();
     test_obj = new("obj_name");
     test_comp = new("comp_name");
+
+    uvm_report_mock::setup();
   endtask
 
 
@@ -761,28 +773,47 @@ module uvm_printer_unit_test;
   // emit tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(emit_asserts_an_error)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_emit;
+
+    then_an_error_is_asserted_by_the_printer;
+  `SVTEST_END()
+
+
+  `SVTEST(emit_returns_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_emit;
+
+    then_the_emitted_string_is(_NULL_STRING);
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // format_row tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(row)
 
   //-----------------------------
   //-----------------------------
   // format_header tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(header)
 
   //-----------------------------
   //-----------------------------
   // format_footer tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(footer)
 
   //-----------------------------
   //-----------------------------
@@ -971,6 +1002,7 @@ module uvm_printer_unit_test;
     test_obj = new("obj_name");
   endfunction
 
+
   //----------
   // WHENS...
   //----------
@@ -1053,6 +1085,22 @@ module uvm_printer_unit_test;
     string_index = uut.index_string(index, name);
   endfunction
 
+  function void when_i_call_emit;
+    emitted_string = uut.emit();
+  endfunction
+
+  function void when_i_call_format_row;
+    uvm_printer_row_info row;
+    formatted_output = uut.format_row(row);
+  endfunction
+
+  function void when_i_call_format_header;
+    formatted_output = uut.format_header();
+  endfunction
+
+  function void when_i_call_format_footer;
+    formatted_output = uut.format_footer();
+  endfunction
 
   //----------
   // THENS...
@@ -1107,5 +1155,18 @@ module uvm_printer_unit_test;
   task  then_the_return_string_is(string s);
     `FAIL_UNLESS(string_index == s);
   endtask
-    
+
+  task then_an_error_is_asserted_by_the_printer;
+    uvm_report_mock::expect_error("NO_OVERRIDE", "emit() method not overridden in printer subtype");
+    `FAIL_IF(!uvm_report_mock::verify_complete());
+  endtask
+
+  task then_the_emitted_string_is(string s);
+    `FAIL_IF(emitted_string != s);
+  endtask
+
+  task then_the_formatted_output_is(string s);
+    `FAIL_IF(formatted_output != s);
+  endtask
+
 endmodule
