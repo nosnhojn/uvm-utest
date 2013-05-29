@@ -20,6 +20,21 @@
   then_the_formatted_output_is(_NULL_STRING); \
 `SVTEST_END()
 
+`define PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(NAME,MIN,MAX) \
+`SVTEST(print_array_range_calls_print_generic_for_``NAME) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
+  then_print_generic_is_called_with("...", "...", -2, "...", "."); \
+`SVTEST_END()
+
+`define PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(NAME,MIN,MAX) \
+`SVTEST(print_array_range_does_nothing_for_``NAME) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
+  then_no_row_is_added; \
+`SVTEST_END()
+
+
 import svunit_pkg::*;
 import svunit_uvm_mock_pkg::*;
 
@@ -982,7 +997,14 @@ module uvm_printer_unit_test;
   // print_array_range tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(max_gt_min,0,1)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(min_eq_minus1,-1,-2)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(max_eq_minus1,43,-1)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(min_eq_max,43,43)
+
+  `PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(max_lt_min,1,0)
+  `PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(max_and_min_eq_minus1,-1,-1)
 
   //-----------------------------
   //-----------------------------
@@ -1245,6 +1267,10 @@ module uvm_printer_unit_test;
     formatted_output = uut.format_footer();
   endfunction
 
+  function void when_i_call_print_array_range_with(int min, int max);
+    uut.print_array_range(min, max);
+  endfunction
+
   //----------
   // THENS...
   //----------
@@ -1318,6 +1344,14 @@ module uvm_printer_unit_test;
 
   task then_the_m_array_stack_size_is(int i);
     `FAIL_IF(uut.get_array_stack_size() != i);
+  endtask
+
+  task then_print_generic_is_called_with(string a, string b, int i, string c, byte d);
+    `FAIL_UNLESS(uut.print_generic_was_called_with(a, b, i, c, d));
+  endtask
+
+  task then_no_row_is_added;
+    `FAIL_UNLESS(uut.get_num_rows == 0);
   endtask
 
 endmodule
