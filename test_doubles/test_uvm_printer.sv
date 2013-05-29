@@ -23,6 +23,14 @@ class test_uvm_printer extends uvm_printer();
   print_args_t p_args;
   print_object_header_args_t poh_args;
 
+  function int get_array_stack_size();
+    return m_array_stack.size();
+  endfunction
+
+  function void m_array_stack_push_back();
+    m_array_stack.push_back($random);
+  endfunction
+
   function string test_adjust_name(string id, byte scope_separator=".");
     return(adjust_name(id, scope_separator));
   endfunction

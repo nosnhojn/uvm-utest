@@ -10,6 +10,8 @@
 `define and_i_call_print_real_with when_i_call_print_real_with
 `define and_i_call_print_generic_with when_i_call_print_generic_with
 `define and_i_call_print_object_header_with when_i_call_print_object_header_with
+`define and_i_call_print_array_header_with when_i_call_print_array_header_with
+`define and_the_m_array_stack_size_is then_the_m_array_stack_size_is
 
 `define OUTPUT_IS_NULL_STRING_FOR_FORMAT(NAME) \
 `SVTEST(format_``NAME``_returns_null_string) \
@@ -109,7 +111,7 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
-  // FAILING TEST because of the uvm_leaf_scope infinite loop
+  // FAILING TEST - REPORTED IN MANTIS 4602
 // `SVTEST(print_int_can_return_the_row_name_as_empty_string)
 //   given_i_have_a_new_uvm_printer();
 //
@@ -582,8 +584,8 @@ module uvm_printer_unit_test;
 // `SVTEST_END()
 
 
-  // FAILING TEST
-  // uvm_print.svh:line 909
+  // FAILING TEST - REPORTED AS MANTIS 4609
+  // uvm_printer.svh:line 909
   // for some reason "..." is treated as a special name. however, the name is never actually
   // assigned in the the case of "..." which means an empty scope stack gets passed to
   // adjust_name. I think want to have the name passed into adjust_name on line 915 instead of
@@ -873,7 +875,107 @@ module uvm_printer_unit_test;
   // print_array_header tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_array_header_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_array_header_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_array_header_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_array_header_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_array_header_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+
+  `SVTEST(print_array_header_type_name_set_to_arraytype)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(.arraytype("goof-ball"));
+  
+    then_the_row_type_name_is_assigned_to("goof-ball");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_size_set_to_size)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(.size(99));
+  
+    then_the_row_size_is_assigned_to("99");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with();
+
+    then_the_row_val_is_assigned_to("-");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(some_name());
+    `and_i_call_print_array_header_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_appends_name_to_scope)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_scope_stack_contains({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_increases_array_stack_size)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_m_array_stack_size_is(1);
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -887,7 +989,29 @@ module uvm_printer_unit_test;
   // print_array_footer tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_array_footer_chomps_scope_and_array_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_increase_the_size_of_the_m_array_stack_by(4);
+
+    when_i_call_print_array_footer;
+
+    then_the_scope_stack_contains("branch0");
+     `and_the_m_array_stack_size_is(3);
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_footer_ignores_scope_and_array_stack_if_no_array_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_footer;
+
+    then_the_scope_stack_contains("branch0.branch1");
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -1002,6 +1126,9 @@ module uvm_printer_unit_test;
     test_obj = new("obj_name");
   endfunction
 
+  function void and_i_increase_the_size_of_the_m_array_stack_by(int i);
+    repeat (i) uut.m_array_stack_push_back();
+  endfunction
 
   //----------
   // WHENS...
@@ -1070,6 +1197,22 @@ module uvm_printer_unit_test;
     update_first_row();
     update_last_row();
   endfunction
+
+  function void when_i_call_print_array_header_with(string name = some_name(),
+                                                    int size = 0,
+                                                    string arraytype = "",
+                                                    byte scope_separator=".");
+    uut.print_array_header(name, size, arraytype, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  function void when_i_call_print_array_footer;
+    uut.print_array_footer();
+    update_first_row();
+    update_last_row();
+  endfunction
+
 
   function void when_i_call_adjust_name_with(string s,
                                              byte scope_separator = ".");
@@ -1167,6 +1310,14 @@ module uvm_printer_unit_test;
 
   task then_the_formatted_output_is(string s);
     `FAIL_IF(formatted_output != s);
+  endtask
+
+  task then_the_scope_stack_contains(string s);
+    `FAIL_IF(uut.m_scope.get() != s);
+  endtask
+
+  task then_the_m_array_stack_size_is(int i);
+    `FAIL_IF(uut.get_array_stack_size() != i);
   endtask
 
 endmodule
