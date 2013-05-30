@@ -25,6 +25,7 @@ class test_uvm_object extends uvm_object;
   bit fake_status = 0;
   bit fake_push_cycle_check = 0;
   bit was_cycle_check_empty = 0;
+  bit m_cycle_check_was_started;
 
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
@@ -33,6 +34,7 @@ class test_uvm_object extends uvm_object;
   uvm_packer do_unpack_unpack;
   string create_name;
   test_uvm_object created_object;
+  string do_print_printer_m_scope_got;
 
   function new(string name);
     super.new(name);
@@ -80,17 +82,20 @@ class test_uvm_object extends uvm_object;
 
   function void do_print(uvm_printer printer);
     $cast(do_print_printer, printer);
+
+    if (do_print_printer != null) do_print_printer_m_scope_got = do_print_printer.m_scope.get();
+
+    if (__m_uvm_status_container.cycle_check.exists(this))
+      m_cycle_check_was_started = __m_uvm_status_container.cycle_check[this];
+    else
+      m_cycle_check_was_started = 0;
+
     super.do_print(printer);
   endfunction
 
   function void do_copy(uvm_object rhs);
     $cast(do_copy_copy, rhs);
     super.do_copy(rhs);
-  endfunction
-
-  function string sprint(uvm_printer printer=null);
-    do_print_printer = null;
-    return super.sprint(printer);
   endfunction
 
   function uvm_object create (string name="");
@@ -123,6 +128,14 @@ class test_uvm_object extends uvm_object;
     if(fake_do_unpack) begin
       packer.m_packed_size = 33;
     end
+  endfunction
+
+  function bit sprint_was_called_with(uvm_printer p);
+    return p == do_print_printer;
+  endfunction
+
+  function bit cycle_check_was_started();
+    return m_cycle_check_was_started;
   endfunction
 endclass
 

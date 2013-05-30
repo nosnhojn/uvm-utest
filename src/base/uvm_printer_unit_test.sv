@@ -12,6 +12,8 @@
 `define and_i_call_print_object_header_with when_i_call_print_object_header_with
 `define and_i_call_print_array_header_with when_i_call_print_array_header_with
 `define and_the_m_array_stack_size_is then_the_m_array_stack_size_is
+`define whatever
+`define and_the_object_is_printed then_the_test_obj_sprint_is_called_with(uut)
 
 `define OUTPUT_IS_NULL_STRING_FOR_FORMAT(NAME) \
 `SVTEST(format_``NAME``_returns_null_string) \
@@ -429,6 +431,106 @@ module uvm_printer_unit_test;
     when_i_call_print_object_with(some_name(), test_obj, "J");
  
     then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_only_calls_print_object_header_when_knob_depth_ge_scope_depth)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_turn_the_depth_knob_to(1);
+      and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+ 
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+     but_the_print_object_doesnt_do_anything_else;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_only_calls_print_object_header_when_cycle_check_is_detected)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_deliberately_violate_the_cycle_check_for(test_obj);
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+ 
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+     but_the_print_object_doesnt_do_anything_else;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_prints_the_object_when_knob_depth_gt_scope_depth)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_turn_the_depth_knob_to(2);
+      and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+    `and_the_object_is_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_calls_sprint)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_sprint_is_called_with(uut);
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_starts_cycle_check)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_cycle_check_is(.started(1));
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pushes_name_to_the_scope_stack)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+    then_the_printer_scope_stack_temporarily_holds({ "temporary_scope." , some_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pushes_object_name_to_the_scope_stack)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(_NULL_STRING, test_obj);
+    then_the_printer_scope_stack_temporarily_holds({ "temporary_scope." , test_obj.get_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pops_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_scope_stack_contains("temporary_scope");
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pops_an_array_index_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with({ "[" , some_name() , "]" }, test_obj);
+
+    then_the_scope_stack_contains("temporary_scope");
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_ends_cycle_check)
+    given_i_have_a_new_uvm_printer_in_its_default_state();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_cycle_check_is(.finished(1));
   `SVTEST_END()
 
   //-----------------------------
@@ -1131,6 +1233,7 @@ module uvm_printer_unit_test;
   `AND_I_TURN_THE_(default_radix,uvm_radix_enum)
   `AND_I_TURN_THE_(show_root,bit)
   `AND_I_TURN_THE_(reference,bit)
+  `AND_I_TURN_THE_(depth,int)
 
   function void and_i_set_my_test_obj_name_to(string s);
     test_obj.set_name(s);
@@ -1150,6 +1253,10 @@ module uvm_printer_unit_test;
 
   function void and_i_increase_the_size_of_the_m_array_stack_by(int i);
     repeat (i) uut.m_array_stack_push_back();
+  endfunction
+
+  function void and_i_deliberately_violate_the_cycle_check_for(uvm_object o);
+    o.__m_uvm_status_container.cycle_check[o] = 1;
   endfunction
 
   //----------
@@ -1352,6 +1459,23 @@ module uvm_printer_unit_test;
 
   task then_no_row_is_added;
     `FAIL_UNLESS(uut.get_num_rows == 0);
+  endtask
+
+  task then_the_test_obj_sprint_is_called_with(uvm_printer p);
+    `FAIL_UNLESS(test_obj.sprint_was_called_with(p));
+  endtask
+
+  task then_the_test_obj_cycle_check_is(bit started=0, finished=0);
+    if (started) `FAIL_UNLESS(test_obj.cycle_check_was_started);
+    if (finished) `FAIL_IF(test_obj.__m_uvm_status_container.cycle_check.exists(test_obj));
+  endtask
+
+  task then_the_printer_scope_stack_temporarily_holds(string s);
+    `FAIL_IF(test_obj.do_print_printer_m_scope_got != s);
+  endtask
+
+  task but_the_print_object_doesnt_do_anything_else;
+    `FAIL_IF(test_obj.do_print_printer != null);
   endtask
 
 endmodule
