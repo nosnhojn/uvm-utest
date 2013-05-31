@@ -13,25 +13,27 @@
 `define and_i_call_print_array_header_with when_i_call_print_array_header_with
 `define and_the_m_array_stack_size_is then_the_m_array_stack_size_is
 `define whatever
-`define and_the_object_is_printed then_the_test_obj_sprint_is_called_with(uut)
+`define then_the_object_is_printed then_the_test_obj_sprint_is_called_with(uut)
+`define then_each_child_comp_is_not_printed then_each_child_comp_is_printed(0);
+`define and_this_child_comp_is_printed then_this_child_comp_is_printed
 
 `define OUTPUT_IS_NULL_STRING_FOR_FORMAT(NAME) \
 `SVTEST(format_``NAME``_returns_null_string) \
-  given_i_have_a_new_uvm_printer_in_its_default_state(); \
+  given_i_have_a_new_uvm_printer(); \
   when_i_call_format_``NAME; \
   then_the_formatted_output_is(_NULL_STRING); \
 `SVTEST_END()
 
 `define PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(NAME,MIN,MAX) \
 `SVTEST(print_array_range_calls_print_generic_for_``NAME) \
-  given_i_have_a_new_uvm_printer_in_its_default_state(); \
+  given_i_have_a_new_uvm_printer(); \
   when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
   then_print_generic_is_called_with("...", "...", -2, "...", "."); \
 `SVTEST_END()
 
 `define PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(NAME,MIN,MAX) \
 `SVTEST(print_array_range_does_nothing_for_``NAME) \
-  given_i_have_a_new_uvm_printer_in_its_default_state(); \
+  given_i_have_a_new_uvm_printer(); \
   when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
   then_no_row_is_added; \
 `SVTEST_END()
@@ -55,6 +57,7 @@ module uvm_printer_unit_test;
   uvm_printer_row_info last_row;
   test_uvm_object test_obj;
   test_uvm_component test_comp;
+  test_uvm_component child_comp[$];
 
   string adjusted_name;
   string string_index;
@@ -92,6 +95,7 @@ module uvm_printer_unit_test;
     svunit_ut.teardown();
     adjusted_name = "";
     string_index = "";
+    child_comp.delete();
   endtask
 
 
@@ -130,7 +134,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - REPORTED IN MANTIS 4602
 // `SVTEST(print_int_can_return_the_row_name_as_empty_string)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_int_with(_NULL_STRING);
 //
@@ -139,7 +143,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_can_return_the_row_name_as_full_scope)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_full_name_knob_to(1);
       and_i_push_this_level_to_the_scope_stack("branch");
 
@@ -150,7 +154,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_can_return_the_row_name_as_leaf_scope)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch");
 
     when_i_call_print_int_with(.name("leaf"));
@@ -160,7 +164,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_returns_row_level_as_scope_depth)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -171,7 +175,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_returns_row_type_name_if_specified)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(.type_name("my_type_name"));
 
@@ -180,7 +184,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_can_return_the_row_type_name_as_time)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(.radix(UVM_TIME));
 
@@ -189,7 +193,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_can_return_the_row_type_name_as_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(.radix(UVM_STRING));
 
@@ -198,7 +202,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_returns_row_type_name_as_integral_by_default)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with();
 
@@ -207,7 +211,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_returns_row_numeric_size_as_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(.size(-1));
 
@@ -217,7 +221,7 @@ module uvm_printer_unit_test;
 
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_returns_val_as_uvm_vector_to_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_bin_radix_knob_to("B");
 
     when_i_call_print_int_with(.value(121), .size(5), .radix(UVM_BIN));
@@ -228,7 +232,7 @@ module uvm_printer_unit_test;
 
   // borrowed these values from the uvm_misc::uvm_vector_to_string test
   `SVTEST(print_int_uses_default_radix_when_noradix_specified)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_default_radix_knob_to(UVM_OCT);
 
     when_i_call_print_int_with(.value(1567), .size(10));
@@ -238,7 +242,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_int_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_int_with(some_name());
     `and_i_call_print_int_with(some_other_name());
@@ -255,7 +259,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_field_is_an_alies_for_print_int)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_field_with(some_name(), 99, 66);
 
@@ -269,7 +273,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_object_header_sets_row_name_to_what_is_passed_in)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(some_name());
     
@@ -278,7 +282,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_derives_name_from_value_when_null)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_obj));
 
@@ -287,7 +291,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_derives_name_from_component_when_null)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_comp));
 
@@ -296,7 +300,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_is_unnamed_for_object_with_no_name)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_set_my_test_obj_name_to(_NULL_STRING);
 
     when_i_call_print_object_header_with(.name(_NULL_STRING), .value(test_obj));
@@ -306,7 +310,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_is_overridden_with_show_root)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_show_root_knob_to(1);
 
     when_i_call_print_object_header_with(some_name(), .value(test_obj));
@@ -316,7 +320,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_name_from_scope)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("my_scope");
       and_i_turn_the_full_name_knob_to(1);
     
@@ -332,7 +336,7 @@ module uvm_printer_unit_test;
   // only handle a '.' as separator. last_row.name in this case is set to
   // "my_scope.my_name" instead of "my_name" as I expect.
 // `SVTEST(print_object_header_name_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   when_i_call_print_object_header_with(some_name(), null, "J");
@@ -342,7 +346,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_level_to_depth0)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with();
 
@@ -351,7 +355,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_level_to_depthN)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("scope0");
       and_i_push_this_level_to_the_scope_stack("scope1");
       and_i_push_this_level_to_the_scope_stack("scope2");
@@ -362,7 +366,7 @@ module uvm_printer_unit_test;
   `SVTEST_END()
 
   `SVTEST(print_object_header_sets_row_val_to_hyphen_without_reference)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_reference_knob_to(0);
 
     when_i_call_print_object_header_with();
@@ -372,7 +376,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_val_to_object_value_str_with_reference)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_reference_knob_to(1);
       and_i_set_the_inst_count_to(99);
 
@@ -383,7 +387,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_size_to_hyphen)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with();
 
@@ -392,7 +396,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_type_name_to_object_if_null)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with();
 
@@ -401,7 +405,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_sets_row_type_name_to_type_name_otherwise)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(.value(test_obj));
 
@@ -410,7 +414,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_header_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_object_header_with(some_name(), null);
     `and_i_call_print_object_header_with(some_other_name(), null);
@@ -426,7 +430,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_object_calls_print_object_header)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
  
     when_i_call_print_object_with(some_name(), test_obj, "J");
  
@@ -435,51 +439,41 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_only_calls_print_object_header_when_knob_depth_ge_scope_depth)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_depth_knob_to(1);
       and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
  
     when_i_call_print_object_with(some_name(), test_obj, "J");
  
     then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
-     but_the_print_object_doesnt_do_anything_else;
+     but_the_object_isnt_actually_printed;
   `SVTEST_END()
 
 
-  `SVTEST(print_object_only_calls_print_object_header_when_cycle_check_is_detected)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+  `SVTEST(print_object_doesnt_print_the_object_when_cycle_check_is_detected)
+    given_i_have_a_new_uvm_printer();
       and_i_deliberately_violate_the_cycle_check_for(test_obj);
  
     when_i_call_print_object_with(some_name(), test_obj, "J");
  
     then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
-     but_the_print_object_doesnt_do_anything_else;
+     but_the_object_isnt_actually_printed;
   `SVTEST_END()
 
 
   `SVTEST(print_object_prints_the_object_when_knob_depth_gt_scope_depth)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_depth_knob_to(2);
       and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
  
-    when_i_call_print_object_with(some_name(), test_obj, "J");
-
-    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
-    `and_the_object_is_printed;
-  `SVTEST_END()
-
-
-  `SVTEST(print_object_calls_sprint)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
- 
     when_i_call_print_object_with(some_name(), test_obj);
 
-    then_the_test_obj_sprint_is_called_with(uut);
+    `then_the_object_is_printed;
   `SVTEST_END()
 
 
   `SVTEST(print_object_starts_cycle_check)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
  
     when_i_call_print_object_with(some_name(), test_obj);
 
@@ -488,7 +482,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_pushes_name_to_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("temporary_scope");
  
     when_i_call_print_object_with(some_name(), test_obj);
@@ -497,16 +491,61 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_pushes_object_name_to_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("temporary_scope");
  
     when_i_call_print_object_with(_NULL_STRING, test_obj);
+
     then_the_printer_scope_stack_temporarily_holds({ "temporary_scope." , test_obj.get_name() });
   `SVTEST_END()
 
 
+  `SVTEST(print_object_prints_child_components)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(3);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    then_each_child_comp_is_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_doesnt_print_child_components_that_are_disabled)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(1);
+      and_i_disable_the_print_for_child(0);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    `then_each_child_comp_is_not_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_selectively_prints_child_components_that_are_enabled)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(4);
+      and_i_disable_the_print_for_child(2);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    then_this_child_comp_is_printed(0);
+    `and_this_child_comp_is_printed(1);
+    `and_this_child_comp_is_printed(3);
+     and_this_child_comp_is_not_printed(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_calls_sprint)
+    given_i_have_a_new_uvm_printer();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_sprint_is_called_with(uut);
+  `SVTEST_END()
+
+
   `SVTEST(print_object_pops_name_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("temporary_scope");
  
     when_i_call_print_object_with(some_name(), test_obj);
@@ -516,7 +555,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_pops_an_array_index_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("temporary_scope");
  
     when_i_call_print_object_with({ "[" , some_name() , "]" }, test_obj);
@@ -526,7 +565,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_object_ends_cycle_check)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
  
     when_i_call_print_object_with(some_name(), test_obj);
 
@@ -540,7 +579,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_string_sets_row_level_to_depthN)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -551,7 +590,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_gets_name_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
       and_i_turn_the_full_name_knob_to(1);
@@ -564,7 +603,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERD BY MANTIS 4600
 // `SVTEST(print_string_sets_name_to_null_string)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_string_with(.name(_NULL_STRING));
 //
@@ -574,7 +613,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERED BY MANTIS 4602
 // `SVTEST(print_string_name_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   when_i_call_print_string_with(some_name(), .scope_separator("R"));
@@ -583,7 +622,7 @@ module uvm_printer_unit_test;
 // `SVTEST_END()
 
   `SVTEST(print_string_type_name_set_to_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with();
   
@@ -592,7 +631,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_size_set_to_string_length)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with(.name(some_name()), .value(some_other_name()));
   
@@ -601,7 +640,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_sets_val_to_value)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with(.value(some_other_name()));
 
@@ -610,7 +649,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_sets_val_to_quotes_for_null_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with(.value(_NULL_STRING));
 
@@ -619,7 +658,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_treats_quotes_in_the_value_field_as_any_other_character)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with(.value("\""));
 
@@ -628,7 +667,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_string_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_string_with(some_name());
     `and_i_call_print_string_with(some_other_name());
@@ -644,7 +683,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_time_is_an_alies_for_print_int)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_time_with(some_name(), 99, "F");
 
@@ -658,7 +697,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_real_sets_row_level_to_depthN)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -669,7 +708,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_real_gets_name_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
       and_i_turn_the_full_name_knob_to(1);
@@ -682,7 +721,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERD BY MANTIS 4600
 // `SVTEST(print_real_sets_name_to_null_string)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_real_with(.name(_NULL_STRING));
 //
@@ -692,7 +731,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERED BY MANTIS 4602
 // `SVTEST(print_real_name_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   when_i_call_print_real_with(some_name(), .scope_separator("R"));
@@ -710,7 +749,7 @@ module uvm_printer_unit_test;
   // functionality appears to be part of print_generic where on line 811, name is passed to
   // adjust_name
 // `SVTEST(WARNING_print_real_trys_to_treat_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_real_with(.name("..."));
 //
@@ -719,7 +758,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_real_type_name_set_to_real)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_real_with();
   
@@ -728,7 +767,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_real_size_set_to_64)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_real_with();
   
@@ -737,7 +776,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_real_sets_val_to_value)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_real_with(.value(500.1234567));
 
@@ -746,7 +785,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_real_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_real_with(some_name());
     `and_i_call_print_real_with(some_other_name());
@@ -762,7 +801,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_generic_sets_row_level_to_depthN)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -773,7 +812,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_gets_name_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
       and_i_turn_the_full_name_knob_to(1);
@@ -786,7 +825,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERD BY MANTIS 4600
 // `SVTEST(print_generic_sets_name_to_null_string)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_generic_with(.name(_NULL_STRING));
 //
@@ -796,7 +835,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERED BY MANTIS 4602
 // `SVTEST(print_generic_name_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   when_i_call_print_generic_with(some_name(), .scope_separator("R"));
@@ -806,7 +845,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(WARNING_print_generic_treats_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
   
     when_i_call_print_generic_with(.name("..."));
   
@@ -815,7 +854,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_type_name_set_to_typename)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.type_name("gopher"));
   
@@ -824,7 +863,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(WARNING_print_generic_size_set_to_DOT_DOT_DOT_when_minus2)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.size(-2));
   
@@ -833,7 +872,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_size_set_to_size_when_lt_minus2)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.size(-3));
   
@@ -842,7 +881,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_size_set_to_size_when_gt_minus2)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.size(-1));
   
@@ -851,7 +890,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_sets_val_to_value)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.value(some_other_name()));
 
@@ -860,7 +899,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_sets_val_to_quotes_for_null_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.value(_NULL_STRING));
 
@@ -869,7 +908,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_treats_quotes_in_the_value_field_as_any_other_character)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(.value("\""));
 
@@ -878,7 +917,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_generic_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_generic_with(some_name());
     `and_i_call_print_generic_with(some_other_name());
@@ -894,7 +933,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(emit_asserts_an_error)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_emit;
 
@@ -903,7 +942,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(emit_returns_null_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_emit;
 
@@ -941,7 +980,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(adjust_name_returns_id_if_full_name_specified)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_full_name_knob_to(1);
 
     when_i_call_adjust_name_with("no.change.expected");
@@ -951,7 +990,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(adjust_name_returns_id_if_id_is_dot_dot_dot)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_adjust_name_with("...");
 
@@ -960,7 +999,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(adjust_name_returns_id_if_scope_depth_eq_0_and_show_root)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_turn_the_show_root_knob_to(1);
 
     when_i_call_adjust_name_with("my.id");
@@ -970,7 +1009,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(adjust_name_returns_leaf_scope_otherwise_with_default_scope_separator)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_adjust_name_with("expect.only.this");
 
@@ -980,7 +1019,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERD BY MANTIS 4600
 // `SVTEST(adjust_name_returns_leaf_scope_otherwise_with_user_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_adjust_name_with("expectJonlyJthis", .scope_separator("J"));
 //
@@ -994,7 +1033,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_array_header_sets_row_level_to_depthN)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -1005,7 +1044,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_gets_name_from_the_scope_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
       and_i_turn_the_full_name_knob_to(1);
@@ -1018,7 +1057,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERD BY MANTIS 4600
 // `SVTEST(print_array_header_sets_name_to_null_string)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //
 //   when_i_call_print_array_header_with(.name(_NULL_STRING));
 //
@@ -1028,7 +1067,7 @@ module uvm_printer_unit_test;
 
   // FAILING TEST - COVERED BY MANTIS 4602
 // `SVTEST(print_array_header_name_from_scope_with_different_scope_separator)
-//   given_i_have_a_new_uvm_printer_in_its_default_state();
+//   given_i_have_a_new_uvm_printer();
 //     and_i_push_this_level_to_the_scope_stack("my_scope");
 //
 //   when_i_call_print_array_header_with(some_name(), .scope_separator("R"));
@@ -1038,7 +1077,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_type_name_set_to_arraytype)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_array_header_with(.arraytype("goof-ball"));
   
@@ -1047,7 +1086,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_size_set_to_size)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_array_header_with(.size(99));
   
@@ -1056,7 +1095,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_sets_val_to_value)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_array_header_with();
 
@@ -1065,7 +1104,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_pushes_back_new_rows)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_array_header_with(some_name());
     `and_i_call_print_array_header_with(some_other_name());
@@ -1076,7 +1115,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_appends_name_to_scope)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -1087,7 +1126,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_header_increases_array_stack_size)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_print_array_header_with(some_name());
 
@@ -1115,7 +1154,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(print_array_footer_chomps_scope_and_array_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
       and_i_increase_the_size_of_the_m_array_stack_by(4);
@@ -1128,7 +1167,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(print_array_footer_ignores_scope_and_array_stack_if_no_array_stack)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("branch0");
       and_i_push_this_level_to_the_scope_stack("branch1");
 
@@ -1144,7 +1183,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(istop_is_true_when_the_depth_of_the_scope_stack_is_0)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_istop();
 
@@ -1153,7 +1192,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(istop_is_false_when_the_depth_of_the_scope_stack_is_gt_0)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
       and_i_push_this_level_to_the_scope_stack("scope0");
 
     when_i_call_istop();
@@ -1168,7 +1207,7 @@ module uvm_printer_unit_test;
   //-----------------------------
 
   `SVTEST(index_string_turns_name_and_index_into_an_array_select_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_index_string_with(.name("some_array"), .index(99));
 
@@ -1177,7 +1216,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(index_string_always_prints_radix_as_decimal)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_index_string_with(.name("some_array"), .index('hf));
 
@@ -1186,7 +1225,7 @@ module uvm_printer_unit_test;
 
 
   `SVTEST(WARNING_index_string_accepts_default_name_of_null_string)
-    given_i_have_a_new_uvm_printer_in_its_default_state();
+    given_i_have_a_new_uvm_printer();
 
     when_i_call_index_string_with(.name(_NULL_STRING), .index('hf));
 
@@ -1202,7 +1241,7 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
-  function void given_i_have_a_new_uvm_printer_in_its_default_state();
+  function void given_i_have_a_new_uvm_printer();
     test_obj = new("obj_name"); 
   endfunction
 
@@ -1257,6 +1296,18 @@ module uvm_printer_unit_test;
 
   function void and_i_deliberately_violate_the_cycle_check_for(uvm_object o);
     o.__m_uvm_status_container.cycle_check[o] = 1;
+  endfunction
+
+  function void and_i_create_a_test_comp_with_this_many_children(int num_children);
+    for (int i=0; i<num_children; i+=1 ) begin
+      automatic test_uvm_component c = new($sformatf("child_comp[%0d]", i), test_comp);
+      child_comp.push_back(c);
+      test_comp.add_pretend_child(c);
+    end
+  endfunction
+
+  function void and_i_disable_the_print_for_child(int i);
+    child_comp[i].print_enabled = 0;
   endfunction
 
   //----------
@@ -1474,8 +1525,24 @@ module uvm_printer_unit_test;
     `FAIL_IF(test_obj.do_print_printer_m_scope_got != s);
   endtask
 
-  task but_the_print_object_doesnt_do_anything_else;
+  task but_the_object_isnt_actually_printed;
     `FAIL_IF(test_obj.do_print_printer != null);
+  endtask
+  
+  task then_each_child_comp_is_printed(bit should_be_printed = 1);
+    for (int i=0; i<child_comp.size(); i+=1) begin
+      if (should_be_printed)  `FAIL_UNLESS(child_comp[i].sprint_was_called_with(uut));
+      if (!should_be_printed) `FAIL_IF(child_comp[i].sprint_was_called_with(uut));
+    end
+  endtask
+
+  task then_this_child_comp_is_printed(int i, bit should_be_printed = 1);
+    if (should_be_printed)  `FAIL_UNLESS(child_comp[i].sprint_was_called_with(uut));
+    if (!should_be_printed) `FAIL_IF(child_comp[i].sprint_was_called_with(uut));
+  endtask
+
+  task and_this_child_comp_is_not_printed(int i);
+    then_this_child_comp_is_printed(i, 0);
   endtask
 
 endmodule
