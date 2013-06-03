@@ -4,33 +4,70 @@
 import uvm_pkg::*;
 
 
-typedef struct {
+class print_args_t;
   string          name;
   uvm_bitstream_t value;
   int             size;
   uvm_radix_enum  radix;
   byte            scope_separator;
   string          type_name;
-} print_args_t;
 
-typedef struct {
+  function void set_all(
+    string          name,
+    uvm_bitstream_t value,
+    int             size,
+    uvm_radix_enum  radix,
+    byte            scope_separator,
+    string          type_name);
+    this.name   = name;
+    this.value  = value;
+    this.size   = size;
+    this.radix  = radix;
+    this.scope_separator = scope_separator;
+    this.type_name = type_name;
+  endfunction
+endclass
+
+class print_object_header_args_t;
   string name;
   uvm_object value;
   byte scope_separator;
-} print_object_header_args_t;
 
-typedef struct {
+  function void set_all(
+    string          name,
+    uvm_object      value,
+    byte            scope_separator); 
+    this.name   = name;
+    this.value  = value;
+    this.scope_separator = scope_separator;
+  endfunction
+endclass
+
+class print_generic_args_t;
   string name;
   string type_name;
   int size;
   string value;
   byte scope_separator;
-} print_generic_args_t;
+
+  function void set_all(
+    string          name,
+    string          type_name,
+    int             size,
+    string          value,
+    byte            scope_separator);
+    this.name   = name;
+    this.type_name = type_name;
+    this.size   = size;
+    this.value  = value;
+    this.scope_separator = scope_separator;
+  endfunction
+endclass
 
 class test_uvm_printer extends uvm_printer();
-  print_args_t p_args;
-  print_object_header_args_t poh_args;
-  print_generic_args_t pg_args;
+  print_args_t p_args = new;
+  print_object_header_args_t poh_args = new;
+  print_generic_args_t pg_args = new;
 
   function int get_array_stack_size();
     return m_array_stack.size();
@@ -62,14 +99,14 @@ class test_uvm_printer extends uvm_printer();
                                    uvm_radix_enum  radix=UVM_NORADIX,
                                    byte            scope_separator=".",
                                    string          type_name="");
-    p_args = '{ name, value, size, radix, scope_separator, type_name };
+    p_args.set_all(name, value, size, radix, scope_separator, type_name);
     super.print_int(name, value, size, radix, scope_separator, type_name);
   endfunction
 
   virtual function void print_object_header(string name,
                                             uvm_object value,
                                             byte scope_separator=".");
-    poh_args = '{ name, value, scope_separator };
+    poh_args.set_all(name, value, scope_separator);
     super.print_object_header(name, value, scope_separator);
   endfunction
 
@@ -99,8 +136,8 @@ class test_uvm_printer extends uvm_printer();
                               string type_name,
                               int size,
                               string value,
-                              byte scope_separator);
-    pg_args = '{ name, type_name, size, value, scope_separator };
+                              byte scope_separator=".");
+    pg_args.set_all(name, type_name, size, value, scope_separator);
     super.print_generic(name, type_name, size, value, scope_separator);
   endfunction
 

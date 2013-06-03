@@ -167,9 +167,8 @@ module uvm_misc_unit_test;
   //-----------------------------
   //-----------------------------
   `SVTEST(top_uvm_instance_scope_is_uvm_pkg)
-    string top_name = "uvm_pkg.";
-
-    `FAIL_IF(uvm_instance_scope() != top_name);
+    bit uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*", uvm_instance_scope());
+    `FAIL_IF(!uvm_instance_scope_match);
   `SVTEST_END(top_uvm_instance_scope_is_uvm_pkg)
 
 
@@ -240,28 +239,26 @@ module uvm_misc_unit_test;
 
   `SVTEST(seed_table_hash_key_is_type_id)
     uvm_seed_map sm;
-    string key_act, key_exp;
+    string key_act;
 
     void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
     void'(sm.seed_table.first(key_act));
 
-    key_exp = "uvm_pkg.tst_obj";
-    `FAIL_IF(key_act != key_exp);
+    `FAIL_UNLESS_STR_EQUAL({uvm_instance_scope(),"tst_obj"}, key_act)
     `FAIL_IF(sm.seed_table.num() != 1);
   `SVTEST_END(seed_table_hash_key_is_type_id)
 
 
   `SVTEST(count_hash_key_is_type_id)
     uvm_seed_map sm;
-    string key_act, key_exp;
+    string key_act;
 
     void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
     void'(sm.count.first(key_act));
 
-    key_exp = "uvm_pkg.tst_obj";
-    `FAIL_IF(key_act != key_exp);
+    `FAIL_UNLESS_STR_EQUAL({uvm_instance_scope(),"tst_obj"}, key_act);
     `FAIL_IF(sm.count.num() != 1);
   `SVTEST_END(count_hash_key_is_type_id)
 
@@ -272,7 +269,7 @@ module uvm_misc_unit_test;
 
     repeat (4) void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
-    cnt = sm.count["uvm_pkg.tst_obj"];
+    cnt = sm.count[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(cnt != 4);
   `SVTEST_END(count_incremented_for_each_reseed)
@@ -282,11 +279,11 @@ module uvm_misc_unit_test;
     uvm_seed_map sm;
     int unsigned exp, act;
 
-    exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst");
+    exp = uvm_oneway_hash({uvm_instance_scope(),"tst_obj::tst_inst"});
 
     void'(uvm_create_random_seed("tst_obj", "tst_inst"));
     sm = uvm_random_seed_table_lookup["tst_inst"];
-    act = sm.seed_table["uvm_pkg.tst_obj"];
+    act = sm.seed_table[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(act != exp);
   `SVTEST_END(seed_table_init_to_oneway_hash)
@@ -296,12 +293,12 @@ module uvm_misc_unit_test;
     uvm_seed_map sm;
     int unsigned exp, act;
 
-    exp = uvm_oneway_hash("uvm_pkg.tst_obj::tst_inst") + 1;
+    exp = uvm_oneway_hash({uvm_instance_scope(),"tst_obj::tst_inst"}) + 1;
 
     repeat (2) void'(uvm_create_random_seed("tst_obj", "tst_inst"));
 
     sm = uvm_random_seed_table_lookup["tst_inst"];
-    act = sm.seed_table["uvm_pkg.tst_obj"];
+    act = sm.seed_table[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(act != exp);
   `SVTEST_END(table_init_to_oneway_hash_plus1_for_reseed)
@@ -316,8 +313,8 @@ module uvm_misc_unit_test;
 
     sm0 = uvm_random_seed_table_lookup["__global__"];
     sm1 = uvm_random_seed_table_lookup["tst_inst"];
-    cnt0 = sm0.count["uvm_pkg.tst_obj0"];
-    cnt1 = sm1.count["uvm_pkg.tst_obj1"];
+    cnt0 = sm0.count[{uvm_instance_scope(),"tst_obj0"}];
+    cnt1 = sm1.count[{uvm_instance_scope(),"tst_obj1"}];
 
     `FAIL_IF(cnt0 != 3);
     `FAIL_IF(cnt1 != 5);
@@ -329,16 +326,16 @@ module uvm_misc_unit_test;
     int unsigned exp0, act0;
     int unsigned exp1, act1;
 
-    exp0 = uvm_oneway_hash("uvm_pkg.tst_obj0::tst_inst") + 1;
-    exp1 = uvm_oneway_hash("uvm_pkg.tst_obj1::__global__") + 1;
+    exp0 = uvm_oneway_hash({uvm_instance_scope(),"tst_obj0::tst_inst"}) + 1;
+    exp1 = uvm_oneway_hash({uvm_instance_scope(),"tst_obj1::__global__"}) + 1;
 
     repeat (2) void'(uvm_create_random_seed("tst_obj0", "tst_inst"));
     repeat (2) void'(uvm_create_random_seed("tst_obj1"));
 
     sm0 = uvm_random_seed_table_lookup["tst_inst"];
     sm1 = uvm_random_seed_table_lookup["__global__"];
-    act0 = sm0.seed_table["uvm_pkg.tst_obj0"];
-    act1 = sm1.seed_table["uvm_pkg.tst_obj1"];
+    act0 = sm0.seed_table[{uvm_instance_scope(),"tst_obj0"}];
+    act1 = sm1.seed_table[{uvm_instance_scope(),"tst_obj1"}];
 
     `FAIL_IF(act0 != exp0);
     `FAIL_IF(act1 != exp1);

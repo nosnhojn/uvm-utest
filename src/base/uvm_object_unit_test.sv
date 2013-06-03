@@ -3,6 +3,7 @@
 `include "test_uvm_object.sv"
 `include "mock_uvm_printer.sv"
 `include "mock_uvm_packer.svh"
+`include "mock_uvm_comparer.svh"
 
 import uvm_pkg::*;
 import svunit_pkg::*;
@@ -18,17 +19,19 @@ module uvm_object_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-  test_uvm_object uut;
+  test_uvm_object   uut;
   test_uvm_object_wrapper uut_wrapper;
-  mock_uvm_printer mock_printer;
 
-  bit  unsigned  bitstream[];
-  byte unsigned  bytestream[];
-  int  unsigned  intstream[];
-  mock_uvm_packer packer = null;
-  uvm_bitstream_t uvm_bitstream;
-  test_uvm_object dummy_object;
-  string          dummy_str;
+  mock_uvm_printer  mock_printer;
+  mock_uvm_comparer comparer;
+  mock_uvm_packer   packer;
+
+  bit  unsigned     bitstream[];
+  byte unsigned     bytestream[];
+  int  unsigned     intstream[];
+  uvm_bitstream_t   uvm_bitstream;
+  test_uvm_object   dummy_object;
+  string            dummy_str;
 
   //===================================
   // Build
@@ -47,12 +50,14 @@ module uvm_object_unit_test;
   task setup();
     svunit_ut.setup();
 
-    mock_printer = new();
     uut = new("object_name");
     uut.use_uvm_seeding = 1;
-
     uut.fake_test_type_name = 0;
+
+    mock_printer = new;
+    comparer = new;
     packer = new;
+
     dummy_object = new("dummy");
     dummy_str = "dummy";
 
@@ -181,6 +186,9 @@ module uvm_object_unit_test;
   //-----------------------------
 
   // relies on get_inst_count()
+  // We have seen this test failing using IUS 12.1
+  // with the installed uvm-1.1 and a local version
+  // of uvm-1.1d
   `SVTEST(inst_id_initialized_to_inst_count)
     test_uvm_object other;
     int current_inst_count = uut.get_inst_count();
@@ -507,7 +515,40 @@ module uvm_object_unit_test;
   // compare tests
   //-----------------------------
   //-----------------------------
-  // TBD
+  `SVTEST(compare_status_container_set_with_default_comparer)
+    void'(uut.compare(dummy_object, null));
+    `FAIL_IF(uut.__m_uvm_status_container.comparer != uvm_default_comparer)
+  `SVTEST_END()
+
+
+  `SVTEST(compare_status_container_set_with_custom_comparer)
+    void'(uut.compare(dummy_object, comparer));
+    `FAIL_IF(uut.__m_uvm_status_container.comparer != comparer)
+  `SVTEST_END()
+
+
+  // This test uses the test double test_uvm_object::get_inst_id
+  // to spy the comparer state. This is a bit convoluted as the
+  // get_inst_id is called from comparer::print_msg_object
+  `SVTEST(compare_comparer_print_msg_object_compare_clean_up_check)
+    uut.check_comparer_cleaned_up = 1;
+    void'(uut.compare(null, null));
+    `FAIL_UNLESS(uut.comparer_cleaned_up_ok)
+  `SVTEST_END()
+
+
+  `SVTEST(compare_comparer_print_msg_object_compare_clean_up_scope_check)
+    uut.check_comparer_cleaned_up_scope = 1;
+    void'(uut.compare(null, null));
+    `FAIL_UNLESS_STR_EQUAL(uut.comparer_cleaned_up_scope, uut.get_name())
+  `SVTEST_END()
+
+
+  // This path is not accessible because the scope depth will
+  // never be empty when reaching this else statement
+  `SVTEST(compare_comparer_print_msg_object_without_scope_depth)
+  `SVTEST_END()
+
 
   //-----------------------------
   //-----------------------------

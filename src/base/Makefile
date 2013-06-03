@@ -3,3 +3,4 @@ UNITTESTS = ./uvm_object_unit_test.sv ./uvm_misc_unit_test.sv ./uvm_scope_stack_
 
 -include svunit.mk
 include $(SVUNIT_INSTALL)/bin/cfg.mk
+

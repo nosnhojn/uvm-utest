@@ -9,16 +9,16 @@ class test_uvm_object_wrapper extends uvm_object_wrapper;
   endfunction
 endclass
 
-typedef struct {
+class __m_uvm_field_automation_t;
   uvm_object tmp_data__;
   int what__;
   string str__;
-} __m_uvm_field_automation_t;
+endclass
 
 class test_uvm_object extends uvm_object;
   rand int rand_property;
 
-  __m_uvm_field_automation_t fa_args;
+  __m_uvm_field_automation_t fa_args = new;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
   bit fake_do_unpack = 0;
