@@ -27,6 +27,11 @@ class test_uvm_object extends uvm_object;
   bit was_cycle_check_empty = 0;
   bit m_cycle_check_was_started;
 
+  bit check_comparer_cleaned_up = 0;
+  bit check_comparer_cleaned_up_scope = 0;
+  bit comparer_cleaned_up_ok = 0;
+  string comparer_cleaned_up_scope;
+
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
   uvm_recorder do_record_record;
@@ -136,6 +141,23 @@ class test_uvm_object extends uvm_object;
 
   function bit cycle_check_was_started();
     return m_cycle_check_was_started;
+  endfunction
+
+  function int get_inst_id ();
+    if(check_comparer_cleaned_up) begin
+      comparer_cleaned_up_ok = 
+        //!__m_uvm_status_container.comparer.compare_map &&
+        __m_uvm_status_container.comparer.result == 1 &&
+        __m_uvm_status_container.comparer.miscompares == "" &&
+        __m_uvm_status_container.comparer.scope == __m_uvm_status_container.scope;
+      check_comparer_cleaned_up = 0;
+    end
+    if(check_comparer_cleaned_up_scope) begin
+      comparer_cleaned_up_scope =
+        __m_uvm_status_container.scope.get();
+      check_comparer_cleaned_up_scope = 0;
+    end
+    return super.get_inst_id();
   endfunction
 endclass
 
