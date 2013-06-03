@@ -8,9 +8,39 @@
 `define and_i_call_print_string_with when_i_call_print_string_with
 `define and_i_call_print_int_with when_i_call_print_int_with
 `define and_i_call_print_real_with when_i_call_print_real_with
+`define and_i_call_print_generic_with when_i_call_print_generic_with
 `define and_i_call_print_object_header_with when_i_call_print_object_header_with
+`define and_i_call_print_array_header_with when_i_call_print_array_header_with
+`define and_the_m_array_stack_size_is then_the_m_array_stack_size_is
+`define whatever
+`define then_the_object_is_printed then_the_test_obj_sprint_is_called_with(uut)
+`define then_each_child_comp_is_not_printed then_each_child_comp_is_printed(0);
+`define and_this_child_comp_is_printed then_this_child_comp_is_printed
+
+`define OUTPUT_IS_NULL_STRING_FOR_FORMAT(NAME) \
+`SVTEST(format_``NAME``_returns_null_string) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_format_``NAME; \
+  then_the_formatted_output_is(_NULL_STRING); \
+`SVTEST_END()
+
+`define PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(NAME,MIN,MAX) \
+`SVTEST(print_array_range_calls_print_generic_for_``NAME) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
+  then_print_generic_is_called_with("...", "...", -2, "...", "."); \
+`SVTEST_END()
+
+`define PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(NAME,MIN,MAX) \
+`SVTEST(print_array_range_does_nothing_for_``NAME) \
+  given_i_have_a_new_uvm_printer(); \
+  when_i_call_print_array_range_with(.min(MIN), .max(MAX)); \
+  then_no_row_is_added; \
+`SVTEST_END()
+
 
 import svunit_pkg::*;
+import svunit_uvm_mock_pkg::*;
 
 module uvm_printer_unit_test;
 
@@ -27,9 +57,12 @@ module uvm_printer_unit_test;
   uvm_printer_row_info last_row;
   test_uvm_object test_obj;
   test_uvm_component test_comp;
+  test_uvm_component child_comp[$];
 
   string adjusted_name;
   string string_index;
+  string emitted_string;
+  string formatted_output;
 
 
   //===================================
@@ -49,6 +82,8 @@ module uvm_printer_unit_test;
     uut = new();
     test_obj = new("obj_name");
     test_comp = new("comp_name");
+
+    uvm_report_mock::setup();
   endtask
 
 
@@ -60,6 +95,7 @@ module uvm_printer_unit_test;
     svunit_ut.teardown();
     adjusted_name = "";
     string_index = "";
+    child_comp.delete();
   endtask
 
 
@@ -96,7 +132,7 @@ module uvm_printer_unit_test;
   //-----------------------------
   //-----------------------------
 
-  // FAILING TEST because of the uvm_leaf_scope infinite loop
+  // FAILING TEST - REPORTED IN MANTIS 4602
 // `SVTEST(print_int_can_return_the_row_name_as_empty_string)
 //   given_i_have_a_new_uvm_printer();
 //
@@ -401,6 +437,141 @@ module uvm_printer_unit_test;
     then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
   `SVTEST_END()
 
+
+  `SVTEST(print_object_only_calls_print_object_header_when_knob_depth_ge_scope_depth)
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_depth_knob_to(1);
+      and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+ 
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+     but_the_object_isnt_actually_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_doesnt_print_the_object_when_cycle_check_is_detected)
+    given_i_have_a_new_uvm_printer();
+      and_i_deliberately_violate_the_cycle_check_for(test_obj);
+ 
+    when_i_call_print_object_with(some_name(), test_obj, "J");
+ 
+    then_the_print_object_header_is_called_with(some_name(), test_obj, "J");
+     but_the_object_isnt_actually_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_prints_the_object_when_knob_depth_gt_scope_depth)
+    given_i_have_a_new_uvm_printer();
+      and_i_turn_the_depth_knob_to(2);
+      and_i_push_this_level_to_the_scope_stack("scope_at_depth_1");
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    `then_the_object_is_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_starts_cycle_check)
+    given_i_have_a_new_uvm_printer();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_cycle_check_is(.started(1));
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pushes_name_to_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+    then_the_printer_scope_stack_temporarily_holds({ "temporary_scope." , some_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pushes_object_name_to_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(_NULL_STRING, test_obj);
+
+    then_the_printer_scope_stack_temporarily_holds({ "temporary_scope." , test_obj.get_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_prints_child_components)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(3);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    then_each_child_comp_is_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_doesnt_print_child_components_that_are_disabled)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(1);
+      and_i_disable_the_print_for_child(0);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    `then_each_child_comp_is_not_printed;
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_selectively_prints_child_components_that_are_enabled)
+    given_i_have_a_new_uvm_printer();
+      and_i_create_a_test_comp_with_this_many_children(4);
+      and_i_disable_the_print_for_child(2);
+
+    when_i_call_print_object_with(some_name(), test_comp);
+
+    then_this_child_comp_is_printed(0);
+    `and_this_child_comp_is_printed(1);
+    `and_this_child_comp_is_printed(3);
+     and_this_child_comp_is_not_printed(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_calls_sprint)
+    given_i_have_a_new_uvm_printer();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_sprint_is_called_with(uut);
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pops_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_scope_stack_contains("temporary_scope");
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_pops_an_array_index_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("temporary_scope");
+ 
+    when_i_call_print_object_with({ "[" , some_name() , "]" }, test_obj);
+
+    then_the_scope_stack_contains("temporary_scope");
+  `SVTEST_END()
+
+
+  `SVTEST(print_object_ends_cycle_check)
+    given_i_have_a_new_uvm_printer();
+ 
+    when_i_call_print_object_with(some_name(), test_obj);
+
+    then_the_test_obj_cycle_check_is(.finished(1));
+  `SVTEST_END()
+
   //-----------------------------
   //-----------------------------
   // print_string tests
@@ -569,12 +740,14 @@ module uvm_printer_unit_test;
 // `SVTEST_END()
 
 
-  // FAILING TEST
-  // uvm_print.svh:line 909
+  // FAILING TEST - REPORTED AS MANTIS 4609
+  // uvm_printer.svh:line 909
   // for some reason "..." is treated as a special name. however, the name is never actually
   // assigned in the the case of "..." which means an empty scope stack gets passed to
   // adjust_name. I think want to have the name passed into adjust_name on line 915 instead of
-  // m_scope.get() since it's done on 911
+  // m_scope.get() since it's done on 911. I think this is a copy paste bug b/c the right
+  // functionality appears to be part of print_generic where on line 811, name is passed to
+  // adjust_name
 // `SVTEST(WARNING_print_real_trys_to_treat_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
 //   given_i_have_a_new_uvm_printer();
 //
@@ -626,35 +799,179 @@ module uvm_printer_unit_test;
   // print_generic tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_generic_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_generic_with(some_name());
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_generic_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_generic_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_generic_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_generic_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_generic_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+
+  `SVTEST(WARNING_print_generic_treats_the_name_of_DOT_DOT_DOT_as_special_for_some_reason)
+    given_i_have_a_new_uvm_printer();
+  
+    when_i_call_print_generic_with(.name("..."));
+  
+    then_the_row_name_is_assigned_to("...");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_type_name_set_to_typename)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.type_name("gopher"));
+  
+    then_the_row_type_name_is_assigned_to("gopher");
+  `SVTEST_END()
+
+
+  `SVTEST(WARNING_print_generic_size_set_to_DOT_DOT_DOT_when_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-2));
+  
+    then_the_row_size_is_assigned_to("...");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_size_set_to_size_when_lt_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-3));
+  
+    then_the_row_size_is_assigned_to("-3");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_size_set_to_size_when_gt_minus2)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.size(-1));
+  
+    then_the_row_size_is_assigned_to("-1");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value(some_other_name()));
+
+    then_the_row_val_is_assigned_to(some_other_name());
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_sets_val_to_quotes_for_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value(_NULL_STRING));
+
+    then_the_row_val_is_assigned_to("\"\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_treats_quotes_in_the_value_field_as_any_other_character)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(.value("\""));
+
+    then_the_row_val_is_assigned_to("\"");
+  `SVTEST_END()
+
+
+  `SVTEST(print_generic_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_generic_with(some_name());
+    `and_i_call_print_generic_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // emit tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(emit_asserts_an_error)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_emit;
+
+    then_an_error_is_asserted_by_the_printer;
+  `SVTEST_END()
+
+
+  `SVTEST(emit_returns_null_string)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_emit;
+
+    then_the_emitted_string_is(_NULL_STRING);
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // format_row tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(row)
 
   //-----------------------------
   //-----------------------------
   // format_header tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(header)
 
   //-----------------------------
   //-----------------------------
   // format_footer tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `OUTPUT_IS_NULL_STRING_FOR_FORMAT(footer)
 
   //-----------------------------
   //-----------------------------
@@ -714,21 +1031,150 @@ module uvm_printer_unit_test;
   // print_array_header tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_array_header_sets_row_level_to_depthN)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_row_level_is_assigned_to(2);
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_gets_name_from_the_scope_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_turn_the_full_name_knob_to(1);
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_row_name_is_assigned_to({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  // FAILING TEST - COVERD BY MANTIS 4600
+// `SVTEST(print_array_header_sets_name_to_null_string)
+//   given_i_have_a_new_uvm_printer();
+//
+//   when_i_call_print_array_header_with(.name(_NULL_STRING));
+//
+//   then_the_row_name_is_assigned_to(_NULL_STRING);
+// `SVTEST_END()
+
+
+  // FAILING TEST - COVERED BY MANTIS 4602
+// `SVTEST(print_array_header_name_from_scope_with_different_scope_separator)
+//   given_i_have_a_new_uvm_printer();
+//     and_i_push_this_level_to_the_scope_stack("my_scope");
+//
+//   when_i_call_print_array_header_with(some_name(), .scope_separator("R"));
+//
+//   then_the_row_name_is_assigned_to(some_name());
+// `SVTEST_END()
+
+
+  `SVTEST(print_array_header_type_name_set_to_arraytype)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(.arraytype("goof-ball"));
+  
+    then_the_row_type_name_is_assigned_to("goof-ball");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_size_set_to_size)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(.size(99));
+  
+    then_the_row_size_is_assigned_to("99");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_sets_val_to_value)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with();
+
+    then_the_row_val_is_assigned_to("-");
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_pushes_back_new_rows)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(some_name());
+    `and_i_call_print_array_header_with(some_other_name());
+
+    then_the_row_name_is_assigned_to(some_other_name());
+     and_the_old_row_name_is_assigned_to(some_name());
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_appends_name_to_scope)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_scope_stack_contains({ "branch0.branch1." , some_name() });
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_header_increases_array_stack_size)
+    given_i_have_a_new_uvm_printer();
+
+    when_i_call_print_array_header_with(some_name());
+
+    then_the_m_array_stack_size_is(1);
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
   // print_array_range tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(max_gt_min,0,1)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(min_eq_minus1,-1,-2)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(max_eq_minus1,43,-1)
+  `PRINT_ARRAY_RANGE_CALLS_PRINT_GENERIC_FOR(min_eq_max,43,43)
+
+  `PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(max_lt_min,1,0)
+  `PRINT_ARRAY_RANGE_DOES_NOTHING_FOR(max_and_min_eq_minus1,-1,-1)
 
   //-----------------------------
   //-----------------------------
   // print_array_footer tests
   //-----------------------------
   //-----------------------------
-  // TBD
+
+  `SVTEST(print_array_footer_chomps_scope_and_array_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+      and_i_increase_the_size_of_the_m_array_stack_by(4);
+
+    when_i_call_print_array_footer;
+
+    then_the_scope_stack_contains("branch0");
+     `and_the_m_array_stack_size_is(3);
+  `SVTEST_END()
+
+
+  `SVTEST(print_array_footer_ignores_scope_and_array_stack_if_no_array_stack)
+    given_i_have_a_new_uvm_printer();
+      and_i_push_this_level_to_the_scope_stack("branch0");
+      and_i_push_this_level_to_the_scope_stack("branch1");
+
+    when_i_call_print_array_footer;
+
+    then_the_scope_stack_contains("branch0.branch1");
+  `SVTEST_END()
 
   //-----------------------------
   //-----------------------------
@@ -826,6 +1272,7 @@ module uvm_printer_unit_test;
   `AND_I_TURN_THE_(default_radix,uvm_radix_enum)
   `AND_I_TURN_THE_(show_root,bit)
   `AND_I_TURN_THE_(reference,bit)
+  `AND_I_TURN_THE_(depth,int)
 
   function void and_i_set_my_test_obj_name_to(string s);
     test_obj.set_name(s);
@@ -841,6 +1288,26 @@ module uvm_printer_unit_test;
   function void and_i_set_the_inst_count_to(int i);
     test_uvm_object::set_inst_count(i);
     test_obj = new("obj_name");
+  endfunction
+
+  function void and_i_increase_the_size_of_the_m_array_stack_by(int i);
+    repeat (i) uut.m_array_stack_push_back();
+  endfunction
+
+  function void and_i_deliberately_violate_the_cycle_check_for(uvm_object o);
+    o.__m_uvm_status_container.cycle_check[o] = 1;
+  endfunction
+
+  function void and_i_create_a_test_comp_with_this_many_children(int num_children);
+    for (int i=0; i<num_children; i+=1 ) begin
+      automatic test_uvm_component c = new($sformatf("child_comp[%0d]", i), test_comp);
+      child_comp.push_back(c);
+      test_comp.add_pretend_child(c);
+    end
+  endfunction
+
+  function void and_i_disable_the_print_for_child(int i);
+    child_comp[i].print_enabled = 0;
   endfunction
 
   //----------
@@ -901,6 +1368,32 @@ module uvm_printer_unit_test;
     update_last_row();
   endfunction
 
+  function void when_i_call_print_generic_with(string name = some_name(),
+                                               string type_name = "",
+                                               int size = 0,
+                                               string value = "",
+                                               byte scope_separator=".");
+    uut.print_generic(name, type_name, size, value, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  function void when_i_call_print_array_header_with(string name = some_name(),
+                                                    int size = 0,
+                                                    string arraytype = "",
+                                                    byte scope_separator=".");
+    uut.print_array_header(name, size, arraytype, scope_separator);
+    update_first_row();
+    update_last_row();
+  endfunction
+
+  function void when_i_call_print_array_footer;
+    uut.print_array_footer();
+    update_first_row();
+    update_last_row();
+  endfunction
+
+
   function void when_i_call_adjust_name_with(string s,
                                              byte scope_separator = ".");
     adjusted_name = uut.test_adjust_name(s, scope_separator);
@@ -915,6 +1408,26 @@ module uvm_printer_unit_test;
     string_index = uut.index_string(index, name);
   endfunction
 
+  function void when_i_call_emit;
+    emitted_string = uut.emit();
+  endfunction
+
+  function void when_i_call_format_row;
+    uvm_printer_row_info row;
+    formatted_output = uut.format_row(row);
+  endfunction
+
+  function void when_i_call_format_header;
+    formatted_output = uut.format_header();
+  endfunction
+
+  function void when_i_call_format_footer;
+    formatted_output = uut.format_footer();
+  endfunction
+
+  function void when_i_call_print_array_range_with(int min, int max);
+    uut.print_array_range(min, max);
+  endfunction
 
   //----------
   // THENS...
@@ -969,5 +1482,67 @@ module uvm_printer_unit_test;
   task  then_the_return_string_is(string s);
     `FAIL_UNLESS(string_index == s);
   endtask
-    
+
+  task then_an_error_is_asserted_by_the_printer;
+    uvm_report_mock::expect_error("NO_OVERRIDE", "emit() method not overridden in printer subtype");
+    `FAIL_IF(!uvm_report_mock::verify_complete());
+  endtask
+
+  task then_the_emitted_string_is(string s);
+    `FAIL_IF(emitted_string != s);
+  endtask
+
+  task then_the_formatted_output_is(string s);
+    `FAIL_IF(formatted_output != s);
+  endtask
+
+  task then_the_scope_stack_contains(string s);
+    `FAIL_IF(uut.m_scope.get() != s);
+  endtask
+
+  task then_the_m_array_stack_size_is(int i);
+    `FAIL_IF(uut.get_array_stack_size() != i);
+  endtask
+
+  task then_print_generic_is_called_with(string a, string b, int i, string c, byte d);
+    `FAIL_UNLESS(uut.print_generic_was_called_with(a, b, i, c, d));
+  endtask
+
+  task then_no_row_is_added;
+    `FAIL_UNLESS(uut.get_num_rows == 0);
+  endtask
+
+  task then_the_test_obj_sprint_is_called_with(uvm_printer p);
+    `FAIL_UNLESS(test_obj.sprint_was_called_with(p));
+  endtask
+
+  task then_the_test_obj_cycle_check_is(bit started=0, finished=0);
+    if (started) `FAIL_UNLESS(test_obj.cycle_check_was_started);
+    if (finished) `FAIL_IF(test_obj.__m_uvm_status_container.cycle_check.exists(test_obj));
+  endtask
+
+  task then_the_printer_scope_stack_temporarily_holds(string s);
+    `FAIL_IF(test_obj.do_print_printer_m_scope_got != s);
+  endtask
+
+  task but_the_object_isnt_actually_printed;
+    `FAIL_IF(test_obj.do_print_printer != null);
+  endtask
+  
+  task then_each_child_comp_is_printed(bit should_be_printed = 1);
+    for (int i=0; i<child_comp.size(); i+=1) begin
+      if (should_be_printed)  `FAIL_UNLESS(child_comp[i].sprint_was_called_with(uut));
+      if (!should_be_printed) `FAIL_IF(child_comp[i].sprint_was_called_with(uut));
+    end
+  endtask
+
+  task then_this_child_comp_is_printed(int i, bit should_be_printed = 1);
+    if (should_be_printed)  `FAIL_UNLESS(child_comp[i].sprint_was_called_with(uut));
+    if (!should_be_printed) `FAIL_IF(child_comp[i].sprint_was_called_with(uut));
+  endtask
+
+  task and_this_child_comp_is_not_printed(int i);
+    then_this_child_comp_is_printed(i, 0);
+  endtask
+
 endmodule
