@@ -15,10 +15,18 @@ class __m_uvm_field_automation_t;
   string str__;
 endclass
 
+class comparer_state;
+  int result = 0;
+  string miscompares = "";
+  uvm_scope_stack scope = null;
+  bit is_this_in_compare_map;
+endclass
+
 class test_uvm_object extends uvm_object;
   rand int rand_property;
 
   __m_uvm_field_automation_t fa_args = new;
+  comparer_state comp_st = new;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
   bit fake_do_unpack = 0;
@@ -26,11 +34,13 @@ class test_uvm_object extends uvm_object;
   bit fake_push_cycle_check = 0;
   bit was_cycle_check_empty = 0;
   bit m_cycle_check_was_started;
+  bit __m_uvm_field_automation_called = 0;
+  bit do_compare_called = 0;
 
-  bit check_comparer_cleaned_up = 0;
-  bit check_comparer_cleaned_up_scope = 0;
+  bit latch_temp_comparer_state = 0;
+  bit latch_temp_scope_stack_get = 0;
   bit comparer_cleaned_up_ok = 0;
-  string comparer_cleaned_up_scope;
+  string latched_scope_stack_get;
 
   uvm_printer do_print_printer;
   uvm_object do_copy_copy;
@@ -40,6 +50,8 @@ class test_uvm_object extends uvm_object;
   string create_name;
   test_uvm_object created_object;
   string do_print_printer_m_scope_got;
+  uvm_object do_compare_rhs;
+  uvm_comparer do_compare_comparer;
 
   function new(string name);
     super.new(name);
@@ -63,6 +75,7 @@ class test_uvm_object extends uvm_object;
   function void __m_uvm_field_automation(uvm_object tmp_data__,
                                          int what__,
                                          string str__);
+    __m_uvm_field_automation_called = 1;
     fa_args.tmp_data__ = tmp_data__;
     fa_args.what__ = what__;
     fa_args.str__ = str__;
@@ -85,6 +98,16 @@ class test_uvm_object extends uvm_object;
            fa_args.str__ == str__;
   endfunction
 
+  function bit temp_comparer_state_latched_as(int result,
+                                              string miscompares,
+                                              uvm_scope_stack scope,
+                                              bit in_compare_map);
+    return comp_st.result == result &&
+           comp_st.miscompares == miscompares &&
+           comp_st.scope == scope &&
+           comp_st.is_this_in_compare_map == in_compare_map;
+  endfunction
+
   function void do_print(uvm_printer printer);
     $cast(do_print_printer, printer);
 
@@ -101,6 +124,13 @@ class test_uvm_object extends uvm_object;
   function void do_copy(uvm_object rhs);
     $cast(do_copy_copy, rhs);
     super.do_copy(rhs);
+  endfunction
+
+  function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+    do_compare_called = 1;
+    $cast(do_compare_rhs, rhs);
+    $cast(do_compare_comparer, comparer);
+    return super.do_compare(rhs, comparer);
   endfunction
 
   function uvm_object create (string name="");
@@ -139,25 +169,33 @@ class test_uvm_object extends uvm_object;
     return p == do_print_printer;
   endfunction
 
+  function bit do_compare_was_called_with(uvm_object o, uvm_comparer c);
+    return do_compare_rhs == o &&
+           do_compare_comparer == c;
+  endfunction
+
   function bit cycle_check_was_started();
     return m_cycle_check_was_started;
   endfunction
 
   function int get_inst_id ();
-    if(check_comparer_cleaned_up) begin
-      comparer_cleaned_up_ok = 
-        //!__m_uvm_status_container.comparer.compare_map &&
-        __m_uvm_status_container.comparer.result == 1 &&
-        __m_uvm_status_container.comparer.miscompares == "" &&
-        __m_uvm_status_container.comparer.scope == __m_uvm_status_container.scope;
-      check_comparer_cleaned_up = 0;
+    if(latch_temp_comparer_state) begin
+      comp_st.is_this_in_compare_map = __m_uvm_status_container.comparer.compare_map.get(this) != null;
+      comp_st.result = __m_uvm_status_container.comparer.result;
+      comp_st.miscompares = __m_uvm_status_container.comparer.miscompares;
+      comp_st.scope = __m_uvm_status_container.comparer.scope;
+      latch_temp_comparer_state = 0;
     end
-    if(check_comparer_cleaned_up_scope) begin
-      comparer_cleaned_up_scope =
+    if(latch_temp_scope_stack_get) begin
+      latched_scope_stack_get =
         __m_uvm_status_container.scope.get();
-      check_comparer_cleaned_up_scope = 0;
+      latch_temp_scope_stack_get = 0;
     end
     return super.get_inst_id();
+  endfunction
+
+  function bit comparer_print_msg_object_was_called();
+    return __m_uvm_status_container.comparer.result != 0;
   endfunction
 endclass
 

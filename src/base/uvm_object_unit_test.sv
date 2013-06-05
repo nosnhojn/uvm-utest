@@ -75,6 +75,13 @@ module uvm_object_unit_test;
     uvm_bitstream = '{default:'0};
     dummy_object = null;
     dummy_str = "";
+    while (uvm_object::__m_uvm_status_container.scope.depth() > 0)
+      void'(uvm_object::__m_uvm_status_container.scope.up());
+    uvm_default_comparer.check_type = 0;
+    uvm_default_comparer.compare_map.clear();
+    uvm_default_comparer.result = 0;
+    uvm_default_comparer.miscompares = "";
+    uvm_default_comparer.scope = null;
   endtask
 
 
@@ -517,36 +524,165 @@ module uvm_object_unit_test;
   //-----------------------------
   `SVTEST(compare_status_container_set_with_default_comparer)
     void'(uut.compare(dummy_object, null));
+
     `FAIL_IF(uut.__m_uvm_status_container.comparer != uvm_default_comparer)
   `SVTEST_END()
 
 
   `SVTEST(compare_status_container_set_with_custom_comparer)
     void'(uut.compare(dummy_object, comparer));
+
     `FAIL_IF(uut.__m_uvm_status_container.comparer != comparer)
   `SVTEST_END()
 
 
-  // This test uses the test double test_uvm_object::get_inst_id
-  // to spy the comparer state. This is a bit convoluted as the
-  // get_inst_id is called from comparer::print_msg_object
-  `SVTEST(compare_comparer_print_msg_object_compare_clean_up_check)
-    uut.check_comparer_cleaned_up = 1;
+  `SVTEST(compare_calls_comparer_print_msg_object_when_rhs_eq_null)
     void'(uut.compare(null, null));
-    `FAIL_UNLESS(uut.comparer_cleaned_up_ok)
+
+    `FAIL_UNLESS(uut.comparer_print_msg_object_was_called());
   `SVTEST_END()
 
 
-  `SVTEST(compare_comparer_print_msg_object_compare_clean_up_scope_check)
-    uut.check_comparer_cleaned_up_scope = 1;
-    void'(uut.compare(null, null));
-    `FAIL_UNLESS_STR_EQUAL(uut.comparer_cleaned_up_scope, uut.get_name())
+  `SVTEST(compare_doesnt_call_comparer_print_msg_object_when_rhs_ne_null)
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.comparer_print_msg_object_was_called());
   `SVTEST_END()
 
 
-  // This path is not accessible because the scope depth will
-  // never be empty when reaching this else statement
-  `SVTEST(compare_comparer_print_msg_object_without_scope_depth)
+  `SVTEST(compare_resets_comparer_state_when_empty_scope_stack)
+    uut.latch_temp_comparer_state = 1;
+
+    void'(uut.compare(null, null));
+
+    `FAIL_UNLESS(uut.temp_comparer_state_latched_as(1, _NULL_STRING, uut.__m_uvm_status_container.scope, 0));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_pushes_obj_name_to_scope_stack_when_empty_scope_stack)
+    uut.latch_temp_scope_stack_get = 1;
+
+    void'(uut.compare(null, null));
+
+    `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, uut.get_name())
+  `SVTEST_END()
+
+
+  `SVTEST(compare_pushes_object_to_scope_stack_when_empty_scope_stack)
+    uut.latch_temp_scope_stack_get = 1;
+    uut.set_name("");
+
+    void'(uut.compare(null, null));
+
+    `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, "<object>")
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_reset_comparer_state_when_scope_stack_not_empty)
+    string miscompares = "bogus";
+    uut.latch_temp_comparer_state = 1;
+    uut.__m_uvm_status_container.scope.down("not empty");
+    uvm_default_comparer.show_max = 2;
+    uvm_default_comparer.result = 1;
+    uvm_default_comparer.miscompares = miscompares;
+    uvm_default_comparer.scope = null;
+    uvm_default_comparer.compare_map.set(uut, uut);
+
+    void'(uut.compare(null, null));
+
+    `FAIL_UNLESS(uut.temp_comparer_state_latched_as(2, miscompares, null, 1));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_leaves_scope_stack_alone_when_scope_stack_not_empty)
+    uut.latch_temp_scope_stack_get = 1;
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(null, null));
+
+    `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, "not empty")
+  `SVTEST_END()
+
+
+  `SVTEST(compare_returns_false_for_true_cycle_check)
+    uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    `FAIL_IF(uut.compare(dummy_object, null));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_calls_print_msg_object_for_cycle_check_when_rhs_is_this)
+    uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.comparer_print_msg_object_was_called());
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_call_print_msg_object_for_cycle_check_when_rhs_is_not_this)
+    uvm_default_comparer.compare_map.set(dummy_object, dummy_object);
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_UNLESS(uut.comparer_print_msg_object_was_called());
+  `SVTEST_END()
+
+
+  `SVTEST(compare_checks_type_when_configured_to_check_type)
+    uvm_default_comparer.check_type = 1;
+    dummy_object.fake_test_type_name = 1;
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_UNLESS_STR_EQUAL(uvm_default_comparer.miscompares, comparer_print_msg(uut, dummy_object));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_check_type_when_cycle_check)
+    uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
+    uvm_default_comparer.check_type = 1;
+    dummy_object.fake_test_type_name = 1;
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_UNLESS_STR_EQUAL(uvm_default_comparer.miscompares, _NULL_STRING);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_calls_field_automation)
+    void'(uut.compare(dummy_object, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(dummy_object, UVM_COMPARE, _NULL_STRING));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_call_field_automation_when_cycle_check)
+    uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.__m_uvm_field_automation_called);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_calls_do_compare)
+    void'(uut.compare(dummy_object, comparer));
+    `FAIL_UNLESS(uut.do_compare_was_called_with(dummy_object, comparer));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_call_do_compare_when_cycle_check)
+    uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.do_compare_called);
   `SVTEST_END()
 
 
@@ -555,15 +691,18 @@ module uvm_object_unit_test;
   // do_compare tests
   //-----------------------------
   //-----------------------------
+
   `SVTEST(do_compare_returns_true)
     `FAIL_IF(uut.do_compare(null, null) != 1);
   `SVTEST_END(do_compare_returns_true)
+
 
   //-----------------------------
   //-----------------------------
   // pack tests
   //-----------------------------
   //-----------------------------
+
   `SVTEST(m_pack_use_default_packer)
     void'(uut.pack(bitstream, null));
     `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
@@ -1083,6 +1222,14 @@ module uvm_object_unit_test;
     void'($rewind(PRINT_FILE));
     void'($fscanf(PRINT_FILE, "%s\n", print_test_simple_sprint_emit));
     $fclose(PRINT_FILE);
+  endfunction
+
+  // this is a duplicate'ish of the comparer.print_msg
+  function string comparer_print_msg(uvm_object lhs, uvm_object rhs);
+    return $sformatf("%s: Miscompare for %s: lhs type = \"%s\" : rhs type = \"%s\"\n", lhs.get_name(),
+                                                                                       lhs.get_name(),
+                                                                                       lhs.get_type_name(),
+                                                                                       rhs.get_type_name());
   endfunction
 
 endmodule
