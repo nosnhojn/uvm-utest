@@ -1,6 +1,7 @@
 ifeq ($(SIMULATOR),IUS)
 	include $(SVUNIT_INSTALL)/bin/ius.mk
 	SIM_ARGS += '-uvm'
+  #SIM_ARGS += '-uvmhome $(UVM_HOME) -64'
 else
 	ifeq ($(SIMULATOR),VCS)
 		include $(SVUNIT_INSTALL)/bin/vcs.mk
