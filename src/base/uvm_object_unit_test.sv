@@ -605,16 +605,14 @@ module uvm_object_unit_test;
 
 
   `SVTEST(compare_returns_false_for_true_cycle_check)
-    uvm_default_comparer.compare_map.set(dummy_object, uut);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure();
 
     `FAIL_IF(uut.compare(dummy_object, null));
   `SVTEST_END()
 
 
   `SVTEST(compare_calls_print_msg_object_for_cycle_check_when_rhs_is_this)
-    uvm_default_comparer.compare_map.set(dummy_object, uut);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure();
 
     void'(uut.compare(dummy_object, null));
 
@@ -623,8 +621,7 @@ module uvm_object_unit_test;
 
 
   `SVTEST(compare_doesnt_call_print_msg_object_for_cycle_check_when_rhs_is_not_this)
-    uvm_default_comparer.compare_map.set(dummy_object, dummy_object);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure(dummy_object);
 
     void'(uut.compare(dummy_object, null));
 
@@ -643,8 +640,7 @@ module uvm_object_unit_test;
 
 
   `SVTEST(compare_doesnt_check_type_when_cycle_check)
-    uvm_default_comparer.compare_map.set(dummy_object, uut);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure();
     uvm_default_comparer.check_type = 1;
     dummy_object.fake_test_type_name = 1;
 
@@ -661,8 +657,7 @@ module uvm_object_unit_test;
 
 
   `SVTEST(compare_doesnt_call_field_automation_when_cycle_check)
-    uvm_default_comparer.compare_map.set(dummy_object, uut);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure();
 
     void'(uut.compare(dummy_object, null));
 
@@ -672,17 +667,63 @@ module uvm_object_unit_test;
 
   `SVTEST(compare_calls_do_compare)
     void'(uut.compare(dummy_object, comparer));
+
     `FAIL_UNLESS(uut.do_compare_was_called_with(dummy_object, comparer));
   `SVTEST_END()
 
 
   `SVTEST(compare_doesnt_call_do_compare_when_cycle_check)
-    uvm_default_comparer.compare_map.set(dummy_object, uut);
-    uut.__m_uvm_status_container.scope.down("not empty");
+    inject_compare_map_cycle_check_failure();
 
     void'(uut.compare(dummy_object, null));
 
     `FAIL_IF(uut.do_compare_called);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_adds_rhs_to_compare_map)
+    uvm_default_comparer.compare_map.clear();
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_object) == null);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_add_rhs_to_compare_map_when_cycle_check)
+    inject_compare_map_cycle_check_failure();
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_object) == null);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_exits_with_no_change_to_scope)
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 0);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_cleans_up_scope_stack_with_depth_1)
+    uut.__m_uvm_status_container.scope.down("not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 0);
+  `SVTEST_END()
+
+
+  // child objects will clear the compare map set by the parent. is
+  // that really what you want??
+  `SVTEST(WARNING_compare_ignores_scope_stack_with_depth_ge_2)
+    uut.__m_uvm_status_container.scope.down("not empty");
+    uut.__m_uvm_status_container.scope.down("really not empty");
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 2);
   `SVTEST_END()
 
 
@@ -1230,6 +1271,13 @@ module uvm_object_unit_test;
                                                                                        lhs.get_name(),
                                                                                        lhs.get_type_name(),
                                                                                        rhs.get_type_name());
+  endfunction
+
+  function void inject_compare_map_cycle_check_failure(uvm_object o = null);
+    uvm_default_comparer.compare_map.clear();
+    if (o != null) uvm_default_comparer.compare_map.set(dummy_object, o);
+    else           uvm_default_comparer.compare_map.set(dummy_object, uut);
+    uut.__m_uvm_status_container.scope.down("not empty");
   endfunction
 
 endmodule

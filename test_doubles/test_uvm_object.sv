@@ -2,6 +2,8 @@
 `define __TEST_UVM_OBJECT__
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
+
 
 class test_uvm_object_wrapper extends uvm_object_wrapper;
   function string get_type_name();
