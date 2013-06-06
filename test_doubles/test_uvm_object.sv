@@ -32,6 +32,7 @@ class test_uvm_object extends uvm_object;
   bit fake_test_type_name = 0;
   bit fake_create = 0;
   bit fake_do_unpack = 0;
+  bit fake_do_compare = 0;
   bit fake_status = 0;
   bit fake_push_cycle_check = 0;
   bit was_cycle_check_empty = 0;
@@ -132,7 +133,8 @@ class test_uvm_object extends uvm_object;
     do_compare_called = 1;
     $cast(do_compare_rhs, rhs);
     $cast(do_compare_comparer, comparer);
-    return super.do_compare(rhs, comparer);
+    if (fake_do_compare) return 0;
+    else return super.do_compare(rhs, comparer);
   endfunction
 
   function uvm_object create (string name="");

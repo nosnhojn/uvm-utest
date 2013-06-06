@@ -642,8 +642,7 @@ module uvm_object_unit_test;
 
   `SVTEST(compare_doesnt_check_type_when_cycle_check)
     inject_compare_map_cycle_check_failure();
-    uvm_default_comparer.check_type = 1;
-    dummy_object.fake_test_type_name = 1;
+    cause_type_mismatch_with_dummy();
 
     void'(uut.compare(dummy_object, null));
 
@@ -716,15 +715,49 @@ module uvm_object_unit_test;
   `SVTEST_END()
 
 
-  // child objects will clear the compare map set by the parent. is
-  // that really what you want??
-  `SVTEST(WARNING_compare_ignores_scope_stack_with_depth_ge_2)
+  `SVTEST(compare_ignores_scope_stack_with_depth_ge_2)
     uut.__m_uvm_status_container.scope.down("not empty");
     uut.__m_uvm_status_container.scope.down("really not empty");
 
     void'(uut.compare(dummy_object, null));
 
     `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 2);
+  `SVTEST_END()
+
+
+  `SVTEST(compare_calls_print_rollup_when_rhs_ne_null)
+    uvm_default_comparer.sev = UVM_WARNING;
+    cause_type_mismatch_with_dummy();
+
+    void'(uut.compare(dummy_object, null));
+
+    `FAIL_UNLESS(print_rollup_called());
+  `SVTEST_END()
+
+
+  `SVTEST(compare_doesnt_call_print_rollup_when_rhs_eq_null)
+    uvm_default_comparer.sev = UVM_WARNING;
+    cause_type_mismatch_with_dummy();
+
+    void'(uut.compare(null, null));
+
+    `FAIL_IF(print_rollup_called());
+  `SVTEST_END()
+
+
+  `SVTEST(compare_returns_true_for_match)
+    `FAIL_UNLESS(uut.compare(dummy_object, null));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_returns_false_for_null)
+    `FAIL_IF(uut.compare(null, null));
+  `SVTEST_END()
+
+
+  `SVTEST(compare_returns_do_compare)
+    uut.fake_do_compare = 1;
+    `FAIL_IF(uut.compare(dummy_object, null));
   `SVTEST_END()
 
 
@@ -1279,6 +1312,18 @@ module uvm_object_unit_test;
     if (o != null) uvm_default_comparer.compare_map.set(dummy_object, o);
     else           uvm_default_comparer.compare_map.set(dummy_object, uut);
     uut.__m_uvm_status_container.scope.down("not empty");
+  endfunction
+
+  // this is bush league but the best I can do is make sure the print_rollup
+  // logs a warning and then make sure the warning got logged.
+  function bit print_rollup_called();
+    uvm_report_mock::expect_warning();
+    return uvm_report_mock::verify_complete();
+  endfunction
+
+  function void cause_type_mismatch_with_dummy();
+    uvm_default_comparer.check_type = 1;
+    dummy_object.fake_test_type_name = 1;
   endfunction
 
 endmodule
