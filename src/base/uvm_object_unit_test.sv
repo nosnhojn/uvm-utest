@@ -197,14 +197,14 @@ module uvm_object_unit_test;
   // We have seen this test failing using IUS 12.1
   // with the installed uvm-1.1 and a local version
   // of uvm-1.1d
-// `SVTEST(inst_id_initialized_to_inst_count)
-//   test_uvm_object other;
-//   int current_inst_count = uut.get_inst_count();
-//
-//   other = new("");
-//
-//   `FAIL_IF(other.get_inst_id() != current_inst_count);
-// `SVTEST_END(inst_id_initialized_to_inst_count)
+  `SVTEST(inst_id_initialized_to_inst_count)
+    test_uvm_object other;
+    int current_inst_count = uut.get_inst_count();
+ 
+    other = new("");
+ 
+    `FAIL_IF(other.get_inst_id() != current_inst_count);
+  `SVTEST_END(inst_id_initialized_to_inst_count)
 
   //-----------------------------
   //-----------------------------
@@ -239,6 +239,7 @@ module uvm_object_unit_test;
   //-----------------------------
 
   `SVTEST(get_object_type_returns_null)
+    // need something in the wrapper LOSER
     `FAIL_IF(uut.get_object_type() != null); 
   `SVTEST_END(get_object_type_returns_null)
 
@@ -1120,6 +1121,7 @@ module uvm_object_unit_test;
   // set_object_local tests
   //-----------------------------
   //-----------------------------
+
   `SVTEST(set_object_local_status_container_warning_set)
     uut.__m_uvm_status_container.warning = 1;
     uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s", "dummy"));
@@ -1150,9 +1152,19 @@ module uvm_object_unit_test;
   `SVTEST_END()
 
 
+// use a non-default value of clone to detect change to the default value LOSER
   `SVTEST(set_object_local_status_container_object_set_with_cloned_value)
     dummy_object.fake_create = 1;
     void'(uut.set_object_local("dummy",dummy_object,1));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object.created_object)
+    `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
+    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_object.created_object.get_name())
+  `SVTEST_END()
+
+
+  `SVTEST(set_object_local_status_container_object_has_default_clone_of_1)
+    dummy_object.fake_create = 1;
+    void'(uut.set_object_local("dummy",dummy_object));
     `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object.created_object)
     `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
     `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_object.created_object.get_name())

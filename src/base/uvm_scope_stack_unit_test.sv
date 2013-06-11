@@ -266,7 +266,7 @@ module uvm_scope_stack_unit_test;
   // up element tests
   //-----------------------------
   //-----------------------------
-
+// up_element more than 1 LOSER
   `SVTEST(up_element_removes_a_down_element)
     string s_exp = "element0";
     uut.down("element0");

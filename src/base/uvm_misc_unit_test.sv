@@ -157,6 +157,7 @@ module uvm_misc_unit_test;
   // that happening though which is why I've chosen to
   // verify it gets some value >0 (for unsigned).
   `SVTEST(global_random_seed_is_randomized)
+// LOSER do this twice to make sure we don't have a contstant
     `FAIL_IF(uvm_global_random_seed <= 0);
   `SVTEST_END(global_random_seed_is_randomized)
 
@@ -166,6 +167,8 @@ module uvm_misc_unit_test;
   // uvm_instance_scope tests
   //-----------------------------
   //-----------------------------
+
+// LOSER... missed lots of tests here... basically the entire method
   `SVTEST(top_uvm_instance_scope_is_uvm_pkg)
     bit uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*", uvm_instance_scope());
     `FAIL_IF(!uvm_instance_scope_match);

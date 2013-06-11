@@ -114,6 +114,7 @@ module uvm_printer_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  // LOSER - virtual methods should be virtual!!
 
   //-----------------------------
   //-----------------------------
