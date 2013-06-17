@@ -11,7 +11,7 @@ import svunit_uvm_mock_pkg::*;
 `SVTEST(get_function_type_returns_``RET) \
   string s_exp = `"RET`"; \
   `FAIL_IF(uut.get_function_type(TYPE) != s_exp); \
-`SVTEST_END(get_function_type_returns_``RET)
+`SVTEST_END
 
 
 module uvm_status_container_unit_test;
@@ -64,12 +64,12 @@ module uvm_status_container_unit_test;
   //
   // Each individual test must be
   // defined between `SVTEST(_NAME_)
-  // `SVTEST_END(_NAME_)
+  // `SVTEST_END
   //
   // i.e.
   //   `SVTEST(mytest)
   //     <test code>
-  //   `SVTEST_END(mytest)
+  //   `SVTEST_END
   //===================================
   `SVUNIT_TESTS_BEGIN
 
@@ -101,7 +101,7 @@ module uvm_status_container_unit_test;
     `FAIL_IF(uut.m_uvm_cycle_scopes.size() != 0);
     `FAIL_IF(uut.field_array.num() != 0);
     `FAIL_IF(uut.print_matches !== 0);
-  `SVTEST_END(defaults_at_construction)
+  `SVTEST_END
 
   
   `SVTEST(statics_are_static)
@@ -111,7 +111,7 @@ module uvm_status_container_unit_test;
 
     `FAIL_IF(other.field_array.num() != 1);
     `FAIL_IF(other.print_matches != 1);
-  `SVTEST_END(statics_are_static)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -131,14 +131,14 @@ module uvm_status_container_unit_test;
 //   uut.do_field_check("done_field_check", o);
 //   uut.do_field_check("done_field_check", o);
 //   `FAIL_IF(!uvm_report_mock::verify_complete());
-// `SVTEST_END(do_field_check_asserts_error_for_existing_field)
+// `SVTEST_END
 
 
   `SVTEST(do_field_check_loads_field_array)
     test_uvm_object o = new("test_do_field_check_object");
     uut.do_field_check("done_field_check", o);
     `FAIL_IF(uut.field_array.num() != 1);
-  `SVTEST_END(do_field_check_loads_field_array)
+  `SVTEST_END
 
 
   `SVTEST(do_field_check_ignores_duplicate_entries)
@@ -147,7 +147,7 @@ module uvm_status_container_unit_test;
     uut.do_field_check("done_field_check", o);
     uut.do_field_check("another_done_field_check", o);
     `FAIL_IF(uut.field_array.num() != 2);
-  `SVTEST_END(do_field_check_ignores_duplicate_entries)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -179,7 +179,7 @@ module uvm_status_container_unit_test;
     uut.scope.down("just_joking");
     uut.scope.down("still_friends");
     `FAIL_IF(uut.get_full_scope_arg() != s_exp);
-  `SVTEST_END(get_full_scope_returns_scope_stack_get)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------

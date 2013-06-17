@@ -7,7 +7,7 @@ import uvm_pkg::*;
 `define GET_RADIX_TEST(RADIX,OUTPUT) \
 `SVTEST(get_``RADIX``_radix) \
   `FAIL_IF(uut.get_radix_str(RADIX) != OUTPUT); \
-`SVTEST_END(get_``RADIX``_radix)
+`SVTEST_END
 
 module uvm_printer_knobs_unit_test;
 
@@ -16,7 +16,7 @@ module uvm_printer_knobs_unit_test;
 
 
   //===================================
-  // This is the UUT that we're 
+  // This is the UUT that we're
   // running the Unit Tests on
   //===================================
   uvm_printer_knobs uut;
@@ -41,7 +41,7 @@ module uvm_printer_knobs_unit_test;
 
 
   //===================================
-  // Here we deconstruct anything we 
+  // Here we deconstruct anything we
   // need after running the Unit Tests
   //===================================
   task teardown();
@@ -56,15 +56,30 @@ module uvm_printer_knobs_unit_test;
   //
   // Each individual test must be
   // defined between `SVTEST(_NAME_)
-  // `SVTEST_END(_NAME_)
+  // `SVTEST_END
   //
   // i.e.
   //   `SVTEST(mytest)
   //     <test code>
-  //   `SVTEST_END(mytest)
+  //   `SVTEST_END
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  //-----------------------------
+  //-----------------------------
+  // parameters
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(UVM_STDOUT_default_value)
+    `FAIL_IF(UVM_STDOUT != 1)
+  `SVTEST_END
+
+
+  //-----------------------------
+  //-----------------------------
+  // public static members
+  //-----------------------------
+  //-----------------------------
 
   //-----------------------------
   //-----------------------------
@@ -103,7 +118,7 @@ module uvm_printer_knobs_unit_test;
     `FAIL_IF(uut.oct_radix != s_oct_radix);
     `FAIL_IF(uut.unsigned_radix != s_unsigned_radix);
     `FAIL_IF(uut.hex_radix != s_hex_radix);
-  `SVTEST_END(defaults_at_construction)
+  `SVTEST_END
 
 
   `SVTEST(deprecated_defaults)
@@ -116,7 +131,7 @@ module uvm_printer_knobs_unit_test;
     `FAIL_IF(uut.size_width != -1);
     `FAIL_IF(uut.value_width != -1);
     `FAIL_IF(uut.sprint != 1);
-  `SVTEST_END(deprecated_defaults)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -142,25 +157,25 @@ module uvm_printer_knobs_unit_test;
   `SVTEST(dont_show_radix)
     uut.show_radix = 0;
     `FAIL_IF(uut.get_radix_str(UVM_HEX) != _NULL_STRING);
-  `SVTEST_END(dont_show_radix)
+  `SVTEST_END
 
 
   `SVTEST(undefined_enum_returns_null_string)
     int invalid_enum = 99;
     `FAIL_IF(uut.get_radix_str(uvm_radix_enum'(invalid_enum)) != _NULL_STRING);
-  `SVTEST_END(undefined_enum_returns_null_string)
+  `SVTEST_END
 
 
   `SVTEST(table_printer_knob_typedefed_to_printer_knob)
     uvm_table_printer_knobs tdef;
     `FAIL_IF($cast(tdef, uut) != 1);
-  `SVTEST_END(table_printer_knob_typedefed_to_printer_knob)
+  `SVTEST_END
 
 
   `SVTEST(tree_printer_knob_typedefed_to_printer_knob)
     uvm_tree_printer_knobs tdef;
     `FAIL_IF($cast(tdef, uut) != 1);
-  `SVTEST_END(tree_printer_knob_typedefed_to_printer_knob)
+  `SVTEST_END
 
 
   `SVUNIT_TESTS_END

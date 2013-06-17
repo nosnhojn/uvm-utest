@@ -16,7 +16,7 @@ import svunit_pkg::*;
   string s_exp = `"EXP`"; \
   string s_act = uvm_vector_to_string (VECTOR, SIZE, RADIX, `"RADIXSTR`"); \
   `FAIL_IF(s_act != s_exp); \
-`SVTEST_END(TESTNAME)
+`SVTEST_END
 
 `define UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(TYPE,OPEN,CLOSED) \
 `SVTEST(uvm_leaf_scope_can_have_``TYPE``_bracket_separator) \
@@ -24,7 +24,7 @@ import svunit_pkg::*;
   string name_out = { OPEN , "leaf" , CLOSED }; \
   byte separator = OPEN; \
   `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
-`SVTEST_END(uvm_leaf_scope_can_have_``TYPE``_bracket_separator) \
+`SVTEST_END \
 
 `define UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR_AND_ARRAY(TYPE,OPEN,CLOSED) \
 `SVTEST(uvm_leaf_scope_can_have_``TYPE``_bracket_separator_and_array) \
@@ -32,7 +32,7 @@ import svunit_pkg::*;
   string name_out = { OPEN , "leaf" , OPEN , 55 , CLOSED , CLOSED }; \
   byte separator = OPEN; \
   `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
-`SVTEST_END(uvm_leaf_scope_can_have_``TYPE``_bracket_separator_and_array) \
+`SVTEST_END \
 
 `define UVM_LEAF_SCOPE_IGNORES_BRACKET_SEPARATOR_IF_NOT_MSBYTE(TYPE,OPEN,CLOSED) \
 `SVTEST(uvm_leaf_scope_ignores_``TYPE``_bracket_separator_if_not_msbyte) \
@@ -40,54 +40,54 @@ import svunit_pkg::*;
   string name_out = { "leaf" }; \
   byte separator = OPEN; \
   `FAIL_IF(uvm_leaf_scope(name_in,separator) != name_out); \
-`SVTEST_END(uvm_leaf_scope_ignores_``TYPE``_bracket_separator_if_not_msbyte)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(RADIX,IDX) \
 `SVTEST(get_array_index_handles_index_with_``RADIX``_radix) \
   string s_in = `"double_trouble[IDX]`"; \
   int i_exp = IDX; \
   `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != i_exp); \
-`SVTEST_END(get_array_index_handles_index_with_``RADIX``_radix)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_STRING_WITH_RADIX_TEST(RADIX,IDX) \
 `SVTEST(get_array_index_string_handles_index_with_``RADIX``_radix) \
   string s_in = `"double_trouble[IDX]`"; \
   string s_exp = `"IDX`"; \
   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp); \
-`SVTEST_END(get_array_index_string_handles_index_with_``RADIX``_radix)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_FOR_WILD(TYPE,NAME,STRING_IN,EXP_WILD) \
 `SVTEST(get_array_index_``TYPE``_``NAME) \
   string s_in = `"STRING_IN`"; \
   void'(uvm_get_array_index_``TYPE(s_in, get_array_index_is_wildcard)); \
   `FAIL_IF(get_array_index_is_wildcard != EXP_WILD); \
-`SVTEST_END(get_array_index_``TYPE``_``NAME)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_INT(NAME,STRING_IN,EXP) \
 `SVTEST(get_array_index_int_``NAME) \
   string s_in = `"STRING_IN`"; \
   `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != EXP); \
-`SVTEST_END(get_array_index_int_``NAME)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_STRING(NAME,STRING_IN,EXP) \
 `SVTEST(get_array_index_string_``NAME) \
   string s_in = `"STRING_IN`"; \
   string s_exp = `"EXP`"; \
   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp); \
-`SVTEST_END(get_array_index_string_``NAME)
+`SVTEST_END
 
 `define UVM_GET_ARRAY_INDEX_STRING_NULL_IDX(NAME,STRING_IN) \
 `SVTEST(get_array_index_string_``NAME) \
   string s_in = `"STRING_IN`"; \
   string s_exp = _NULL_STRING; \
   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp); \
-`SVTEST_END(get_array_index_string_``NAME)
+`SVTEST_END
 
 `define HAS_WILDCARD_RETURNS(NAME,STRING_IN,EXP) \
 `SVTEST(has_wildcard_returns_``NAME) \
   string s_in = `"STRING_IN`"; \
   `FAIL_IF(uvm_has_wildcard(s_in) != EXP); \
-`SVTEST_END(has_wildcard_returns_``NAME)
+`SVTEST_END
 
 
 module uvm_misc_unit_test;
@@ -97,7 +97,7 @@ module uvm_misc_unit_test;
   bit get_array_index_is_wildcard;
 
   //===================================
-  // This is the UUT that we're 
+  // This is the UUT that we're
   // running the Unit Tests on
   //===================================
 
@@ -119,7 +119,7 @@ module uvm_misc_unit_test;
 
 
   //===================================
-  // Here we deconstruct anything we 
+  // Here we deconstruct anything we
   // need after running the Unit Tests
   //===================================
   task teardown();
@@ -135,12 +135,12 @@ module uvm_misc_unit_test;
   //
   // Each individual test must be
   // defined between `SVTEST(_NAME_)
-  // `SVTEST_END(_NAME_)
+  // `SVTEST_END
   //
   // i.e.
   //   `SVTEST(mytest)
   //     <test code>
-  //   `SVTEST_END(mytest)
+  //   `SVTEST_END
   //===================================
   const bit [31:0] crc_polynomial = 'h04c11db6;
 
@@ -158,8 +158,9 @@ module uvm_misc_unit_test;
   // verify it gets some value >0 (for unsigned).
   `SVTEST(global_random_seed_is_randomized)
 // LOSER do this twice to make sure we don't have a contstant
+// (without running the test twice, there is no way to catch this)
     `FAIL_IF(uvm_global_random_seed <= 0);
-  `SVTEST_END(global_random_seed_is_randomized)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -172,7 +173,15 @@ module uvm_misc_unit_test;
   `SVTEST(top_uvm_instance_scope_is_uvm_pkg)
     bit uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*", uvm_instance_scope());
     `FAIL_IF(!uvm_instance_scope_match);
-  `SVTEST_END(top_uvm_instance_scope_is_uvm_pkg)
+  `SVTEST_END
+// (recursive method, %m, i.e. scope, seems to be out of our control)
+//  `SVTEST(top_uvm_instance_scope_is_uvm_pkg_dot_test)
+//    bit uvm_instance_scope_match;
+//    uvm_object::__m_uvm_status_container.scope.set("test");
+//    $display(uvm_instance_scope());
+//    uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*test", uvm_instance_scope());
+//    `FAIL_IF(!uvm_instance_scope_match);
+//  `SVTEST_END
 
 
   //-----------------------------
@@ -182,21 +191,21 @@ module uvm_misc_unit_test;
   //-----------------------------
   `SVTEST(crc_polynomial_is_const)
     `FAIL_IF(UVM_STR_CRC_POLYNOMIAL != crc_polynomial);
-  `SVTEST_END(crc_polynomial_is_const)
+  `SVTEST_END
 
 
   `SVTEST(default_calc_crc_out)
     string s = "tst_obj::tst_inst";
 
     `FAIL_IF(uvm_oneway_hash(s) - uvm_global_random_seed != crc32('hffff_ffff, crc_polynomial, s));
-  `SVTEST_END(default_calc_crc_out)
+  `SVTEST_END
 
 
   `SVTEST(calc_crc_out_w_seed)
     string s = "tst_obj::tst_inst";
 
     `FAIL_IF(uvm_oneway_hash(s, 10) - 10 != crc32('hffff_ffff, crc_polynomial, s));
-  `SVTEST_END(calc_crc_out_w_seed)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -207,7 +216,7 @@ module uvm_misc_unit_test;
 
   `SVTEST(seed_table_empty_at_init)
     `FAIL_IF(uvm_random_seed_table_lookup.num() > 0);
-  `SVTEST_END(seed_table_empty_at_init)
+  `SVTEST_END
 
 
   `SVTEST(add_global_seed_table_entry)
@@ -218,7 +227,7 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(sm == null);
     `FAIL_IF(uvm_random_seed_table_lookup.num() != 1);
-  `SVTEST_END(add_global_seed_table_entry)
+  `SVTEST_END
 
 
   `SVTEST(add_inst_seed_table_entry)
@@ -229,7 +238,7 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(sm == null);
     `FAIL_IF(uvm_random_seed_table_lookup.num() != 1);
-  `SVTEST_END(add_inst_seed_table_entry)
+  `SVTEST_END
 
 
   `SVTEST(_1_entry_for_reseeded_seed_table_entry)
@@ -237,7 +246,7 @@ module uvm_misc_unit_test;
     void'(uvm_create_random_seed("tst_obj", "tst_inst"));
 
     `FAIL_IF(uvm_random_seed_table_lookup.num() != 1);
-  `SVTEST_END(_1_entry_for_reseeded_seed_table_entry)
+  `SVTEST_END
 
 
   `SVTEST(seed_table_hash_key_is_type_id)
@@ -250,7 +259,7 @@ module uvm_misc_unit_test;
 
     `FAIL_UNLESS_STR_EQUAL({uvm_instance_scope(),"tst_obj"}, key_act)
     `FAIL_IF(sm.seed_table.num() != 1);
-  `SVTEST_END(seed_table_hash_key_is_type_id)
+  `SVTEST_END
 
 
   `SVTEST(count_hash_key_is_type_id)
@@ -263,7 +272,7 @@ module uvm_misc_unit_test;
 
     `FAIL_UNLESS_STR_EQUAL({uvm_instance_scope(),"tst_obj"}, key_act);
     `FAIL_IF(sm.count.num() != 1);
-  `SVTEST_END(count_hash_key_is_type_id)
+  `SVTEST_END
 
 
   `SVTEST(count_incremented_for_each_reseed)
@@ -275,7 +284,7 @@ module uvm_misc_unit_test;
     cnt = sm.count[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(cnt != 4);
-  `SVTEST_END(count_incremented_for_each_reseed)
+  `SVTEST_END
 
 
   `SVTEST(seed_table_init_to_oneway_hash)
@@ -289,7 +298,7 @@ module uvm_misc_unit_test;
     act = sm.seed_table[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(act != exp);
-  `SVTEST_END(seed_table_init_to_oneway_hash)
+  `SVTEST_END
 
 
   `SVTEST(table_init_to_oneway_hash_plus1_for_reseed)
@@ -304,7 +313,7 @@ module uvm_misc_unit_test;
     act = sm.seed_table[{uvm_instance_scope(),"tst_obj"}];
 
     `FAIL_IF(act != exp);
-  `SVTEST_END(table_init_to_oneway_hash_plus1_for_reseed)
+  `SVTEST_END
 
 
   `SVTEST(count_incremented_for_each_reseed_with_multiple_tables)
@@ -321,7 +330,7 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(cnt0 != 3);
     `FAIL_IF(cnt1 != 5);
-  `SVTEST_END(count_incremented_for_each_reseed_with_multiple_tables)
+  `SVTEST_END
 
 
   `SVTEST(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
@@ -342,7 +351,7 @@ module uvm_misc_unit_test;
 
     `FAIL_IF(act0 != exp0);
     `FAIL_IF(act1 != exp1);
-  `SVTEST_END(table_init_to_oneway_hash_plus1_for_each_reseed_with_multiple_tables)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -354,7 +363,7 @@ module uvm_misc_unit_test;
     string s_exp = "<null>";
     test_uvm_object obj;
     `FAIL_IF(uvm_object_value_str(obj) != s_exp);
-  `SVTEST_END(uvm_object_value_str_is_null_when_null)
+  `SVTEST_END
 
 
   // FAILING TEST: BUT ONLY ON IUS. get_inst_id is way out to lunch.
@@ -366,7 +375,7 @@ module uvm_misc_unit_test;
 //   obj = new("");
 //
 //   `FAIL_IF(uvm_object_value_str(obj) != s_exp);
-// `SVTEST_END(uvm_object_value_str_returns_at_inst_id)
+// `SVTEST_END
 
   //---------------------------------------------------------------
   //---------------------------------------------------------------
@@ -383,14 +392,14 @@ module uvm_misc_unit_test;
   `SVTEST(uvm_leaf_scope_with_leaf)
     string name = "leaf";
     `FAIL_IF(uvm_leaf_scope(name) != name);
-  `SVTEST_END(uvm_leaf_scope_with_leaf)
+  `SVTEST_END
 
 
   `SVTEST(uvm_leaf_scope_with_branch_n_leaf)
     string name_in = "branch.leaf";
     string name_out = "leaf";
     `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
-  `SVTEST_END(uvm_leaf_scope_with_branch_n_leaf)
+  `SVTEST_END
 
 
   `UVM_LEAF_SCOPE_WITH_BRACKET_SEPARATOR(curly,"{","}")
@@ -414,7 +423,7 @@ module uvm_misc_unit_test;
     string name_in = "branch[{<(]}>).leaf[{<(]}>)";
     string name_out = "leaf[{<(]}>)";
     `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
-  `SVTEST_END(uvm_leaf_scope_ignores_other_possible_separators_with_default)
+  `SVTEST_END
 
 
   `SVTEST(uvm_leaf_scope_ignores_default_with_other_possible_separators)
@@ -422,7 +431,7 @@ module uvm_misc_unit_test;
     string name_out = "(.lea.f.(.l)(.e).)";
     byte separator = "(";
     `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
-  `SVTEST_END(uvm_leaf_scope_ignores_default_with_other_possible_separators)
+  `SVTEST_END
 
 
   // FAILING TEST - REPORTED
@@ -433,7 +442,7 @@ module uvm_misc_unit_test;
 //   string name_out = "leaf";
 //   byte separator = "&";
 //   `FAIL_IF(uvm_leaf_scope(name_in, separator) != name_out);
-// `SVTEST_END(uvm_leaf_scope_can_use_any_separator)
+// `SVTEST_END
 
 
   // FAILING TEST - REPORTED
@@ -441,14 +450,14 @@ module uvm_misc_unit_test;
   // null string results in 'for (pos=-1; p!=0; --pos) begin'
 // `SVTEST(uvm_leaf_scope_can_handle_empty_full_name)
 //   `FAIL_IF(uvm_leaf_scope(_NULL_STRING) != _NULL_STRING);
-// `SVTEST_END(uvm_leaf_scope_can_handle_empty_full_name)
+// `SVTEST_END
 
 
   `SVTEST(uvm_leaf_scope_can_return_null_leaf)
     string name_in = "branch.";
     string name_out = "";
     `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
-  `SVTEST_END(uvm_leaf_scope_can_return_null_leaf)
+  `SVTEST_END
 
 
   // FAILING TEST - REPORTED
@@ -460,7 +469,7 @@ module uvm_misc_unit_test;
 //   string name_in = ".";
 //   string name_out = "";
 //   `FAIL_IF(uvm_leaf_scope(name_in) != name_out);
-// `SVTEST_END(uvm_leaf_scope_can_return_null_leaf_without_branch)
+// `SVTEST_END
 
 
   //-----------------------------
@@ -480,7 +489,7 @@ module uvm_misc_unit_test;
 //   string s_exp = "-1";
 //   string s_act = uvm_vector_to_string ('hf, 4, UVM_DEC, "j");
 //   `FAIL_IF(s_act != s_exp);
-// `SVTEST_END(signed_vector_to_string)
+// `SVTEST_END
 
   `UVM_VECTOR_TO_STRING(bin_vector_to_string,b11001,121,5,UVM_BIN,b);
   `UVM_VECTOR_TO_STRING(oct_vector_to_string,o1037,1567,10,UVM_OCT,o);
@@ -508,14 +517,14 @@ module uvm_misc_unit_test;
   `SVTEST(get_array_index_int_returns_minus1_for_char_lt_0)
     string s_in = "double_trouble[/]";
     `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != -1);
-  `SVTEST_END(get_array_index_int_returns_minus1_for_char_lt_0)
+  `SVTEST_END
 
   `UVM_GET_ARRAY_INDEX_INT(returns_minus1_for_char_gt_9,double_trouble[:],-1)
 
   `SVTEST(WARNING_get_array_index_int_returns_0_for_incomplete_array_string)
     string s_in = "99]";
     `FAIL_IF(uvm_get_array_index_int(s_in, get_array_index_is_wildcard) != 0);
-  `SVTEST_END(WARNING_get_array_index_int_returns_0_for_incomplete_array_string)
+  `SVTEST_END
 
   `UVM_GET_ARRAY_INDEX_INT(returns_returns_0_for_wildcard_index_WARNING,double_trouble[?],0)
 
@@ -551,7 +560,7 @@ module uvm_misc_unit_test;
 //   string s_in = "[]";
 //   uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
 //   `FAIL_IF(get_array_index_is_wildcard != 0);
-// `SVTEST_END(get_array_index_no_string_nothing_in_brackets_is_not_wildcart)
+// `SVTEST_END
 
 
   // FAILING TEST
@@ -562,7 +571,7 @@ module uvm_misc_unit_test;
 //   string s_in = "double_trouble]";
 //   uvm_get_array_index_int(s_in, get_array_index_is_wildcard);
 //   `FAIL_IF(get_array_index_is_wildcard != 0);
-// `SVTEST_END(incomplete_strings_are_not_wild)
+// `SVTEST_END
 
   //---------------------------------
   //---------------------------------
@@ -576,8 +585,8 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_STRING(returns_N_for_idx_with_multi_digit,double_trouble[9998],9998)
   `UVM_GET_ARRAY_INDEX_STRING(returns_lower_boundary_zero,double_trouble[0],0)
   `UVM_GET_ARRAY_INDEX_STRING(returns_upper_boundary_nine,double_trouble[9],9)
- 
- 
+
+
   // FAILING TEST
   // uvm_misc.svh:line 567
   // there's no effort here to limit to numeric indecies like is done in the
@@ -586,9 +595,9 @@ module uvm_misc_unit_test;
 //   string s_in = "double_trouble[/]";
 //   string s_exp = "";
 //   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
-// `SVTEST_END(get_array_index_string_returns_null_string_for_char_lt_0)
- 
- 
+// `SVTEST_END
+
+
   // FAILING TEST
   // uvm_misc.svh:line 567
   // there's no effort here to limit to numeric indecies like is done in the
@@ -597,12 +606,12 @@ module uvm_misc_unit_test;
 //   string s_in = "double_trouble[:]";
 //   string s_exp = "";
 //   `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != s_exp);
-// `SVTEST_END(get_array_index_string_returns_null_string_for_char_gt_9)
+// `SVTEST_END
 
   `SVTEST(get_array_index_string_returns_null_string_for_incomplete_array_string)
     string s_in = "99]";
     `FAIL_IF(uvm_get_array_index_string(s_in, get_array_index_is_wildcard) != _NULL_STRING);
-  `SVTEST_END(get_array_index_string_returns_null_string_for_incomplete_array_string)
+  `SVTEST_END
 
   `UVM_GET_ARRAY_INDEX_STRING_NULL_IDX(returns_null_string_for_wildcard_index,double_trouble[?])
 
@@ -634,7 +643,7 @@ module uvm_misc_unit_test;
 //   string s_in = "[]";
 //   uvm_get_array_index_string(s_in, get_array_index_is_wildcard);
 //   `FAIL_IF(get_array_index_is_wildcard != 0);
-// `SVTEST_END(get_array_index_string_no_string_nothing_in_brackets_is_not_wildcart)
+// `SVTEST_END
 
 
   // FAILING TEST
@@ -645,7 +654,7 @@ module uvm_misc_unit_test;
 //   string s_in = "double_trouble]";
 //   uvm_get_array_index_string(s_in, get_array_index_is_wildcard);
 //   `FAIL_IF(get_array_index_is_wildcard != 0);
-// `SVTEST_END(get_array_index_string_incomplete_strings_are_not_wild)
+// `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -656,19 +665,19 @@ module uvm_misc_unit_test;
   `SVTEST(is_array_returns_true_for_array_select)
     string s_in = "a[o]";
     `FAIL_IF(uvm_is_array(s_in) != 1);
-  `SVTEST_END(is_array_returns_true_for_array_select)
+  `SVTEST_END
 
 
   `SVTEST(is_array_returns_false_for_no_array)
     string s_in = "x";
     `FAIL_IF(uvm_is_array(s_in) != 0);
-  `SVTEST_END(is_array_returns_false_for_no_array)
+  `SVTEST_END
 
 
   `SVTEST(is_array_returns_false_for_null_string)
     string s_in = "";
     `FAIL_IF(uvm_is_array(s_in) != 0);
-  `SVTEST_END(is_array_returns_false_for_null_string)
+  `SVTEST_END
 
 
   // FAILING TEST
@@ -677,7 +686,7 @@ module uvm_misc_unit_test;
 // `SVTEST(is_array_square_bracket_is_not_array)
 //   string s_in = "]";
 //   `FAIL_IF(uvm_is_array(s_in) != 0);
-// `SVTEST_END(is_array_square_bracket_is_not_array)
+// `SVTEST_END
 
 
   // FAILING TEST
@@ -686,7 +695,7 @@ module uvm_misc_unit_test;
 // `SVTEST(is_array_only_brackets_is_not_array)
 //   string s_in = "[]";
 //   `FAIL_IF(uvm_is_array(s_in) != 0);
-// `SVTEST_END(is_array_only_brackets_is_not_array)
+// `SVTEST_END
 
 
   // FAILING TEST
@@ -695,7 +704,7 @@ module uvm_misc_unit_test;
 // `SVTEST(is_array_only_index_is_not_array)
 //   string s_in = "[x]";
 //   `FAIL_IF(uvm_is_array(s_in) != 0);
-// `SVTEST_END(is_array_only_index_is_not_array)
+// `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -706,13 +715,13 @@ module uvm_misc_unit_test;
   `SVTEST(WARNING_has_wildcard_returns_true_for_any_regex)
     string s_in = "/silly billy/";
     `FAIL_IF(uvm_has_wildcard(s_in) != 1);
-  `SVTEST_END(WARNING_has_wildcard_returns_true_for_any_regex)
+  `SVTEST_END
 
 
   `SVTEST(WARNING_has_wildcard_returns_true_for_empty_regex)
     string s_in = "//";
     `FAIL_IF(uvm_has_wildcard(s_in) != 1);
-  `SVTEST_END(WARNING_has_wildcard_returns_true_for_empty_regex)
+  `SVTEST_END
 
 
   `HAS_WILDCARD_RETURNS(true_for_star_at_end_of_string,*junk,1);
@@ -731,19 +740,19 @@ module uvm_misc_unit_test;
   `SVTEST(has_wildcard_returns_false_for_all_other_puncuation)
     string s_in = "`~!@#$%^&()-_=[]{}\|;:'\",<.>//";
     `FAIL_IF(uvm_has_wildcard(s_in) != 0);
-  `SVTEST_END(has_wildcard_returns_false_for_all_other_puncuation)
+  `SVTEST_END
 
 
   `SVTEST(has_wildcard_returns_false_for_alpha_numeric)
     string s_in = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
     `FAIL_IF(uvm_has_wildcard(s_in) != 0);
-  `SVTEST_END(has_wildcard_returns_false_for_alpha_numeric)
+  `SVTEST_END
 
 
   `SVTEST(has_wildcard_returns_false_for_null_string)
     string s_in = "";
     `FAIL_IF(uvm_has_wildcard(s_in) != 0);
-  `SVTEST_END(has_wildcard_returns_false_for_null_string)
+  `SVTEST_END
 
   `SVUNIT_TESTS_END
 

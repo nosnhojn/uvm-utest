@@ -1,6 +1,7 @@
 `include "svunit_defines.svh"
 `include "test_defines.sv"
 `include "test_uvm_object.sv"
+`include "test_uvm_object_virtuals.sv"
 `include "mock_uvm_printer.sv"
 `include "mock_uvm_packer.svh"
 `include "mock_uvm_comparer.svh"
@@ -16,11 +17,12 @@ module uvm_object_unit_test;
 
 
   //===================================
-  // This is the UUT that we're 
+  // This is the UUT that we're
   // running the Unit Tests on
   //===================================
-  test_uvm_object   uut;
-  test_uvm_object_wrapper uut_wrapper;
+  test_uvm_object           uut;
+  test_uvm_object_wrapper   uut_wrapper;
+  test_uvm_object_virtuals  uut_virt;
 
   mock_uvm_printer  mock_printer;
   mock_uvm_comparer comparer;
@@ -30,7 +32,8 @@ module uvm_object_unit_test;
   byte unsigned     bytestream[];
   int  unsigned     intstream[];
   uvm_bitstream_t   uvm_bitstream;
-  test_uvm_object   dummy_object;
+  uvm_object        dummy_object;
+  test_uvm_object   dummy_test_object;
   string            dummy_str;
 
   //===================================
@@ -54,11 +57,14 @@ module uvm_object_unit_test;
     uut.use_uvm_seeding = 1;
     uut.fake_test_type_name = 0;
 
+    uut_virt = new("object_virt");
+    dummy_object = uut_virt;
+
     mock_printer = new;
     comparer = new;
     packer = new;
 
-    dummy_object = new("dummy");
+    dummy_test_object = new("dummy");
     dummy_str = "dummy";
 
     uvm_report_mock::setup();
@@ -66,14 +72,14 @@ module uvm_object_unit_test;
 
 
   //===================================
-  // Here we deconstruct anything we 
+  // Here we deconstruct anything we
   // need after running the Unit Tests
   //===================================
   task teardown();
     svunit_ut.teardown();
     bitstream.delete();
     uvm_bitstream = '{default:'0};
-    dummy_object = null;
+    dummy_test_object = null;
     dummy_str = "";
     while (uvm_object::__m_uvm_status_container.scope.depth() > 0)
       void'(uvm_object::__m_uvm_status_container.scope.up());
@@ -91,14 +97,140 @@ module uvm_object_unit_test;
   //
   // Each individual test must be
   // defined between `SVTEST(_NAME_)
-  // `SVTEST_END(_NAME_)
+  // `SVTEST_END
   //
   // i.e.
   //   `SVTEST(mytest)
   //     <test code>
-  //   `SVTEST_END(mytest)
+  //   `SVTEST_END
   //===================================
   `SVUNIT_TESTS_BEGIN
+
+
+  //-----------------------------
+  //-----------------------------
+  // public static members
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(use_uvm_seeding_default_value)
+    `FAIL_IF(uut.use_uvm_seeding != 1)
+  `SVTEST_END
+
+
+  //-----------------------------
+  //-----------------------------
+  // virtual interfaces
+  //-----------------------------
+  //-----------------------------
+  `SVTEST(virt_set_name)
+    dummy_object.set_name("");
+    `FAIL_UNLESS(uut_virt.set_name_called)
+  `SVTEST_END
+
+  `SVTEST(virt_get_name)
+    void'(dummy_object.get_name());
+    `FAIL_UNLESS(uut_virt.get_name_called)
+  `SVTEST_END
+
+  `SVTEST(virt_get_full_name)
+    void'(dummy_object.get_full_name());
+    `FAIL_UNLESS(uut_virt.get_full_name_called)
+  `SVTEST_END
+
+  `SVTEST(virt_get_inst_id)
+    void'(dummy_object.get_inst_id());
+    `FAIL_UNLESS(uut_virt.get_inst_id_called)
+  `SVTEST_END
+
+  `SVTEST(virt_get_object_type)
+    void'(dummy_object.get_object_type());
+    `FAIL_UNLESS(uut_virt.get_object_type_called)
+  `SVTEST_END
+
+  `SVTEST(virt_get_type_name)
+    void'(dummy_object.get_type_name());
+    `FAIL_UNLESS(uut_virt.get_type_name_called)
+  `SVTEST_END
+
+  `SVTEST(virt_create)
+    void'(dummy_object.create());
+    `FAIL_UNLESS(uut_virt.create_called)
+  `SVTEST_END
+
+  `SVTEST(virt_clone)
+    void'(dummy_object.clone());
+    `FAIL_UNLESS(uut_virt.clone_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_print)
+    dummy_object.do_print(null);
+    `FAIL_UNLESS(uut_virt.do_print_called)
+  `SVTEST_END
+
+  `SVTEST(virt_convert2string)
+    void'(dummy_object.convert2string());
+    `FAIL_UNLESS(uut_virt.convert2string_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_record)
+    dummy_object.do_record(null);
+    `FAIL_UNLESS(uut_virt.do_record_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_copy)
+    dummy_object.do_copy(null);
+    `FAIL_UNLESS(uut_virt.do_copy_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_compare)
+    void'(dummy_object.do_compare(null,null));
+    `FAIL_UNLESS(uut_virt.do_compare_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_pack)
+    dummy_object.do_pack(null);
+    `FAIL_UNLESS(uut_virt.do_pack_called)
+  `SVTEST_END
+
+  `SVTEST(virt_do_unpack)
+    dummy_object.do_unpack(null);
+    `FAIL_UNLESS(uut_virt.do_unpack_called)
+  `SVTEST_END
+
+  `SVTEST(virt_set_int_local)
+    dummy_object.set_int_local("",uvm_bitstream);
+    `FAIL_UNLESS(uut_virt.set_int_local_called)
+  `SVTEST_END
+
+  `SVTEST(virt_set_string_local)
+    dummy_object.set_string_local("","");
+    `FAIL_UNLESS(uut_virt.set_string_local_called)
+  `SVTEST_END
+
+  `SVTEST(virt_set_object_local)
+    dummy_object.set_object_local("",null);
+    `FAIL_UNLESS(uut_virt.set_object_local_called)
+  `SVTEST_END
+
+  `SVTEST(virt___m_uvm_field_automation)
+    dummy_object.__m_uvm_field_automation(null,0,"");
+    `FAIL_UNLESS(uut_virt.__m_uvm_field_automation_called)
+  `SVTEST_END
+
+// protected - not accessible
+//  `SVTEST(virt_m_get_report_object)
+//    void'(dummy_object.m_get_report_object());
+//    `FAIL_UNLESS(uut_virt.m_get_report_object_called)
+//  `SVTEST_END
+
+  `SVTEST(static_get_inst_count)
+    `FAIL_IF(uvm_object::get_inst_count() == 0)
+  `SVTEST_END
+
+  `SVTEST(static_get_type)
+    uvm_report_mock::expect_error("","");
+    `FAIL_IF(uvm_object::get_type() != null)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -115,7 +247,7 @@ module uvm_object_unit_test;
     repeat (new_test_objs) other = new("");
 
     `FAIL_IF(uut.get_inst_count() != current_inst_count + new_test_objs);
-  `SVTEST_END(inst_cnt_is_static)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -134,7 +266,7 @@ module uvm_object_unit_test;
     void'(other.randomize());
 
     `FAIL_IF(uut.rand_property == other.rand_property);
-  `SVTEST_END(enabled_obj_is_reseeded)
+  `SVTEST_END
 
 
   `SVTEST(disabled_obj_is_not_reseeded)
@@ -148,7 +280,7 @@ module uvm_object_unit_test;
     void'(other.randomize());
 
     `FAIL_IF(uut.rand_property != other.rand_property);
-  `SVTEST_END(disabled_obj_is_not_reseeded)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -160,8 +292,8 @@ module uvm_object_unit_test;
   `SVTEST(override_with_setname)
     string n = "other_name";
     uut.set_name(n);
-    `FAIL_IF(uut.get_name() != n); 
-  `SVTEST_END(override_with_setname)
+    `FAIL_IF(uut.get_name() != n);
+  `SVTEST_END
 
 
   //-----------------------------
@@ -172,8 +304,8 @@ module uvm_object_unit_test;
 
   `SVTEST(getname_set_by_constructor)
     string n = "object_name";
-    `FAIL_IF(uut.get_name() != n); 
-  `SVTEST_END(getname_set_by_constructor)
+    `FAIL_IF(uut.get_name() != n);
+  `SVTEST_END
 
 
   //-----------------------------
@@ -183,8 +315,8 @@ module uvm_object_unit_test;
   //-----------------------------
 
   `SVTEST(get_full_name_returns_get_name)
-    `FAIL_IF(uut.get_name() != uut.get_full_name()); 
-  `SVTEST_END(get_full_name_returns_get_name)
+    `FAIL_IF(uut.get_name() != uut.get_full_name());
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -200,11 +332,11 @@ module uvm_object_unit_test;
   `SVTEST(inst_id_initialized_to_inst_count)
     test_uvm_object other;
     int current_inst_count = uut.get_inst_count();
- 
+
     other = new("");
- 
+
     `FAIL_IF(other.get_inst_id() != current_inst_count);
-  `SVTEST_END(inst_id_initialized_to_inst_count)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -219,7 +351,7 @@ module uvm_object_unit_test;
     other = new("");
 
     `FAIL_IF(other.get_inst_count() != 100);
-  `SVTEST_END(inst_count_incremented_in_constructer)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -230,7 +362,7 @@ module uvm_object_unit_test;
 // Can't do anything here unless the UVM_ERROR
 // macro is used instead of the uvm_report_error
 // `SVTEST(get_type_is_an_error)
-// `SVTEST_END(get_type_is_an_error)
+// `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -239,15 +371,20 @@ module uvm_object_unit_test;
   //-----------------------------
 
   `SVTEST(get_object_type_returns_null)
-    // need something in the wrapper LOSER
-    `FAIL_IF(uut.get_object_type() != null); 
-  `SVTEST_END(get_object_type_returns_null)
+    `FAIL_IF(uut.get_object_type() != null);
+  `SVTEST_END
+
+//  `SVTEST(get_object_type_returns_null)
+//    // need something in the wrapper LOSER (???)
+//    uut.fake_test_type_name = 1;
+//    `FAIL_IF(uut.get_object_type() != null);
+//  `SVTEST_END
 
   // relies on correct implementation of factory (not verified as of here/now)
   `SVTEST(get_object_type_returns_type)
     uut.fake_test_type_name = 1;
-    `FAIL_IF(uut.get_object_type() != uut_wrapper); 
-  `SVTEST_END(get_object_type_returns_type)
+    `FAIL_IF(uut.get_object_type() != uut_wrapper);
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -257,8 +394,8 @@ module uvm_object_unit_test;
 
   `SVTEST(get_type_name_returns_unknown)
     string type_name = "<unknown>";
-    `FAIL_IF(uut.get_type_name() != type_name); 
-  `SVTEST_END(get_type_name_returns_unknown)
+    `FAIL_IF(uut.get_type_name() != type_name);
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -268,7 +405,7 @@ module uvm_object_unit_test;
 
   `SVTEST(create_returns_null)
     `FAIL_IF(uut.create() != null);
-  `SVTEST_END(create_returns_null)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -278,7 +415,7 @@ module uvm_object_unit_test;
 
   `SVTEST(clone_returns_null)
     `FAIL_IF(uut.clone() != null);
-  `SVTEST_END(clone_returns_null)
+  `SVTEST_END
 
 
   `SVTEST(clone_asserts_warning_for_null_object)
@@ -286,15 +423,15 @@ module uvm_object_unit_test;
                                     { "The create method failed for " , uut.get_name() , ",  object cannot be cloned" }
                                    );
     void'(uut.clone());
- 
+
     `FAIL_IF(!uvm_report_mock::verify_complete());
-  `SVTEST_END(clone_asserts_warning_for_null_object)
+  `SVTEST_END
 
 
   `SVTEST(clone_is_created_with_get_name)
     void'(uut.clone());
     `FAIL_IF(uut.create_name != uut.get_name());
-  `SVTEST_END(clone_is_created_with_get_name)
+  `SVTEST_END
 
 
   // copy isn't virtual so we're going to need to find a
@@ -305,7 +442,7 @@ module uvm_object_unit_test;
     $cast(o, uut.clone());
     `FAIL_IF(o.get_name() != uut.fake_create_name())
     `FAIL_IF(o.do_copy_copy == null)
-  `SVTEST_END(clone_returns_a_new_copy)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -320,7 +457,7 @@ module uvm_object_unit_test;
   `SVTEST(print_destination_is_knobs_mcd)
     string s_act = print_test_simple_sprint_emit(uut, mock_printer);
     `FAIL_IF(s_act != mock_printer.emit());
-  `SVTEST_END(print_destination_is_knobs_mcd)
+  `SVTEST_END
 
 
   `SVTEST(print_assign_default_printer_if_null)
@@ -330,14 +467,14 @@ module uvm_object_unit_test;
     s_act = print_test_simple_sprint_emit(uut, null);
 
     `FAIL_IF(s_act != mock_printer.emit());
-  `SVTEST_END(print_assign_default_printer_if_null)
+  `SVTEST_END
 
 
   // can't check the null printer error b/c the fwrite
   // is called regardless of null (i.e. we can check the message
   // but we die with a null object access right after)
   // `SVTEST(print_with_default_null_printer_is_error)
-  // `SVTEST_END(print_with_default_null_printer_is_error)
+  // `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -350,7 +487,7 @@ module uvm_object_unit_test;
     string s_exp = { uut.get_name() , "::" , uut.get_inst_id };
     mock_printer.set_istop(1);
     `FAIL_IF(uut.sprint(mock_printer) != s_exp);
-  `SVTEST_END(sprint_returns_m_string)
+  `SVTEST_END
 
 
   `SVTEST(sprint_uses_default_scope_separator)
@@ -358,7 +495,7 @@ module uvm_object_unit_test;
     mock_printer.set_istop(1);
     void'(uut.sprint(mock_printer));
     `FAIL_IF(mock_printer.get_scope_separator() != _DOT);
-  `SVTEST_END(sprint_uses_default_scope_separator)
+  `SVTEST_END
 
 
   `SVTEST(sprint_returns_emit_if_printer_returns_empty_string)
@@ -366,7 +503,7 @@ module uvm_object_unit_test;
     mock_printer.override_m_string(1);
     mock_printer.set_m_string("");
     `FAIL_IF(uut.sprint(mock_printer) != mock_printer.emit());
-  `SVTEST_END(sprint_returns_emit_if_printer_returns_empty_string)
+  `SVTEST_END
 
 
   `SVTEST(sprint_assigns_the_status_container_printer)
@@ -375,14 +512,14 @@ module uvm_object_unit_test;
     void'(uut.sprint(mock_printer));
     `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
     `FAIL_IF(uut.__m_uvm_status_container.printer == null);
-  `SVTEST_END(sprint_assigns_the_status_container_printer)
+  `SVTEST_END
 
 
   `SVTEST(sprint_calls_field_automation)
     mock_printer.set_istop(0);
     void'(uut.sprint(mock_printer));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PRINT, _NULL_STRING));
-  `SVTEST_END(sprint_calls_field_automation)
+  `SVTEST_END
 
 
   `SVTEST(sprint_invokes_do_print_when_not_top)
@@ -390,13 +527,13 @@ module uvm_object_unit_test;
     void'(uut.sprint(mock_printer));
     `FAIL_IF(!$cast(mock_printer, uut.do_print_printer));
     `FAIL_IF(uut.do_print_printer == null);
-  `SVTEST_END(sprint_invokes_do_print_when_not_top)
+  `SVTEST_END
 
 
   `SVTEST(sprint_returns_null_string_when_not_top)
     mock_printer.set_istop(0);
     `FAIL_IF(uut.sprint(mock_printer) != _NULL_STRING);
-  `SVTEST_END(sprint_returns_null_string_when_not_top)
+  `SVTEST_END
 
 
   `SVTEST(sprint_assigns_default_printer_if_null)
@@ -405,7 +542,7 @@ module uvm_object_unit_test;
     void'(uut.sprint());
     `FAIL_IF(!$cast(mock_printer, uut.__m_uvm_status_container.printer));
     `FAIL_IF(uut.__m_uvm_status_container.printer == null);
-  `SVTEST_END(sprint_assigns_default_printer_if_null)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -416,7 +553,7 @@ module uvm_object_unit_test;
     uvm_printer p;
     uut.do_print(p);
     `FAIL_IF(0);
-  `SVTEST_END(do_print_is_empty)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -425,7 +562,7 @@ module uvm_object_unit_test;
   //-----------------------------
   `SVTEST(convert2string_returns_empty_string)
     `FAIL_IF(uut.convert2string() != _NULL_STRING);
-  `SVTEST_END(convert2string_returns_empty_string)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -436,14 +573,14 @@ module uvm_object_unit_test;
     uvm_default_recorder.tr_handle = 0;
     uut.record();
     `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
-  `SVTEST_END(record_default_recorder_tr_handle_null)
+  `SVTEST_END
 
   `SVTEST(record_recorder_tr_handle_null)
     uvm_recorder dummy_rec = new("rec");
     dummy_rec.tr_handle = 0;
     uut.record(dummy_rec);
     `FAIL_IF(uut.__m_uvm_status_container.recorder != null)
-  `SVTEST_END(record_recorder_tr_handle_null)
+  `SVTEST_END
 
   `SVTEST(record_recorder_tr_handle_not_null)
     uvm_recorder dummy_rec = new("rec");
@@ -451,7 +588,7 @@ module uvm_object_unit_test;
     uut.record(dummy_rec);
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_RECORD, _NULL_STRING));
     `FAIL_IF(dummy_rec.tr_handle != 0);
-  `SVTEST_END(record_recorder_tr_handle_not_null)
+  `SVTEST_END
 
   `SVTEST(record_recorder_recording_depth_not_null)
     uvm_recorder dummy_rec = new("rec");
@@ -460,7 +597,7 @@ module uvm_object_unit_test;
     uut.record(dummy_rec);
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_RECORD, _NULL_STRING));
     `FAIL_IF(dummy_rec.tr_handle != 1);
-  `SVTEST_END(record_recorder_recording_depth_not_null)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -471,7 +608,7 @@ module uvm_object_unit_test;
     uvm_recorder dummy_rec = new("rec");
     uut.do_record(dummy_rec);
     `FAIL_IF(0)
-  `SVTEST_END(do_record_is_empty)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -483,9 +620,9 @@ module uvm_object_unit_test;
     uvm_report_mock::expect_warning("NULLCP", "A null object was supplied to copy; copy is ignored");
     void'(uut.copy(rhs));
     `FAIL_IF(!uvm_report_mock::verify_complete());
-  `SVTEST_END(copy_rhs_null)
-  
-  
+  `SVTEST_END
+
+
   // WARNING
   // We decided to skip the cycle checking code as
   // this seems to refer to the time when functions
@@ -497,7 +634,7 @@ module uvm_object_unit_test;
     test_uvm_object rhs=new("name");
     void'(uut.copy(rhs));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(rhs, UVM_COPY, _NULL_STRING));
-  `SVTEST_END(copy_rhs_not_null_field_automation)
+  `SVTEST_END
 
 
   `SVTEST(copy_rhs_not_null_do_copy)
@@ -505,8 +642,8 @@ module uvm_object_unit_test;
     void'(uut.copy(rhs));
     `FAIL_IF(!$cast(rhs, uut.do_copy_copy));
     `FAIL_IF(uut.do_copy_copy == null);
-  `SVTEST_END(copy_rhs_not_null_do_copy)
-  
+  `SVTEST_END
+
 
   //-----------------------------
   //-----------------------------
@@ -517,7 +654,7 @@ module uvm_object_unit_test;
     test_uvm_object o;
     uut.do_copy(o);
     `FAIL_IF(0);
-  `SVTEST_END(do_copy_is_empty)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -525,31 +662,31 @@ module uvm_object_unit_test;
   //-----------------------------
   //-----------------------------
   `SVTEST(compare_status_container_set_with_default_comparer)
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.__m_uvm_status_container.comparer != uvm_default_comparer)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_status_container_set_with_custom_comparer)
-    void'(uut.compare(dummy_object, comparer));
+    void'(uut.compare(dummy_test_object, comparer));
 
     `FAIL_IF(uut.__m_uvm_status_container.comparer != comparer)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_calls_comparer_print_msg_object_when_rhs_eq_null)
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS(uut.comparer_print_msg_object_was_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_call_comparer_print_msg_object_when_rhs_ne_null)
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.comparer_print_msg_object_was_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_resets_comparer_state_when_empty_scope_stack)
@@ -558,7 +695,7 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS(uut.temp_comparer_state_latched_as(1, _NULL_STRING, uut.__m_uvm_status_container.scope, 0));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_pushes_obj_name_to_scope_stack_when_empty_scope_stack)
@@ -567,7 +704,7 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, uut.get_name())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_pushes_object_to_scope_stack_when_empty_scope_stack)
@@ -577,7 +714,7 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, "<object>")
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_reset_comparer_state_when_scope_stack_not_empty)
@@ -593,7 +730,7 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS(uut.temp_comparer_state_latched_as(2, miscompares, null, 1));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_leaves_scope_stack_alone_when_scope_stack_not_empty)
@@ -603,137 +740,137 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_UNLESS_STR_EQUAL(uut.latched_scope_stack_get, "not empty")
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_returns_false_for_true_cycle_check)
     inject_compare_map_cycle_check_failure();
 
-    `FAIL_IF(uut.compare(dummy_object, null));
-  `SVTEST_END()
+    `FAIL_IF(uut.compare(dummy_test_object, null));
+  `SVTEST_END
 
 
   `SVTEST(compare_calls_print_msg_object_for_cycle_check_when_rhs_is_this)
     inject_compare_map_cycle_check_failure();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.comparer_print_msg_object_was_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_call_print_msg_object_for_cycle_check_when_rhs_is_not_this)
-    inject_compare_map_cycle_check_failure(dummy_object);
+    inject_compare_map_cycle_check_failure(dummy_test_object);
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_UNLESS(uut.comparer_print_msg_object_was_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_checks_type_when_configured_to_check_type)
     uvm_default_comparer.check_type = 1;
-    dummy_object.fake_test_type_name = 1;
+    dummy_test_object.fake_test_type_name = 1;
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
-    `FAIL_UNLESS_STR_EQUAL(uvm_default_comparer.miscompares, comparer_print_msg(uut, dummy_object));
-  `SVTEST_END()
+    `FAIL_UNLESS_STR_EQUAL(uvm_default_comparer.miscompares, comparer_print_msg(uut, dummy_test_object));
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_check_type_when_cycle_check)
     inject_compare_map_cycle_check_failure();
     cause_type_mismatch_with_dummy();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_UNLESS_STR_EQUAL(uvm_default_comparer.miscompares, _NULL_STRING);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_calls_field_automation)
-    void'(uut.compare(dummy_object, null));
-    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(dummy_object, UVM_COMPARE, _NULL_STRING));
-  `SVTEST_END()
+    void'(uut.compare(dummy_test_object, null));
+    `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(dummy_test_object, UVM_COMPARE, _NULL_STRING));
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_call_field_automation_when_cycle_check)
     inject_compare_map_cycle_check_failure();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.__m_uvm_field_automation_called);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_calls_do_compare)
-    void'(uut.compare(dummy_object, comparer));
+    void'(uut.compare(dummy_test_object, comparer));
 
-    `FAIL_UNLESS(uut.do_compare_was_called_with(dummy_object, comparer));
-  `SVTEST_END()
+    `FAIL_UNLESS(uut.do_compare_was_called_with(dummy_test_object, comparer));
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_call_do_compare_when_cycle_check)
     inject_compare_map_cycle_check_failure();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.do_compare_called);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_adds_rhs_to_compare_map)
     uvm_default_comparer.compare_map.clear();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
-    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_object) == null);
-  `SVTEST_END()
+    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_test_object) == null);
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_add_rhs_to_compare_map_when_cycle_check)
     inject_compare_map_cycle_check_failure();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
-    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_object) == null);
-  `SVTEST_END()
+    `FAIL_IF(uvm_default_comparer.compare_map.get(dummy_test_object) == null);
+  `SVTEST_END
 
 
   `SVTEST(compare_exits_with_no_change_to_scope)
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 0);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_cleans_up_scope_stack_with_depth_1)
     uut.__m_uvm_status_container.scope.down("not empty");
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 0);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_ignores_scope_stack_with_depth_ge_2)
     uut.__m_uvm_status_container.scope.down("not empty");
     uut.__m_uvm_status_container.scope.down("really not empty");
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_IF(uut.__m_uvm_status_container.scope.depth() != 2);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_calls_print_rollup_when_rhs_ne_null)
     uvm_default_comparer.sev = UVM_WARNING;
     cause_type_mismatch_with_dummy();
 
-    void'(uut.compare(dummy_object, null));
+    void'(uut.compare(dummy_test_object, null));
 
     `FAIL_UNLESS(print_rollup_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_doesnt_call_print_rollup_when_rhs_eq_null)
@@ -743,23 +880,23 @@ module uvm_object_unit_test;
     void'(uut.compare(null, null));
 
     `FAIL_IF(print_rollup_called());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_returns_true_for_match)
-    `FAIL_UNLESS(uut.compare(dummy_object, null));
-  `SVTEST_END()
+    `FAIL_UNLESS(uut.compare(dummy_test_object, null));
+  `SVTEST_END
 
 
   `SVTEST(compare_returns_false_for_null)
     `FAIL_IF(uut.compare(null, null));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(compare_returns_do_compare)
     uut.fake_do_compare = 1;
-    `FAIL_IF(uut.compare(dummy_object, null));
-  `SVTEST_END()
+    `FAIL_IF(uut.compare(dummy_test_object, null));
+  `SVTEST_END
 
 
   //-----------------------------
@@ -770,7 +907,7 @@ module uvm_object_unit_test;
 
   `SVTEST(do_compare_returns_true)
     `FAIL_IF(uut.do_compare(null, null) != 1);
-  `SVTEST_END(do_compare_returns_true)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -782,13 +919,13 @@ module uvm_object_unit_test;
   `SVTEST(m_pack_use_default_packer)
     void'(uut.pack(bitstream, null));
     `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
-  `SVTEST_END(m_pack_use_default_packer)
+  `SVTEST_END
 
 
   `SVTEST(m_pack_custom_packer)
     void'(uut.pack(bitstream, packer));
     `FAIL_IF(uut.__m_uvm_status_container.packer != packer)
-  `SVTEST_END(m_pack_custom_packer)
+  `SVTEST_END
 
 
   `SVTEST(m_pack_packer_is_initialized)
@@ -796,20 +933,20 @@ module uvm_object_unit_test;
     `FAIL_IF(uvm_default_packer.count != 0);
     `FAIL_IF(uvm_default_packer.m_bits != 0);
     `FAIL_IF(uvm_default_packer.m_packed_size != 0);
-  `SVTEST_END(m_pack_packer_is_initialized)
+  `SVTEST_END
 
 
   `SVTEST(m_pack_field_automation)
     void'(uut.pack(bitstream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
-  `SVTEST_END(m_pack_field_automation)
+  `SVTEST_END
 
 
   `SVTEST(m_pack_do_pack)
     uvm_default_packer = packer;
     void'(uut.pack(bitstream, null));
     `FAIL_IF(packer != uut.do_pack_pack)
-  `SVTEST_END(m_pack_do_pack)
+  `SVTEST_END
 
 
   `SVTEST(m_pack_packer_scope)
@@ -817,7 +954,7 @@ module uvm_object_unit_test;
     packer.scope.down(myscope);
     void'(uut.pack(bitstream, packer));
     `FAIL_IF(packer.scope.get() != myscope);
-  `SVTEST_END(m_pack_packer_scope)
+  `SVTEST_END
 
 
   // NOTE we are not interesting into testing the uvm_packer
@@ -827,7 +964,7 @@ module uvm_object_unit_test;
     int rval = uut.pack(bitstream, packer);
     `FAIL_IF($size(bitstream) != 8);
     `FAIL_IF(bitstream != '{8{1'b1}});
-  `SVTEST_END(pack_bitstream)
+  `SVTEST_END
 
 
   `SVTEST(pack_returns_size_of_bitstream)
@@ -836,7 +973,7 @@ module uvm_object_unit_test;
       int rval = uut.pack(bitstream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END(pack_returns_size_of_bitstream)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -848,13 +985,13 @@ module uvm_object_unit_test;
     int rval = uut.pack_bytes(bytestream, packer);
     `FAIL_IF($size(bytestream) != 8);
     `FAIL_IF(bytestream != '{8{8'hef}});
-  `SVTEST_END(pack_bytestream)
+  `SVTEST_END
 
 
   `SVTEST(pack_bytes_field_automation)
     void'(uut.pack_bytes(bytestream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(pack_returns_size_of_bytestream)
@@ -863,7 +1000,7 @@ module uvm_object_unit_test;
       int rval = uut.pack_bytes(bytestream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END(pack_returns_size_of_bytestream)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -875,13 +1012,13 @@ module uvm_object_unit_test;
     int rval = uut.pack_ints(intstream, packer);
     `FAIL_IF($size(intstream) != 8);
     `FAIL_IF(intstream != '{8{32'hdeadbeef}});
-  `SVTEST_END(pack_intstream)
+  `SVTEST_END
 
 
   `SVTEST(pack_ints_field_automation)
     void'(uut.pack_ints(intstream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_PACK, _NULL_STRING));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(pack_returns_size_of_intstream)
@@ -890,7 +1027,7 @@ module uvm_object_unit_test;
       int rval = uut.pack_ints(intstream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END(pack_returns_size_of_intstream)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -902,7 +1039,7 @@ module uvm_object_unit_test;
     uvm_packer p;
     uut.do_pack(p);
     `FAIL_IF(0);
-  `SVTEST_END(do_pack_is_empty)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -912,13 +1049,13 @@ module uvm_object_unit_test;
   `SVTEST(m_unpack_pre_use_default_packer)
     void'(uut.unpack(bitstream, null));
     `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_pre_custom_packer)
     void'(uut.unpack(bitstream, packer));
     `FAIL_IF(uut.__m_uvm_status_container.packer != packer)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_pre_packer_is_initialized)
@@ -927,14 +1064,14 @@ module uvm_object_unit_test;
     `FAIL_IF(packer.count != 0);
     `FAIL_IF(packer.m_bits != 0);
     `FAIL_IF(packer.m_packed_size != 0);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_pre_packer_with_bitstream)
     bitstream = '{8{1'b1}};
     void'(uut.unpack(bitstream, packer));
     `FAIL_IF(packer.captured_m_packed_size != bitstream.size());
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_post_get_packed_size_warning_check)
@@ -942,7 +1079,7 @@ module uvm_object_unit_test;
     void'(uut.unpack(bitstream, packer));
     uvm_report_mock::expect_warning("BDUNPK", $sformatf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits",33,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_post_packer_scope)
@@ -950,20 +1087,20 @@ module uvm_object_unit_test;
     packer.scope.down(myscope);
     void'(uut.unpack(bitstream, packer));
     `FAIL_IF(packer.scope.get() != myscope);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_post_field_automation)
     void'(uut.unpack(bitstream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_do_unpack)
     uvm_default_packer = packer;
     void'(uut.unpack(bitstream, null));
     `FAIL_IF(packer != uut.do_unpack_unpack)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(unpack_returns_size_of_bitstream)
@@ -972,7 +1109,7 @@ module uvm_object_unit_test;
       int rval = uut.unpack(bitstream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-----------------------------
@@ -983,20 +1120,20 @@ module uvm_object_unit_test;
   `SVTEST(m_unpack_bytes_pre_use_default_packer)
     void'(uut.unpack_bytes(bytestream, null));
     `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_bytes_pre_packer_with_bytestream)
     bytestream = '{8{8'h7d}};
     void'(uut.unpack_bytes(bytestream, packer));
     `FAIL_IF(packer.captured_m_packed_size != bytestream.size()*8);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_bytes_post_field_automation)
     void'(uut.unpack_bytes(bytestream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(unpack_bytes_returns_size_of_bytestream)
@@ -1005,7 +1142,7 @@ module uvm_object_unit_test;
       int rval = uut.unpack_bytes(bytestream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-----------------------------
@@ -1016,20 +1153,20 @@ module uvm_object_unit_test;
   `SVTEST(m_unpack_ints_pre_use_default_packer)
     void'(uut.unpack_ints(intstream, null));
     `FAIL_IF(uut.__m_uvm_status_container.packer != uvm_default_packer);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_ints_pre_packer_with_intstream)
     intstream = '{8{32'hdeadbeef}};
     void'(uut.unpack_ints(intstream, packer));
     `FAIL_IF(packer.captured_m_packed_size != intstream.size()*32);
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(m_unpack_ints_post_field_automation)
     void'(uut.unpack_ints(intstream, null));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_UNPACK, _NULL_STRING));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(unpack_ints_returns_size_of_intstream)
@@ -1038,7 +1175,7 @@ module uvm_object_unit_test;
       int rval = uut.unpack_ints(intstream, packer);
       `FAIL_IF(rval != 51);
     end
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-----------------------------
@@ -1050,7 +1187,7 @@ module uvm_object_unit_test;
     uvm_packer p;
     uut.do_unpack(p);
     `FAIL_IF(0);
-  `SVTEST_END(do_unpack_is_empty)
+  `SVTEST_END
 
 
   //-----------------------------
@@ -1063,7 +1200,7 @@ module uvm_object_unit_test;
     uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s", "dummy"));
     void'(uut.set_int_local("dummy",uvm_bitstream,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_status_container_status_set)
@@ -1071,49 +1208,49 @@ module uvm_object_unit_test;
     uut.fake_status = 1;
     void'(uut.set_int_local("dummy",uvm_bitstream,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
-  
+  `SVTEST_END
+
 
   `SVTEST(set_int_local_status_container_status_properly_reset)
     uut.__m_uvm_status_container.status = 1;
     void'(uut.set_int_local("dummy",uvm_bitstream,0));
     `FAIL_IF(uut.__m_uvm_status_container.status != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_status_container_bitstream_set_with_value)
     uvm_bitstream[7:0] = '{8{1'b1}};
     void'(uut.set_int_local("dummy",uvm_bitstream,0));
     `FAIL_IF(uut.__m_uvm_status_container.bitstream != uvm_bitstream)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_field_automation)
     string str = "dummy";
     void'(uut.set_int_local(str, uvm_bitstream, 0));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETINT, str));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_cycle_check_empty_before_automation)
-    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
+    uut.__m_uvm_status_container.cycle_check[dummy_test_object] = 1;
     void'(uut.set_int_local("dummy", uvm_bitstream, 0));
     `FAIL_IF(uut.was_cycle_check_empty != 1)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_m_uvm_cycle_scopes_empty)
-    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_test_object);
     void'(uut.set_int_local("dummy", uvm_bitstream, 0));
     `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_int_local_cycle_check_empty)
     uut.fake_push_cycle_check = 1;
     void'(uut.set_int_local("dummy", uvm_bitstream, 0));
     `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-----------------------------
@@ -1125,85 +1262,94 @@ module uvm_object_unit_test;
   `SVTEST(set_object_local_status_container_warning_set)
     uut.__m_uvm_status_container.warning = 1;
     uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s", "dummy"));
-    dummy_object = null;
-    void'(uut.set_object_local("dummy",dummy_object,0));
+    dummy_test_object = null;
+    void'(uut.set_object_local("dummy",dummy_test_object,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_status_container_status_set)
     uut.__m_uvm_status_container.warning = 1;
     uut.fake_status = 1;
-    void'(uut.set_object_local("dummy",dummy_object,0));
+    void'(uut.set_object_local("dummy",dummy_test_object,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_status_container_status_properly_reset)
     uut.__m_uvm_status_container.status = 1;
-    void'(uut.set_object_local("dummy",dummy_object,0));
+    void'(uut.set_object_local("dummy",dummy_test_object,0));
     `FAIL_IF(uut.__m_uvm_status_container.status != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_status_container_object_set_with_value)
-    void'(uut.set_object_local("dummy",dummy_object,0));
-    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object)
-  `SVTEST_END()
+    void'(uut.set_object_local("dummy",dummy_test_object,0));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_test_object)
+  `SVTEST_END
 
 
-// use a non-default value of clone to detect change to the default value LOSER
   `SVTEST(set_object_local_status_container_object_set_with_cloned_value)
-    dummy_object.fake_create = 1;
-    void'(uut.set_object_local("dummy",dummy_object,1));
-    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object.created_object)
+    dummy_test_object.fake_create = 1;
+    void'(uut.set_object_local("dummy",dummy_test_object,1));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_test_object.created_object)
     `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
-    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_object.created_object.get_name())
-  `SVTEST_END()
+    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_test_object.created_object.get_name())
+  `SVTEST_END
+
+
+  // use a non-default value of clone to detect change to the default value LOSER (fixed)
+  `SVTEST(set_object_local_status_container_object_set_with_cloned_value_when_using_clone_default_value)
+    dummy_test_object.fake_create = 1;
+    void'(uut.set_object_local("dummy",dummy_test_object));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_test_object.created_object)
+    `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
+    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_test_object.created_object.get_name())
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_status_container_object_has_default_clone_of_1)
-    dummy_object.fake_create = 1;
-    void'(uut.set_object_local("dummy",dummy_object));
-    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_object.created_object)
+    dummy_test_object.fake_create = 1;
+    void'(uut.set_object_local("dummy",dummy_test_object));
+    `FAIL_IF(uut.__m_uvm_status_container.object != dummy_test_object.created_object)
     `FAIL_IF(uut.__m_uvm_status_container.clone != 1)
-    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_object.created_object.get_name())
-  `SVTEST_END()
+    `FAIL_IF(uut.__m_uvm_status_container.object.get_name() != dummy_test_object.created_object.get_name())
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_status_container_object_set_with_cloned_null_value)
     test_uvm_object null_object;
     void'(uut.set_object_local("dummy",null_object,1));
     `FAIL_IF(uut.__m_uvm_status_container.object != null)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_field_automation)
     string str = "dummy";
-    void'(uut.set_object_local(str, dummy_object, 0));
+    void'(uut.set_object_local(str, dummy_test_object, 0));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETOBJ, str));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_cycle_check_empty_before_automation)
-    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
-    void'(uut.set_object_local("dummy", dummy_object, 0));
+    uut.__m_uvm_status_container.cycle_check[dummy_test_object] = 1;
+    void'(uut.set_object_local("dummy", dummy_test_object, 0));
     `FAIL_IF(uut.was_cycle_check_empty != 1)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_m_uvm_cycle_scopes_empty)
-    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
-    void'(uut.set_object_local("dummy", dummy_object, 0));
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_test_object);
+    void'(uut.set_object_local("dummy", dummy_test_object, 0));
     `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_object_local_cycle_check_empty)
     uut.fake_push_cycle_check = 1;
-    void'(uut.set_object_local("dummy", dummy_object, 0));
+    void'(uut.set_object_local("dummy", dummy_test_object, 0));
     `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-----------------------------
@@ -1216,7 +1362,7 @@ module uvm_object_unit_test;
     uvm_report_mock::expect_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", dummy_str,uut.get_inst_id()));
     void'(uut.set_string_local("dummy",dummy_str,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_status_container_status_set)
@@ -1224,48 +1370,48 @@ module uvm_object_unit_test;
     uut.fake_status = 1;
     void'(uut.set_string_local("dummy",dummy_str,0));
     `FAIL_IF(!uvm_report_mock::verify_complete())
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_status_container_status_properly_reset)
     uut.__m_uvm_status_container.status = 1;
     void'(uut.set_string_local("dummy",dummy_str,0));
     `FAIL_IF(uut.__m_uvm_status_container.status != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_status_container_stringv_set_with_value)
     void'(uut.set_string_local("dummy",dummy_str,0));
     `FAIL_IF(uut.__m_uvm_status_container.stringv != dummy_str)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_field_automation)
     string str = "dummy";
     void'(uut.set_string_local(str, dummy_str, 0));
     `FAIL_UNLESS(uut.__m_uvm_field_automation_was_called_with(null, UVM_SETSTR, str));
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_cycle_check_empty_before_automation)
-    uut.__m_uvm_status_container.cycle_check[dummy_object] = 1;
+    uut.__m_uvm_status_container.cycle_check[dummy_test_object] = 1;
     void'(uut.set_string_local("dummy", dummy_str, 0));
     `FAIL_IF(uut.was_cycle_check_empty != 1)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_m_uvm_cycle_scopes_empty)
-    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_object);
+    uut.__m_uvm_status_container.m_uvm_cycle_scopes.push_back(dummy_test_object);
     void'(uut.set_string_local("dummy", dummy_str, 0));
     `FAIL_IF(uut.__m_uvm_status_container.m_uvm_cycle_scopes.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   `SVTEST(set_string_local_cycle_check_empty)
     uut.fake_push_cycle_check = 1;
     void'(uut.set_string_local("dummy", dummy_str, 0));
     `FAIL_IF(uut.__m_uvm_status_container.cycle_check.size() != 0)
-  `SVTEST_END()
+  `SVTEST_END
 
 
   //-------------------------------
@@ -1280,7 +1426,7 @@ module uvm_object_unit_test;
     const string str__ = "66";
     uut.__m_uvm_field_automation(tmp_data__, what__, str__);
     `FAIL_IF(0);
-  `SVTEST_END(__m_uvm_field_automation_is_empty)
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------
@@ -1289,7 +1435,7 @@ module uvm_object_unit_test;
   //-----------------------------
   `SVTEST(get_report_object_returns_null)
     `FAIL_IF(uut.test_get_report_object() != null);
-  `SVTEST_END(get_report_object_returns_null)
+  `SVTEST_END
 
   `SVUNIT_TESTS_END
 
@@ -1321,8 +1467,8 @@ module uvm_object_unit_test;
 
   function void inject_compare_map_cycle_check_failure(uvm_object o = null);
     uvm_default_comparer.compare_map.clear();
-    if (o != null) uvm_default_comparer.compare_map.set(dummy_object, o);
-    else           uvm_default_comparer.compare_map.set(dummy_object, uut);
+    if (o != null) uvm_default_comparer.compare_map.set(dummy_test_object, o);
+    else           uvm_default_comparer.compare_map.set(dummy_test_object, uut);
     uut.__m_uvm_status_container.scope.down("not empty");
   endfunction
 
@@ -1335,7 +1481,7 @@ module uvm_object_unit_test;
 
   function void cause_type_mismatch_with_dummy();
     uvm_default_comparer.check_type = 1;
-    dummy_object.fake_test_type_name = 1;
+    dummy_test_object.fake_test_type_name = 1;
   endfunction
 
 endmodule
