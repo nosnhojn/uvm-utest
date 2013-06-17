@@ -529,13 +529,13 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_INT(returns_returns_0_for_wildcard_index_WARNING,double_trouble[?],0)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4634
   // uvm_misc.sv:line 539
   // radix ('h/'o/'d/'b) are treated as illegal characters
-// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(bin,'b1);
-// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(oct,'o7);
-// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(dec,'d8);
-// `UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(hex,'h8);
+  //`UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(bin,'b1);
+  //`UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(oct,'o7);
+  //`UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(dec,'d8);
+  //`UVM_GET_ARRAY_INDEX_WITH_RADIX_TEST(hex,'h8);
 
 
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,is_not_wild_for_no_array,double_trouble,0);
@@ -545,7 +545,7 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,plus_sign_is_wild,double_trouble[+],1);
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4635
   // uvm_misc.sv:line 539
   // default of wildcard not valid for illegal indecies strings
 // `UVM_GET_ARRAY_INDEX_FOR_WILD(int,illegal_index_is_not_wild,double_trouble[>],0);
@@ -553,7 +553,7 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(int,nothing_in_brackets_is_not_wildcart,double_trouble[],0);
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4635
   // uvm_misc.sv:line 533
   // default of wildcard not valid for non-happy-path strings
 // `SVTEST(get_array_index_no_string_nothing_in_brackets_is_not_wildcart)
@@ -563,7 +563,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4635
   // uvm_misc.sv:line 536
   // going through the while loop with a string that includes no "["
   // means the is_wildcard is left in an erroneous state
@@ -587,7 +587,7 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_STRING(returns_upper_boundary_nine,double_trouble[9],9)
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4636
   // uvm_misc.svh:line 567
   // there's no effort here to limit to numeric indecies like is done in the
   // uvm_get_array_index_int (this test would limit the lower bound i.e. 0)
@@ -598,7 +598,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4636
   // uvm_misc.svh:line 567
   // there's no effort here to limit to numeric indecies like is done in the
   // uvm_get_array_index_int (this test would limit the upper bound i.e. 0)
@@ -626,7 +626,7 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,star_is_wild,double_trouble[*],1);
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,question_mark_is_wild,double_trouble[?],1);
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4640
   // uvm_misc.svh:line 567
   // the '+' sign is considered a wildcard in uvm_is_wildcard but not
   // here making the 2 functions incompatible.
@@ -636,7 +636,7 @@ module uvm_misc_unit_test;
   `UVM_GET_ARRAY_INDEX_FOR_WILD(string,nothing_in_brackets_is_not_wildcart,double_trouble[],0);
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4637
   // uvm_misc.sv:line 563
   // default of wildcard not valid for non-happy-path strings
 // `SVTEST(get_array_index_string_no_string_nothing_in_brackets_is_not_wildcart)
@@ -646,7 +646,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4637
   // uvm_misc.sv:line 566
   // going through the while loop with a string that includes no "["
   // means the is_wildcard is left in an erroneous state
@@ -680,7 +680,7 @@ module uvm_misc_unit_test;
   `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4638
   // uvm_misc.sv:line 581
   // malformed array string is interpretted as an array
 // `SVTEST(is_array_square_bracket_is_not_array)
@@ -689,7 +689,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4638
   // uvm_misc.sv:line 581
   // malformed array string is interpretted as an array
 // `SVTEST(is_array_only_brackets_is_not_array)
@@ -698,7 +698,7 @@ module uvm_misc_unit_test;
 // `SVTEST_END
 
 
-  // FAILING TEST
+  // FAILING TEST - REPORTED - MANTIS 4638
   // uvm_misc.sv:line 581
   // malformed array string is interpretted as an array
 // `SVTEST(is_array_only_index_is_not_array)
