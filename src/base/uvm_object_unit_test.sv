@@ -21,7 +21,8 @@ module uvm_object_unit_test;
   // running the Unit Tests on
   //===================================
   test_uvm_object           uut;
-  test_uvm_object_wrapper   uut_wrapper;
+  test_uvm_object_wrapper   valid_uut_wrapper;
+  test_uvm_object_wrapper   unknown_uut_wrapper;
   test_uvm_object_virtuals  uut_virt;
 
   mock_uvm_printer  mock_printer;
@@ -42,8 +43,12 @@ module uvm_object_unit_test;
   function void build();
     svunit_ut = new(name);
 
-    uut_wrapper = new();
-    factory.register(uut_wrapper);
+    valid_uut_wrapper = new();
+    factory.register(valid_uut_wrapper);
+
+    unknown_uut_wrapper = new();
+    unknown_uut_wrapper.set_type_name("<unknown>");
+    factory.register(unknown_uut_wrapper);
   endfunction
 
 
@@ -374,16 +379,10 @@ module uvm_object_unit_test;
     `FAIL_IF(uut.get_object_type() != null);
   `SVTEST_END
 
-//  `SVTEST(get_object_type_returns_null)
-//    // need something in the wrapper LOSER (???)
-//    uut.fake_test_type_name = 1;
-//    `FAIL_IF(uut.get_object_type() != null);
-//  `SVTEST_END
-
   // relies on correct implementation of factory (not verified as of here/now)
   `SVTEST(get_object_type_returns_type)
     uut.fake_test_type_name = 1;
-    `FAIL_IF(uut.get_object_type() != uut_wrapper);
+    `FAIL_IF(uut.get_object_type() != valid_uut_wrapper);
   `SVTEST_END
 
   //-----------------------------

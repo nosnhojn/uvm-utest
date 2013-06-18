@@ -6,8 +6,14 @@ import uvm_pkg::*;
 
 
 class test_uvm_object_wrapper extends uvm_object_wrapper;
+  string fake_type_name = "test_uvm_object";
+
   function string get_type_name();
-    return "test_uvm_object";
+    return fake_type_name;
+  endfunction
+
+  function string set_type_name(string ftn);
+    fake_type_name = ftn;
   endfunction
 endclass
 
