@@ -152,14 +152,27 @@ module uvm_misc_unit_test;
   //-----------------------------
   //-----------------------------
 
-  // this test is not entirely accurate b/c technically,
-  // the global seed could randomize to 0. slim chance of
-  // that happening though which is why I've chosen to
-  // verify it gets some value >0 (for unsigned).
-  `SVTEST(global_random_seed_is_randomized)
-// LOSER do this twice to make sure we don't have a contstant
-// (without running the test twice, there is no way to catch this)
+  `SVTEST(global_random_seed_is_unsigned)
     `FAIL_IF(uvm_global_random_seed <= 0);
+  `SVTEST_END
+
+
+  `SVTEST(global_random_seed_is_randomized)
+    int UVM_UTEST_SEED = $fopen("./.uvm_utest.seed", "r");
+    int unsigned last_seed;
+
+    if (UVM_UTEST_SEED != 0) begin
+      $fscanf(UVM_UTEST_SEED, "%0d", last_seed);
+      $fclose(UVM_UTEST_SEED);
+    end else begin
+      last_seed = 0;
+    end
+
+    UVM_UTEST_SEED = $fopen("./.uvm_utest.seed", "w");
+    $fwrite(UVM_UTEST_SEED, "%0d", uvm_global_random_seed);
+    $fclose(UVM_UTEST_SEED);
+
+    `FAIL_IF(uvm_global_random_seed == last_seed);
   `SVTEST_END
 
 
@@ -168,20 +181,14 @@ module uvm_misc_unit_test;
   // uvm_instance_scope tests
   //-----------------------------
   //-----------------------------
-
-// LOSER... missed lots of tests here... basically the entire method
   `SVTEST(top_uvm_instance_scope_is_uvm_pkg)
-    bit uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*", uvm_instance_scope());
-    `FAIL_IF(!uvm_instance_scope_match);
+    string uvm_pkg_colons = "uvm_pkg::";
+    string uvm_pkg_dot = "uvm_pkg.";
+    string scope = uvm_instance_scope();
+
+    `FAIL_IF(scope != uvm_pkg_colons &&
+             scope != uvm_pkg_dot);
   `SVTEST_END
-// (recursive method, %m, i.e. scope, seems to be out of our control)
-//  `SVTEST(top_uvm_instance_scope_is_uvm_pkg_dot_test)
-//    bit uvm_instance_scope_match;
-//    uvm_object::__m_uvm_status_container.scope.set("test");
-//    $display(uvm_instance_scope());
-//    uvm_instance_scope_match = !uvm_re_match("uvm_pkg[.:]*test", uvm_instance_scope());
-//    `FAIL_IF(!uvm_instance_scope_match);
-//  `SVTEST_END
 
 
   //-----------------------------
