@@ -1,5 +1,6 @@
 `include "svunit_defines.svh"
 `include "test_uvm_printer.sv"
+`include "test_uvm_printer_virtuals.sv"
 `include "test_uvm_object.sv"
 `include "test_uvm_component.sv"
 `include "test_uvm_agent.sv"
@@ -53,11 +54,14 @@ module uvm_printer_unit_test;
   // running the Unit Tests on
   //===================================
   test_uvm_printer uut;
+  test_uvm_printer_virtuals  uut_virt;
   uvm_printer_row_info first_row;
   uvm_printer_row_info last_row;
   test_uvm_object test_obj;
   test_uvm_component test_comp;
   test_uvm_component child_comp[$];
+
+  uvm_printer        dummy_object;
 
   string adjusted_name;
   string string_index;
@@ -82,6 +86,9 @@ module uvm_printer_unit_test;
     uut = new();
     test_obj = new("obj_name");
     test_comp = new("comp_name");
+
+    uut_virt = new();
+    dummy_object = uut_virt;
 
     uvm_report_mock::setup();
   endtask
@@ -114,7 +121,71 @@ module uvm_printer_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
-  // LOSER - virtual methods should be virtual!!
+  `SVTEST(virt_print_int)
+    dummy_object.print_int("", 0, 0);
+    `FAIL_UNLESS(uut_virt.print_int_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_field)
+    dummy_object.print_field("", 0, 0);
+    `FAIL_UNLESS(uut_virt.print_field_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_object)
+    dummy_object.print_object("", null);
+    `FAIL_UNLESS(uut_virt.print_object_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_object_header)
+    dummy_object.print_object_header("", null);
+    `FAIL_UNLESS(uut_virt.print_object_header_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_string)
+    dummy_object.print_string("", "");
+    `FAIL_UNLESS(uut_virt.print_string_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_real)
+    dummy_object.print_real("", "");
+    `FAIL_UNLESS(uut_virt.print_real_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_generic)
+    dummy_object.print_generic("", "", 0, "");
+    `FAIL_UNLESS(uut_virt.print_generic_called);
+  `SVTEST_END
+
+
+  `SVTEST(virt_print_time)
+    dummy_object.print_time("", 0);
+    `FAIL_UNLESS(uut_virt.print_time_called);
+  `SVTEST_END
+    
+
+  `SVTEST(virt_emit)
+    dummy_object.emit();
+    `FAIL_UNLESS(uut_virt.emit_called);
+  `SVTEST_END
+    
+
+  `SVTEST(virt_format_row)
+    uvm_printer_row_info info;
+    dummy_object.format_row(info);
+    `FAIL_UNLESS(uut_virt.format_row_called);
+  `SVTEST_END
+    
+
+  `SVTEST(virt_format_header)
+    dummy_object.format_header();
+    `FAIL_UNLESS(uut_virt.format_header_called);
+  `SVTEST_END
 
   //-----------------------------
   //-----------------------------

@@ -45,10 +45,12 @@ class test_uvm_object extends uvm_object;
   bit m_cycle_check_was_started;
   bit __m_uvm_field_automation_called = 0;
   bit do_compare_called = 0;
+  bit do_copy_called = 0;
 
   bit latch_temp_comparer_state = 0;
   bit latch_temp_scope_stack_get = 0;
   bit comparer_cleaned_up_ok = 0;
+  bit enable_nested_copy = 0;
   string latched_scope_stack_get;
 
   uvm_printer do_print_printer;
@@ -61,6 +63,8 @@ class test_uvm_object extends uvm_object;
   string do_print_printer_m_scope_got;
   uvm_object do_compare_rhs;
   uvm_comparer do_compare_comparer;
+
+  int number_of_objects_in_copy_map = 0;
 
   function new(string name);
     super.new(name);
@@ -132,7 +136,17 @@ class test_uvm_object extends uvm_object;
 
   function void do_copy(uvm_object rhs);
     $cast(do_copy_copy, rhs);
+    do_copy_called = 1;
     super.do_copy(rhs);
+
+    if (enable_nested_copy) begin
+      test_uvm_object nested_obj = new("nested_obj");
+      test_uvm_object another_rhs = new("another_rhs");
+
+      nested_obj.copy(another_rhs);
+      number_of_objects_in_copy_map = (uvm_global_copy_map.get(rhs) != null) +
+                                      (uvm_global_copy_map.get(another_rhs) != null);
+    end
   endfunction
 
   function bit do_compare(uvm_object rhs, uvm_comparer comparer);

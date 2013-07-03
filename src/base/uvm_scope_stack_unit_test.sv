@@ -275,7 +275,6 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END
 
 
-  // up_element more than 1 LOSER (fixed)
   `SVTEST(up_element_removes_a_down_element_when_multiple_elements_on_the_stack)
     string s_exp = "element0.element1";
     uut.down("element0");
@@ -286,7 +285,6 @@ module uvm_scope_stack_unit_test;
   `SVTEST_END
 
 
-  // up_element more than 1 LOSER (extra)
   `SVTEST(up_element_removes_two_down_elements_when_multiple_elements_on_the_stack)
     string s_exp = "element0";
     uut.down("element0");

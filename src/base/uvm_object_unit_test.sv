@@ -614,6 +614,26 @@ module uvm_object_unit_test;
   // copy tests
   //-----------------------------
   //-----------------------------
+  `SVTEST(copy_cycle_check_if_rhs_not_null)
+    test_uvm_object rhs = new("name");
+
+    uvm_global_copy_map.set(rhs, uut);
+    void'(uut.copy(rhs));
+
+    `FAIL_IF(uut.do_copy_called);
+  `SVTEST_END
+
+
+  `SVTEST(copy_no_cycle_check_if_rhs_null)
+    test_uvm_object rhs;
+
+    uvm_global_copy_map.set(rhs, uut);
+    void'(uut.copy(rhs));
+
+    `FAIL_IF(uut.do_copy_called);
+  `SVTEST_END
+
+
   `SVTEST(copy_rhs_null)
     uvm_object rhs=null;
     uvm_report_mock::expect_warning("NULLCP", "A null object was supplied to copy; copy is ignored");
@@ -622,13 +642,16 @@ module uvm_object_unit_test;
   `SVTEST_END
 
 
-  // WARNING
-  // We decided to skip the cycle checking code as
-  // this seems to refer to the time when functions
-  // could consume time. Therefore we didn't test
-  // the uvm_global_copy_map.
+  `SVTEST(copy_returns_when_rhs_null)
+    test_uvm_object rhs;
 
-  `SVTEST(copy_rhs_not_null_field_automation)
+    void'(uut.copy(rhs));
+
+    `FAIL_IF(uut.do_copy_called);
+  `SVTEST_END
+
+
+  `SVTEST(copy_field_automation)
     string s_exp = "name";
     test_uvm_object rhs=new("name");
     void'(uut.copy(rhs));
@@ -636,11 +659,30 @@ module uvm_object_unit_test;
   `SVTEST_END
 
 
-  `SVTEST(copy_rhs_not_null_do_copy)
+  `SVTEST(copy_do_copy)
     uvm_callback rhs=new("name");
     void'(uut.copy(rhs));
     `FAIL_IF(!$cast(rhs, uut.do_copy_copy));
     `FAIL_IF(uut.do_copy_copy == null);
+  `SVTEST_END
+
+
+  `SVTEST(copy_copy_map_depth)
+    test_uvm_object rhs = new("name");
+
+    uut.enable_nested_copy = 1;
+    void'(uut.copy(rhs));
+
+    `FAIL_IF(uut.number_of_objects_in_copy_map != 2);
+  `SVTEST_END
+
+  `SVTEST(copy_copy_map_is_empty)
+    test_uvm_object rhs = new("name");
+
+    uvm_global_copy_map.set(uut, rhs);
+    void'(uut.copy(rhs));
+
+    `FAIL_IF(uvm_global_copy_map.get(rhs) != null);
   `SVTEST_END
 
 
@@ -1297,7 +1339,6 @@ module uvm_object_unit_test;
   `SVTEST_END
 
 
-  // use a non-default value of clone to detect change to the default value LOSER (fixed)
   `SVTEST(set_object_local_status_container_object_set_with_cloned_value_when_using_clone_default_value)
     dummy_test_object.fake_create = 1;
     void'(uut.set_object_local("dummy",dummy_test_object));
