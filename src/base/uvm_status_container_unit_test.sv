@@ -55,6 +55,8 @@ module uvm_status_container_unit_test;
   //===================================
   task teardown();
     svunit_ut.teardown();
+
+    uut.m_uvm_cycle_scopes.delete();
   endtask
 
 
@@ -186,10 +188,87 @@ module uvm_status_container_unit_test;
   // m_uvm_cycle_scopes tests
   //-----------------------------
   //-----------------------------
-  // WARNING: I don't see why this cycle checking
-  //          is necessary so I'm ignoring it until
-  //          I know what it's for
+
+  `SVTEST(cycle_check_append_same_scope)
+    repeat (3) push_new_cycle_scope();
+
+    void'(uut.m_do_cycle_check(uut.m_uvm_cycle_scopes[$]));
+
+    `FAIL_IF(uut.m_uvm_cycle_scopes[3] != uut.m_uvm_cycle_scopes[2]);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_same_scope_is_not_cycle_check)
+    repeat (3) push_new_cycle_scope();
+
+    `FAIL_IF(uut.m_do_cycle_check(uut.m_uvm_cycle_scopes[$]) !== 0);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_same_scope_bumps_size_by_1)
+    repeat (99) push_new_cycle_scope();
+
+    void'(uut.m_do_cycle_check(uut.m_uvm_cycle_scopes[$]));
+
+    `FAIL_IF(uut.m_uvm_cycle_scopes.size() != 100);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_append_new_scope)
+    test_uvm_object d;
+
+    repeat (3) push_new_cycle_scope();
+
+    d = new("d");
+    void'(uut.m_do_cycle_check(d));
+
+    `FAIL_IF(uut.m_uvm_cycle_scopes[3] != d);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_new_scope_is_not_cycle_check)
+    test_uvm_object d;
+
+    repeat (3) push_new_cycle_scope();
+
+    d = new("d");
+    `FAIL_IF(uut.m_do_cycle_check(d) !== 0);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_new_scope_bumps_size_by_1)
+    test_uvm_object d;
+
+    repeat (51) push_new_cycle_scope();
+
+    d = new("d");
+    void'(uut.m_do_cycle_check(d));
+
+    `FAIL_IF(uut.m_uvm_cycle_scopes.size() != 52);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_old_scope_doesnt_change_cycle_scopes)
+    repeat (21) push_new_cycle_scope();
+
+    void'(uut.m_do_cycle_check(uut.m_uvm_cycle_scopes[0]));
+
+    `FAIL_IF(uut.m_uvm_cycle_scopes.size() != 21);
+  `SVTEST_END
+
+
+  `SVTEST(cycle_check_old_scope_is_cycle_check)
+    repeat (21) push_new_cycle_scope();
+
+    `FAIL_UNLESS(uut.m_do_cycle_check(uut.m_uvm_cycle_scopes[19]));
+  `SVTEST_END
+
 
   `SVUNIT_TESTS_END
+
+  function void push_new_cycle_scope();
+    automatic test_uvm_object new_scope = new("new");
+    uut.m_uvm_cycle_scopes.push_back(new_scope);
+  endfunction
 
 endmodule
