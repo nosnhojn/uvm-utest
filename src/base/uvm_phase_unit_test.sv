@@ -14,7 +14,7 @@ module uvm_phase_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-  uvm_phase my_uvm_phase;
+  uvm_phase uut;
 
 
   //===================================
@@ -23,7 +23,7 @@ module uvm_phase_unit_test;
   function void build();
     svunit_ut = new(name);
 
-    my_uvm_phase = new(/* New arguments if needed */);
+    uut = new(/* New arguments if needed */);
   endfunction
 
 
@@ -65,6 +65,9 @@ module uvm_phase_unit_test;
   //----------------------
   // constructor tests
   //----------------------
+  `SVTEST(new_calls_super)
+    `FAIL_UNLESS_STR_EQUAL(uut.get_name(), "uvm_phase");
+  `SVTEST_END
 
 
   //----------------------
