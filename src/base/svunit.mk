@@ -1,7 +1,7 @@
 ifeq ($(SIMULATOR),IUS)
 	include $(SVUNIT_INSTALL)/bin/ius.mk
-	#SIM_ARGS += '-svseed $(shell echo $$RANDOM) -uvm'
-  SIM_ARGS += '-svseed $(shell echo $$RANDOM) -uvmhome $(UVM_HOME) -64'
+	SIM_ARGS += '-svseed $(shell echo $$RANDOM) -uvm'
+  #SIM_ARGS += '-svseed $(shell echo $$RANDOM) -uvmhome $(UVM_HOME) -64'
 else
 	ifeq ($(SIMULATOR),VCS)
 		include $(SVUNIT_INSTALL)/bin/vcs.mk

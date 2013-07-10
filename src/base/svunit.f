@@ -1,7 +1,7 @@
 # for questa user defined library
-$UVM_HOME/src/uvm.sv
-+incdir+$UVM_HOME/src
--R -sv_lib $UVM_HOME/lib/uvm_dpi64 -
+#$UVM_HOME/src/uvm.sv
+#+incdir+$UVM_HOME/src
+#-R -sv_lib $UVM_HOME/lib/uvm_dpi64 -
 
 +incdir+$SVUNIT_INSTALL/svunit_base/uvm-mock
 +incdir+../../test_doubles
