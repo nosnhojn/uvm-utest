@@ -77,6 +77,13 @@ module uvm_boat_anchor_unit_test;
     `FAIL_UNLESS(boat_anchor._4635(malformed_array_select));
   `SVTEST_END
 
+
+  `SVTEST(_4636_returns_illegal_character)
+    string s_in = "double_trouble[:]";
+    `FAIL_UNLESS_STR_EQUAL(boat_anchor._4636(s_in), ":");
+  `SVTEST_END
+
+
   `SVTEST(weigh_anchor)
     `FAIL_UNLESS(boat_anchor.weight_anchor() == 1);
   `SVTEST_END
