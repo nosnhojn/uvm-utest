@@ -72,7 +72,7 @@ module uvm_boat_anchor_unit_test;
   `SVTEST_END
 
 
-  `SVTEST(_4635_returns_wildcar)
+  `SVTEST(_4635_returns_wildcard)
     string malformed_array_select = "bozo[>]";
     `FAIL_UNLESS(boat_anchor._4635(malformed_array_select));
   `SVTEST_END
@@ -84,8 +84,25 @@ module uvm_boat_anchor_unit_test;
   `SVTEST_END
 
 
+  `SVTEST(_4609_cant_handle_DOT_DOT_DOT)
+    `FAIL_IF_STR_EQUAL(boat_anchor._4609("..."), "...");
+  `SVTEST_END
+
+
+  `SVTEST(_4637_returns_wildcard)
+    string malformed_array = "[]";
+    `FAIL_UNLESS(boat_anchor._4637(malformed_array) === 1);
+  `SVTEST_END
+
+
+  `SVTEST(weigh_anchor_failed)
+    boat_anchor.set_fake_failure();
+    `FAIL_UNLESS_STR_EQUAL(boat_anchor.weight_anchor(), "Uh oh! You're boat anchor is broken. Looks like someone \"fixed\" something.");
+  `SVTEST_END
+
+
   `SVTEST(weigh_anchor)
-    `FAIL_UNLESS(boat_anchor.weight_anchor() == 1);
+    `FAIL_UNLESS_STR_EQUAL(boat_anchor.weight_anchor(), "Great! You're boat anchor is working perfectly!");
   `SVTEST_END
 
 
