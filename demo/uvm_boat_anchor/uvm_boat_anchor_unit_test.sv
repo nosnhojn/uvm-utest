@@ -61,6 +61,25 @@ module uvm_boat_anchor_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
+  `SVTEST(_4601_returns_positive_number)
+    `FAIL_UNLESS_STR_EQUAL(boat_anchor._4601('hf, 4), "15");
+  `SVTEST_END
+
+
+  `SVTEST(_4634_returns_illegal_radix)
+    string array_with_index = "array['h77]";
+    `FAIL_UNLESS(boat_anchor._4634(array_with_index) == -1);
+  `SVTEST_END
+
+
+  `SVTEST(_4635_returns_wildcar)
+    string malformed_array_select = "bozo[>]";
+    `FAIL_UNLESS(boat_anchor._4635(malformed_array_select));
+  `SVTEST_END
+
+  `SVTEST(weigh_anchor)
+    `FAIL_UNLESS(boat_anchor.weight_anchor() == 1);
+  `SVTEST_END
 
 
   `SVUNIT_TESTS_END
