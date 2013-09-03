@@ -47,14 +47,31 @@ class uvm_boat_anchor;
   endfunction
 
 
+  function bit _4640(string array_name);
+    return uvm_has_wildcard(array_name);;
+  endfunction
+
+
+  function string _4602(string name);
+    uvm_tree_printer p = new();
+    string emitted;
+
+    p.m_scope.down("scope");
+    p.print_object_header(name, null, "J");
+    emitted = p.emit();
+    return emitted[2:14];
+  endfunction
+
   function string weight_anchor();
-    if (_4601('hf, 4) !== "-1"            &&
-        _4609("...") !== "..."            &&
-        _4634("array['h77]") !== 77       &&
-        _4635("bozo[>]")                  &&
-        _4636("double_trouble[:]") == ":" &&
-        _4637("[]")                       &&
-        _4638("]")                        &&
+    if (_4601('hf, 4) !== "-1"              &&
+        _4609("...") !== "..."              &&
+        _4634("array['h77]") !== 77         &&
+        _4635("bozo[>]")                    &&
+        _4636("double_trouble[:]") == ":"   &&
+        _4637("[]")                         &&
+        _4638("]")                          &&
+        _4640("+")                          &&
+        _4602("name_in") == "scope.name_in" &&
         !_fake_failure)
     begin
       return "Great! You're boat anchor is working perfectly!";
