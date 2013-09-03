@@ -95,6 +95,12 @@ module uvm_boat_anchor_unit_test;
   `SVTEST_END
 
 
+  `SVTEST(_4638_returns_true_bad_array)
+    string s_in = "]";
+    `FAIL_UNLESS(boat_anchor._4638(s_in) === 1);
+  `SVTEST_END
+
+
   `SVTEST(weigh_anchor_failed)
     boat_anchor.set_fake_failure();
     `FAIL_UNLESS_STR_EQUAL(boat_anchor.weight_anchor(), "Uh oh! You're boat anchor is broken. Looks like someone \"fixed\" something.");

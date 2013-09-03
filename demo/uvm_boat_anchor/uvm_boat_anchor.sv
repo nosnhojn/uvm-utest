@@ -19,31 +19,42 @@ class uvm_boat_anchor;
     return emitted[0:2];
   endfunction
 
+
   function int signed _4634(string array_with_index);
     return uvm_get_array_index_int(array_with_index, waste_of_typing);
   endfunction
 
+
   function bit _4635(string array_with_malformed_index);
-    uvm_get_array_index_int(array_with_malformed_index, waste_of_typing);
+    void'(uvm_get_array_index_int(array_with_malformed_index, waste_of_typing));
     return waste_of_typing;
   endfunction
+
 
   function string _4636(string array_with_malformed_index);
     return uvm_get_array_index_string(array_with_malformed_index, waste_of_typing);
   endfunction
 
+
   function int _4637(string malformed_array);
-    uvm_get_array_index_string(malformed_array, waste_of_typing);
+    void'(uvm_get_array_index_string(malformed_array, waste_of_typing));
     return waste_of_typing;
   endfunction
 
+
+  function bit _4638(string malformed_array);
+    return (uvm_is_array(malformed_array));
+  endfunction
+
+
   function string weight_anchor();
-    if (_4601('hf, 4) == "15"             &&
+    if (_4601('hf, 4) !== "-1"            &&
         _4609("...") !== "..."            &&
-        _4634("array['h77]") == -1        &&
+        _4634("array['h77]") !== 77       &&
         _4635("bozo[>]")                  &&
         _4636("double_trouble[:]") == ":" &&
         _4637("[]")                       &&
+        _4638("]")                        &&
         !_fake_failure)
     begin
       return "Great! You're boat anchor is working perfectly!";
