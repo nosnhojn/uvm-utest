@@ -5,6 +5,7 @@ else
 		include $(SVUNIT_INSTALL)/bin/vcs.mk
 	else
 		include $(SVUNIT_INSTALL)/bin/questa.mk
+		SIM_EXE=qverilog
 	endif
 endif
 
