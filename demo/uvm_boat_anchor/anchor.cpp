@@ -18,25 +18,25 @@ void sig_handler(int);
 struct ascii_out_t
 {
   string sky[6] = {
-                   "                                                      * ** ** ** *   \n",
-                   "                                                     * *  *  *  * ** \n",
-                   "                                                     *   *  *  *  *  \n",
-                   "                                                      *** ** ** **   \n",
-                   "                                                                     \n",
-                   "                                                                     \n"
+                   "                                                    *** ** ** ** * *** **     \n",
+                   "                                                   * * *  *  *  * * * *  *    \n",
+                   "                                                   ***   *  *  *  *  *   *    \n",
+                   "                                                    ***** ** ** ** ** ***     \n",
+                   "                                                                              \n",
+                   "                                                                              \n"
                   };
 
   string boat[10] = {
-                   "                                                     .             \n",
-                   "                                                    /|\\           \n",
-                   "                                                   / | \\          \n",
-                   "                                                  /  |  \\         \n",
-                   "                                                 /   |   \\        \n",
-                   "                                                /    |    \\       \n",
-                   "                                               /     |     \\      \n",
-                   "                                              /      |      \\     \n",
-                   "                                             ._______|_______.     \n",
-                   "                                      `--.___________|___________  \n"
+                   "                                                     .                        \n",
+                   "                                                    /|\\                      \n",
+                   "                                                   / | \\                     \n",
+                   "                                                  /  |  \\                    \n",
+                   "                                                 /   |   \\                   \n",
+                   "                                                /    |    \\                  \n",
+                   "                                               /     |     \\                 \n",
+                   "                                              /      |      \\                \n",
+                   "                                             ._______|_______.                \n",
+                   "                                      `--.___________|___________             \n"
                   };
 
   string water[2] = {
@@ -105,8 +105,30 @@ struct ascii_out_t
     if (chainLength == BOTTOM) fullDrawing.push_back(bottom.c_str());
   }
 
-  void makeItRain(int length) {
-    
+  void makeItRain(int i, int total) {
+    int j=0;
+
+    fullDrawingIt = fullDrawing.begin();
+    while (j<17) {
+      fullDrawingIt++;
+      j++;
+
+      if (j >= 4) {
+        if ((j+i-4) % 3 == 0) {
+          (*fullDrawingIt)[53-(j-4)] = '/';
+          (*fullDrawingIt)[55-(j-4)] = '/';
+          (*fullDrawingIt)[57-(j-4)] = '/';
+          (*fullDrawingIt)[59-(j-4)] = '/';
+          (*fullDrawingIt)[61-(j-4)] = '/';
+          (*fullDrawingIt)[63-(j-4)] = '/';
+          (*fullDrawingIt)[65-(j-4)] = '/';
+          (*fullDrawingIt)[67-(j-4)] = '/';
+          (*fullDrawingIt)[69-(j-4)] = '/';
+          (*fullDrawingIt)[71-(j-4)] = '/';
+          (*fullDrawingIt)[73-(j-4)] = '/';
+        }
+      }
+    }
   }
 
   void drawAll() {
@@ -127,7 +149,7 @@ struct ascii_out_t
       drawAll();
 
       refresh();
-      wait(0.1);
+      wait(0.01);
     }
 
     // anchor goes down
@@ -138,20 +160,25 @@ struct ascii_out_t
       drawAll();
 
       refresh();
-      wait(0.1);
+      wait(0.01);
     }
 
-    wait(2);
+    wait(.5);
   }
 
   void startRaining() {
-    clear();
+    for (int i=0; i<=50; i++) {
+      clear();
 
-    buildAll(0, BOTTOM);
-    makeItRain(50);
-    drawAll();
+      buildAll(0, BOTTOM);
+      makeItRain(i, 50);
+      drawAll();
 
-    refresh();
+      refresh();
+
+      wait(0.2);
+    }
+
     wait(2);
   }
 
@@ -202,7 +229,7 @@ int main() {
 
   ascii_out.startRaining();
 
-  ascii_out.sailOut();
+  //ascii_out.sailOut();
 
   endwin();
 
