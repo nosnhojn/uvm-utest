@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include <time.h>
 #include <signal.h>
+#include <queue>
 
 using namespace std;
 
@@ -43,9 +44,26 @@ struct ascii_out_t
                      "   \\___/   \\___/    \\__/    \\____/    \\___/   \\__/   \\__/   \\__/   \\__/   \\__\n"
                     };
 
+  string chain = "                                                |\n";
+
+  string anchor[11] = {
+                   "                                      /\\        O        /\\  \n",
+                   "                                      | \\      / \\      / |  \n",
+                   "                                      |  \\     | |     /  |   \n",
+                   "                                      | |\\\\    | |    //| |  \n",
+                   "                                      | | \\\\   | |   // | |  \n",
+                   "                                      \\ \\  '   | |   '  / /  \n",
+                   "                                       \\ \\     | |     / /   \n",
+                   "                                        \\ \\    | |    / /    \n",
+                   "                                         \\ '---^ ^---' /      \n",
+                   "                                          \\   U V M   /       \n",
+                   "                                          '-----^-----'        \n"
+                  };
+  string bottom = "/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n";
+
   string updatedWater[2];
 
-  string skyBoatWater[18];
+  queue<string> fullDrawing;
 
   void updateWater(int distance) {
     for (int i=0; i<2; i++) updatedWater[i] = water[i];
@@ -59,71 +77,78 @@ struct ascii_out_t
       if (updatedWater[1][44-distance] == '_') updatedWater[1][44-distance] = '\\';
   }
 
-  void drawSkyBoatWater(int distance) {
+  void buildAll(int distance, int chainLength) {
     for (int i=0; i<6; i++) {
-      skyBoatWater[i] = sky[i];
+      fullDrawing.push(sky[i]);
     }
    
     for (int i=0; i<10; i++) {
-      skyBoatWater[i+6] = boat[i].substr(distance).c_str();
+      fullDrawing.push(boat[i].substr(distance).c_str());
     }
    
     updateWater(distance);
     for (int i=0; i<2; i++) {
-      skyBoatWater[i+16] = updatedWater[i];
+      fullDrawing.push(updatedWater[i]);
     }
 
-    for (int i=0; i<18; i++) {
-      addstr(skyBoatWater[i].c_str());
-    }
-  }
-
-  void drawChain(int chainLength) {
     for (int i=0; i<chainLength; i+=1) {
-      addstr("                                                |\n");
+      fullDrawing.push(chain.c_str());
     }
+
+    if (chainLength > 0) {
+      for (int i=0; i<11; i+=1) {
+        fullDrawing.push(anchor[i].c_str());
+      }
+    }
+
+    if (chainLength == BOTTOM) fullDrawing.push(bottom.c_str());
   }
 
-  void drawAnchor() {
-    addstr("                                      /\\        O        /\\  \n");
-    addstr("                                      | \\      / \\      / |  \n");
-    addstr("                                      |  \\     | |     /  |   \n");
-    addstr("                                      | |\\\\    | |    //| |  \n");
-    addstr("                                      | | \\\\   | |   // | |  \n");
-    addstr("                                      \\ \\  '   | |   '  / /  \n");
-    addstr("                                       \\ \\     | |     / /   \n");
-    addstr("                                        \\ \\    | |    / /    \n");
-    addstr("                                         \\ '---^ ^---' /      \n");
-    addstr("                                          \\   U V M   /       \n");
-    addstr("                                          '-----^-----'        \n");
+  void makeItRain(int length) {
+    
   }
 
-  void drawBottom() {
-      addstr("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n");
-  }
-
-  int draw(int distance, int chainLength) {
-      clear();
-      drawSkyBoatWater(distance);
-      drawChain(chainLength);
-      if (chainLength > 0) drawAnchor();
-      if (chainLength == BOTTOM) drawBottom();
-      refresh();
+  void drawAll() {
+    while (!fullDrawing.empty()) {
+      addstr(fullDrawing.front().c_str());
+      fullDrawing.pop();
+    }
   }
 
   void sailIn() {
     // boat sails in
     for (int i=TRAVEL; i>=0; i--) {
-      draw(i, 0);
+      clear();
+
+      buildAll(i, 0);
+      drawAll();
+
+      refresh();
       wait(0.1);
     }
 
     // anchor goes down
     for (int i=0; i<=BOTTOM; i++) {
-      draw(0, i);
+      clear();
+
+      buildAll(0, i);
+      drawAll();
+
+      refresh();
       wait(0.1);
     }
 
+    wait(2);
+  }
+
+  void startRaining() {
+    clear();
+
+    buildAll(0, BOTTOM);
+    makeItRain(50);
+    drawAll();
+
+    refresh();
     wait(2);
   }
 
@@ -131,7 +156,12 @@ struct ascii_out_t
   void sailOut() {
     // anchor goes up
     for (int i=BOTTOM; i>=0; i--) {
-      draw(0, i);
+      clear();
+
+      buildAll(0, i);
+      drawAll();
+
+      refresh();
       wait(0.1);
     }
 
@@ -139,7 +169,12 @@ struct ascii_out_t
 
     // boat sails away
     for (int i=0; i<=TRAVEL; i++) {
-      draw(i, 0);
+      clear();
+
+      buildAll(i, 0);
+      drawAll();
+
+      refresh();
       wait(0.1);
     }
 
@@ -161,6 +196,8 @@ int main() {
   initscr();
 
   ascii_out.sailIn();
+
+  ascii_out.startRaining();
 
   ascii_out.sailOut();
 
