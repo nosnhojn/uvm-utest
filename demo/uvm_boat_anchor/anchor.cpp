@@ -4,7 +4,7 @@
 #include <ncurses.h>
 #include <time.h>
 #include <signal.h>
-#include <queue>
+#include <list>
 
 using namespace std;
 
@@ -63,7 +63,8 @@ struct ascii_out_t
 
   string updatedWater[2];
 
-  queue<string> fullDrawing;
+  list<string> fullDrawing;
+  list<string>::iterator fullDrawingIt;
 
   void updateWater(int distance) {
     for (int i=0; i<2; i++) updatedWater[i] = water[i];
@@ -79,29 +80,29 @@ struct ascii_out_t
 
   void buildAll(int distance, int chainLength) {
     for (int i=0; i<6; i++) {
-      fullDrawing.push(sky[i]);
+      fullDrawing.push_back(sky[i]);
     }
    
     for (int i=0; i<10; i++) {
-      fullDrawing.push(boat[i].substr(distance).c_str());
+      fullDrawing.push_back(boat[i].substr(distance).c_str());
     }
    
     updateWater(distance);
     for (int i=0; i<2; i++) {
-      fullDrawing.push(updatedWater[i]);
+      fullDrawing.push_back(updatedWater[i]);
     }
 
     for (int i=0; i<chainLength; i+=1) {
-      fullDrawing.push(chain.c_str());
+      fullDrawing.push_back(chain.c_str());
     }
 
     if (chainLength > 0) {
       for (int i=0; i<11; i+=1) {
-        fullDrawing.push(anchor[i].c_str());
+        fullDrawing.push_back(anchor[i].c_str());
       }
     }
 
-    if (chainLength == BOTTOM) fullDrawing.push(bottom.c_str());
+    if (chainLength == BOTTOM) fullDrawing.push_back(bottom.c_str());
   }
 
   void makeItRain(int length) {
@@ -109,10 +110,12 @@ struct ascii_out_t
   }
 
   void drawAll() {
-    while (!fullDrawing.empty()) {
-      addstr(fullDrawing.front().c_str());
-      fullDrawing.pop();
+    fullDrawingIt = fullDrawing.begin();
+    while (fullDrawingIt != fullDrawing.end()) {
+      addstr((*fullDrawingIt).c_str());
+      fullDrawingIt++;
     }
+    fullDrawing.clear();
   }
 
   void sailIn() {
