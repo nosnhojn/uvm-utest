@@ -18,10 +18,10 @@ void sig_handler(int);
 struct ascii_out_t
 {
   string sky[6] = {
-                   "                                                    *** ** ** ** * *** **     \n",
-                   "                                                   * * *  *  *  * * * *  *    \n",
-                   "                                                   ***   *  *  *  *  *   *    \n",
-                   "                                                    ***** ** ** ** ** ***     \n",
+                   "                                                       *** ** ** ** * *** **     \n",
+                   "                                                      * * *  *  *  * * * *  *    \n",
+                   "                                                      ***   *  *  *  *  *   *    \n",
+                   "                                                       ***** ** ** ** ** ***     \n",
                    "                                                                              \n",
                    "                                                                              \n"
                   };
@@ -114,7 +114,7 @@ struct ascii_out_t
       j++;
 
       if (j >= 4) {
-        if ((j+i-4) % 3 == 0) {
+        if ((j-i+total-4) % 3 == 0) {
           (*fullDrawingIt)[53-(j-4)] = '/';
           (*fullDrawingIt)[55-(j-4)] = '/';
           (*fullDrawingIt)[57-(j-4)] = '/';
