@@ -7,9 +7,8 @@ rm -rf work
 vlib work
 
 vlog -sv -ccflags "-std=c++0x -lncurses" \
-     demo.sv
+     uvm_boat_anchor_demo.sv
      #-dpiheader cimports.h
-     #uvm_boat_anchor.cpp
 
 vsim -c \
      -l run.log \

@@ -1,109 +1,90 @@
-#include <iostream>
-#include <string>
-#include <stdlib.h>
-#include <ncurses.h>
-#include <time.h>
-#include <signal.h>
-#include <list>
-
-using namespace std;
-
-const int BOTTOM = 5;
-const int TRAVEL = 66;
-
-int draw(int, int);
-void wait (float);
-void sig_handler(int);
+#include "uvm_boat_anchor.h"
 
 struct ascii_out_t
 {
-  string sky[6] = {
-                   "                                                       *** ** ** ** * *** **     \n",
-                   "                                                      * * *  *  *  * * * *  *    \n",
-                   "                                                      ***   *  *  *  *  *   *    \n",
-                   "                                                       ***** ** ** ** ** ***     \n",
-                   "                                                                              \n",
-                   "                                                                              \n"
-                  };
+  list<string> sky;
+  list<string> boat;
+  list<string> water;
+  list<string> updatedWater;
+  list<string> chain;
+  list<string> anchor;
+  list<string> bottom;
 
-  string boat[10] = {
-                   "                                                     .                        \n",
-                   "                                                    /|\\                      \n",
-                   "                                                   / | \\                     \n",
-                   "                                                  /  |  \\                    \n",
-                   "                                                 /   |   \\                   \n",
-                   "                                                /    |    \\                  \n",
-                   "                                               /     |     \\                 \n",
-                   "                                              /      |      \\                \n",
-                   "                                             ._______|_______.                \n",
-                   "                                      `--.___________|___________             \n"
-                  };
+  ascii_out_t() {
+    sky.push_back("                                                       *** ** ** ** * *** **     \n");
+    sky.push_back("                                                      * * *  *  *  * * * *  *    \n");
+    sky.push_back("                                                      ***   *  *  *  *  *   *    \n");
+    sky.push_back("                                                       ***** ** ** ** ** ***     \n");
+    sky.push_back("                                                                                 \n");
+    sky.push_back("                                                                                 \n");
 
-  string water[2] = {
-                     "___     ___     ____    ____      ____     ___    ___    ___    ___    ___\n",
-                     "   \\___/   \\___/    \\__/    \\____/    \\___/   \\__/   \\__/   \\__/   \\__/   \\__\n"
-                    };
+    boat.push_back("                                                     .                          \n");
+    boat.push_back("                                                    /|\\                         \n");
+    boat.push_back("                                                   / | \\                        \n");
+    boat.push_back("                                                  /  |  \\                       \n");
+    boat.push_back("                                                 /   |   \\                      \n");
+    boat.push_back("                                                /    |    \\                     \n");
+    boat.push_back("                                               /     |     \\                    \n");
+    boat.push_back("                                              /      |      \\                   \n");
+    boat.push_back("                                             ._______|_______.                  \n");
+    boat.push_back("                                      `--.___________|___________               \n");
 
-  string chain = "                                                |\n";
+    water.push_back("___     ___     ____    ____      ____     ___    ___    ___    ___    ___\n");
+    water.push_back("   \\___/   \\___/    \\__/    \\____/    \\___/   \\__/   \\__/   \\__/   \\__/   \\__\n");
 
-  string anchor[11] = {
-                   "                                      /\\        O        /\\  \n",
-                   "                                      | \\      / \\      / |  \n",
-                   "                                      |  \\     | |     /  |   \n",
-                   "                                      | |\\\\    | |    //| |  \n",
-                   "                                      | | \\\\   | |   // | |  \n",
-                   "                                      \\ \\  '   | |   '  / /  \n",
-                   "                                       \\ \\     | |     / /   \n",
-                   "                                        \\ \\    | |    / /    \n",
-                   "                                         \\ '---^ ^---' /      \n",
-                   "                                          \\   U V M   /       \n",
-                   "                                          '-----^-----'        \n"
-                  };
-  string bottom = "/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n";
+    chain.push_back("                                                |\n");
 
-  string updatedWater[2];
+    anchor.push_back("                                      /\\        O        /\\  \n");
+    anchor.push_back("                                      | \\      / \\      / |  \n");
+    anchor.push_back("                                      |  \\     | |     /  |   \n");
+    anchor.push_back("                                      | |\\\\    | |    //| |  \n");
+    anchor.push_back("                                      | | \\\\   | |   // | |  \n");
+    anchor.push_back("                                      \\ \\  '   | |   '  / /  \n");
+    anchor.push_back("                                       \\ \\     | |     / /   \n");
+    anchor.push_back("                                        \\ \\    | |    / /    \n");
+    anchor.push_back("                                         \\ '---^ ^---' /      \n");
+    anchor.push_back("                                          \\   U V M   /       \n");
+    anchor.push_back("                                          '-----^-----'        \n");
+
+    bottom.push_back("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n");
+  }
 
   list<string> fullDrawing;
   list<string>::iterator fullDrawingIt;
 
   void updateWater(int distance) {
-    for (int i=0; i<2; i++) updatedWater[i] = water[i];
+    updatedWater = list<string>(water);
+    list<string>::iterator it = updatedWater.begin();
 
-    if (distance <= 64) updatedWater[0][64-distance] = '/';
-    if (distance <= 43) updatedWater[0][43-distance] = '\\';
+    if (distance <= 64) (*it)[64-distance] = '/';
+    if (distance <= 43) (*it)[43-distance] = '\\';
 
+    ++it;
     if (distance <= 64)
-      if (updatedWater[1][63-distance] == '_') updatedWater[1][63-distance] = '/';
+      if ((*it)[63-distance] == '_') (*it)[63-distance] = '/';
     if (distance <= 43)
-      if (updatedWater[1][44-distance] == '_') updatedWater[1][44-distance] = '\\';
+      if ((*it)[44-distance] == '_') (*it)[44-distance] = '\\';
   }
 
   void buildAll(int distance, int chainLength) {
-    for (int i=0; i<6; i++) {
-      fullDrawing.push_back(sky[i]);
-    }
+    fullDrawing.insert(fullDrawing.end(), sky.begin(), sky.end());
    
+    list<string>::iterator it;
+    it = boat.begin();
     for (int i=0; i<10; i++) {
-      fullDrawing.push_back(boat[i].substr(distance).c_str());
+      fullDrawing.push_back((*it).substr(distance).c_str());
+      it++;
     }
-   
+
     updateWater(distance);
-    for (int i=0; i<2; i++) {
-      fullDrawing.push_back(updatedWater[i]);
-    }
-
-    for (int i=0; i<chainLength; i+=1) {
-      fullDrawing.push_back(chain.c_str());
-    }
-
+    fullDrawing.insert(fullDrawing.end(), updatedWater.begin(), updatedWater.end());
     if (chainLength > 0) {
-      for (int i=0; i<11; i+=1) {
-        fullDrawing.push_back(anchor[i].c_str());
-      }
+      for (int i=0; i<chainLength; i++) fullDrawing.insert(fullDrawing.end(), chain.begin(), chain.end());
+      fullDrawing.insert(fullDrawing.end(), anchor.begin(), anchor.end());
     }
-
-    if (chainLength == BOTTOM) fullDrawing.push_back(bottom.c_str());
+    if (chainLength == BOTTOM) fullDrawing.insert(fullDrawing.end(), bottom.begin(), bottom.end());
   }
+
 
   void makeItRain(int i, int total) {
     int j=0;
@@ -149,7 +130,7 @@ struct ascii_out_t
       drawAll();
 
       refresh();
-      wait(0.01);
+      wait(0.1);
     }
 
     // anchor goes down
@@ -160,10 +141,10 @@ struct ascii_out_t
       drawAll();
 
       refresh();
-      wait(0.01);
+      wait(0.1);
     }
 
-    wait(.5);
+    wait(2);
   }
 
   void startRaining() {
@@ -213,28 +194,54 @@ struct ascii_out_t
 } ascii_out;
 
 
-
-int main() {
-  struct sigaction act;
-
-  // signal handling to return the endwin()
+struct sigaction act;
+void c_setup()
+{
   act.sa_handler = sig_handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
   sigaction(SIGINT, &act, 0);
+  //initscr();
+  SVAck();
+}
+/*
 
-  initscr();
-
+void c_sailIn() {
   ascii_out.sailIn();
-
-  ascii_out.startRaining();
-
-  //ascii_out.sailOut();
-
-  endwin();
-
 }
 
+void c_build() {
+  ascii_out.buildAll(0, 0);
+  ascii_out.drawAll();
+}
+
+void c_startRaining() {
+  ascii_out.startRaining();
+}
+
+void c_sailOut() {
+  ascii_out.sailOut();
+}
+
+void c_teardown() {
+  endwin();
+}
+
+*/
+
+/*
+int main() {
+  c_setup();
+
+  c_sailIn();
+
+  c_startRaining();
+
+  c_sailOut();
+
+  c_teardown();
+}
+*/
 
 void sig_handler (int sig)
 {
@@ -242,9 +249,12 @@ void sig_handler (int sig)
   exit(1);
 }
 
+
+/*
 void wait ( float seconds )
 {
   clock_t endwait;
   endwait = clock () + seconds * CLOCKS_PER_SEC ;
   while (clock() < endwait) {}
 }
+*/
