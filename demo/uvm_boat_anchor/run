@@ -1,13 +1,13 @@
-g++ -fPIC -DQUESTA -g -W -shared -std=c++11  \
-    -lncurses \
-    -I/tools/model/qs10.1c_1/questasim/include \
-    uvm_boat_anchor.cpp -o uvm_boat_anchor.so
+#g++ -fPIC -DQUESTA -g -W -shared -std=c++11  \
+#    -lncurses \
+#    -I/tools/model/qs10.1c_1/questasim/include \
+#    uvm_boat_anchor.cpp -o uvm_boat_anchor.so
 
 rm -rf work
-vlib work
+vlib work > sim.log
 
 vlog -sv -ccflags "-std=c++0x -lncurses" \
-     uvm_boat_anchor_demo.sv
+     uvm_boat_anchor_demo.sv >> sim.log
      #-dpiheader cimports.h
 
 vsim -c \
@@ -16,4 +16,4 @@ vsim -c \
      -sv_lib libstdc++ \
      -sv_lib libncurses \
      -sv_lib uvm_boat_anchor \
-     -do "run -all"
+     -do "run -all" >> sim.log

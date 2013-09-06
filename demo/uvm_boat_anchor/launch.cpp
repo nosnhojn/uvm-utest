@@ -5,6 +5,7 @@ FILE * fdfile;
 WINDOW * simWin;
 WINDOW * guiWin;
 ifstream iStream;
+uvm_boat_anchor boat_anchor;
 
 void register_sig_handler(void);
 void setup(void);
@@ -12,7 +13,6 @@ void runSim(void);
 void sailBoat(void);
 void shutdown(void);
 
-void wait(float);
 void sig_handler (int);
 
 struct sigaction act;
@@ -50,11 +50,16 @@ void setup() {
   fdfile = fopen("/dev/lft0", "r+");
   fullScreen=newterm("linux", fdfile, fdfile);
   set_term(fullScreen);
-  simWin = newwin(200, 400, xSimPos, ySimPos);
+
+  simWin = newwin(SIMWINHEIGHT, 400, xSimPos, ySimPos);
   wmove(simWin, xSimPos, ySimPos);
   waddstr(simWin, "jokes");
   wmove(simWin, ++xSimPos, ySimPos);
   wrefresh(simWin);
+
+  guiWin = newwin(SIMWINHEIGHT, 400, SIMWINHEIGHT+1, 0);
+  waddstr(guiWin, "dingle");
+  wrefresh(guiWin);
 }
 
 
@@ -72,7 +77,7 @@ void runSim() {
 
 
 void sailBoat() {
-
+  boat_anchor.setWindow(guiWin);
 }
 
 
@@ -80,13 +85,6 @@ void sailBoat() {
 void shutdown() {
   delwin(simWin);
   endwin();
-}
-
-void wait ( float seconds )
-{
-  clock_t endwait;
-  endwait = clock () + seconds * CLOCKS_PER_SEC ;
-  while (clock() < endwait) {}
 }
 
 void sig_handler (int sig)

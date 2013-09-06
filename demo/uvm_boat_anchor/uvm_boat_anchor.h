@@ -11,15 +11,30 @@ using namespace std;
 const int BOTTOM = 5;
 const int TRAVEL = 66;
 
-extern "C" void c_setup();
-extern "C" void c_sailIn();
-extern "C" void c_build();
-extern "C" void c_startRaining();
-extern "C" void c_sailOut();
-extern "C" void c_teardown();
+class uvm_boat_anchor {
+  private: 
+    list<string> sky;
+    list<string> boat;
+    list<string> water;
+    list<string> updatedWater;
+    list<string> chain;
+    list<string> anchor;
+    list<string> bottom;
+    WINDOW * myWin;
 
-int draw(int, int);
-void wait (float);
-void sig_handler(int);
+    list<string> fullDrawing;
+    list<string>::iterator fullDrawingIt;
 
-struct ascii_out_t;
+    void updateWater(int);
+    void buildAll(int, int);
+    void makeItRain(int, int);
+    void drawAll();
+    void wait (float);
+
+  public:
+    uvm_boat_anchor();
+    void setWindow(WINDOW*);
+    void sailIn();
+    void startRaining();
+    void sailOut();
+};
