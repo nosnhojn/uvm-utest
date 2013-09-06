@@ -106,7 +106,7 @@ void uvm_boat_anchor::makeItRain(int i, int total) {
 void uvm_boat_anchor::drawAll() {
   fullDrawingIt = fullDrawing.begin();
   while (fullDrawingIt != fullDrawing.end()) {
-    addstr((*fullDrawingIt).c_str());
+    waddstr(myWin, (*fullDrawingIt).c_str());
     fullDrawingIt++;
   }
   fullDrawing.clear();
@@ -115,23 +115,23 @@ void uvm_boat_anchor::drawAll() {
 void uvm_boat_anchor::sailIn() {
   // boat sails in
   for (int i=TRAVEL; i>=0; i--) {
-    clear();
+    wclear(myWin);
 
     buildAll(i, 0);
     drawAll();
 
-    refresh();
+    wrefresh(myWin);
     wait(0.1);
   }
 
   // anchor goes down
   for (int i=0; i<=BOTTOM; i++) {
-    clear();
+    wclear(myWin);
 
     buildAll(0, i);
     drawAll();
 
-    refresh();
+    wrefresh(myWin);
     wait(0.1);
   }
 
@@ -140,13 +140,13 @@ void uvm_boat_anchor::sailIn() {
 
 void uvm_boat_anchor::startRaining() {
   for (int i=0; i<=50; i++) {
-    clear();
+    wclear(myWin);
 
     buildAll(0, BOTTOM);
     makeItRain(i, 50);
     drawAll();
 
-    refresh();
+    wrefresh(myWin);
 
     wait(0.2);
   }
@@ -158,12 +158,12 @@ void uvm_boat_anchor::startRaining() {
 void uvm_boat_anchor::sailOut() {
   // anchor goes up
   for (int i=BOTTOM; i>=0; i--) {
-    clear();
+    wclear(myWin);
 
     buildAll(0, i);
     drawAll();
 
-    refresh();
+    wrefresh(myWin);
     wait(0.1);
   }
 
@@ -171,12 +171,12 @@ void uvm_boat_anchor::sailOut() {
 
   // boat sails away
   for (int i=0; i<=TRAVEL; i++) {
-    clear();
+    wclear(myWin);
 
     buildAll(i, 0);
     drawAll();
 
-    refresh();
+    wrefresh(myWin);
     wait(0.1);
   }
 

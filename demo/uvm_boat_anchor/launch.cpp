@@ -57,7 +57,7 @@ void setup() {
   wmove(simWin, ++xSimPos, ySimPos);
   wrefresh(simWin);
 
-  guiWin = newwin(SIMWINHEIGHT, 400, SIMWINHEIGHT+1, 0);
+  guiWin = newwin(GUIWINHEIGHT, 400, SIMWINHEIGHT+1, 0);
   waddstr(guiWin, "dingle");
   wrefresh(guiWin);
 }
@@ -78,6 +78,9 @@ void runSim() {
 
 void sailBoat() {
   boat_anchor.setWindow(guiWin);
+  boat_anchor.sailIn();
+  boat_anchor.startRaining();
+  boat_anchor.sailOut();
 }
 
 

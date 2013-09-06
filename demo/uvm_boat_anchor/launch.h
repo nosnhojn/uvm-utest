@@ -8,5 +8,6 @@
 #include "uvm_boat_anchor.h"
 
 const int SIMWINHEIGHT = 30;
+const int GUIWINHEIGHT = 70;
 
 using namespace std;
