@@ -1,5 +1,3 @@
-#include "vpi_user.h"
-#include "cimports.h"
 #include <iostream>
 #include <string>
 #include <stdlib.h>

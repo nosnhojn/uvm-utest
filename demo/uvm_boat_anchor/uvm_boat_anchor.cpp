@@ -201,10 +201,8 @@ void c_setup()
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
   sigaction(SIGINT, &act, 0);
-  //initscr();
-  SVAck();
+  initscr();
 }
-/*
 
 void c_sailIn() {
   ascii_out.sailIn();
@@ -227,9 +225,6 @@ void c_teardown() {
   endwin();
 }
 
-*/
-
-/*
 int main() {
   c_setup();
 
@@ -241,7 +236,6 @@ int main() {
 
   c_teardown();
 }
-*/
 
 void sig_handler (int sig)
 {
@@ -250,11 +244,9 @@ void sig_handler (int sig)
 }
 
 
-/*
 void wait ( float seconds )
 {
   clock_t endwait;
   endwait = clock () + seconds * CLOCKS_PER_SEC ;
   while (clock() < endwait) {}
 }
-*/
