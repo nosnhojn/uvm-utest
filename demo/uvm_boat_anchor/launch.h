@@ -10,7 +10,7 @@
 #include <sys/wait.h>
 #include "uvm_boat_anchor.h"
 
-const int SIMWINHEIGHT = 23;
+const int SIMWINHEIGHT = 5;
 const int GUIWINHEIGHT = 70;
 
 using namespace std;

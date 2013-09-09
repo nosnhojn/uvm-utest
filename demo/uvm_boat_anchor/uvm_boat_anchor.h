@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int BOTTOM = 5;
+const int BOTTOM = 2;
 const int TRAVEL = 66;
 
 class uvm_boat_anchor {
@@ -29,7 +29,6 @@ class uvm_boat_anchor {
     void buildAll(int, int);
     void makeItRain(int, int);
     void drawAll();
-    void wait (float);
 
   public:
     uvm_boat_anchor();
@@ -38,4 +37,6 @@ class uvm_boat_anchor {
     void sailIn();
     void startRaining();
     void sailOut();
+    void finalScene();
+    void wait (float);
 };

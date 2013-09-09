@@ -5,9 +5,13 @@ module uvm_boat_anchor_demo;
   uvm_boat_anchor ba;
   initial begin
     ba = new();
-    $display("Sail in");
-    if (ba.weigh_anchor()) $display("Sail away");
-    else                  $display("It's raining");
+
+    $display("$cmd> Sail in");
+    if (ba.weigh_anchor()) $display("$cmd> Sail away");
+    else                   $display("$cmd> It's raining");
+
+    $display("$cmd> All done");
+
     $finish();
   end
 endmodule

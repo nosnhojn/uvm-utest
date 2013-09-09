@@ -18,7 +18,7 @@ void sig_handler (int);
 struct sigaction act;
 string iBuf;
 
-int xSimPos = 0;
+int xSimPos = 10;
 int ySimPos = 0;
 
 int main()
@@ -51,12 +51,15 @@ void setup() {
   fullScreen=newterm("linux", fdfile, fdfile);
   set_term(fullScreen);
 
-  simWin = newwin(SIMWINHEIGHT, 400, xSimPos, ySimPos);
+  simWin = newwin(SIMWINHEIGHT, 400, ySimPos, xSimPos);
   scrollok(simWin, TRUE);
-  wmove(simWin, xSimPos, ySimPos);
+  waddstr(simWin, "** Hang on a sec... just waiting for the uvm boat anchor demo to compile\n");
+  wmove(simWin, ++ySimPos, xSimPos);
+  waddstr(simWin, "** and start running. You'll see something happen shortly...\n\n");
+  wmove(simWin, ++ySimPos, xSimPos);
   wrefresh(simWin);
 
-  guiWin = newwin(GUIWINHEIGHT, 400, SIMWINHEIGHT+1, 0);
+  guiWin = newwin(GUIWINHEIGHT, 400, SIMWINHEIGHT+1, xSimPos);
   boat_anchor.setWindow(guiWin);
   boat_anchor.startingScene();
   wrefresh(guiWin);
@@ -75,17 +78,23 @@ void runSim() {
     if (postLogging > 0) {
       waddstr(simWin, iBuf.c_str());
       wrefresh(simWin);
-      wmove(simWin, ++xSimPos, ySimPos);
+      wmove(simWin, ++ySimPos, xSimPos);
+      boat_anchor.wait(0.2);
     }
 
-    if (!iBuf.compare("  Sail in\n")) {
+    if (!iBuf.compare("  $cmd> Sail in\n")) {
       boat_anchor.setWindow(guiWin);
       boat_anchor.sailIn();
     }
 
-    else if (!iBuf.compare("  Sail away\n")) {
+    else if (!iBuf.compare("  $cmd> Sail away\n")) {
       boat_anchor.setWindow(guiWin);
       boat_anchor.sailOut();
+    }
+
+    else if (!iBuf.compare("  $cmd> All done\n")) {
+      boat_anchor.setWindow(guiWin);
+      boat_anchor.finalScene();
     }
 
     else if (!iBuf.compare("  run -all \n")) {

@@ -18,8 +18,8 @@ uvm_boat_anchor::uvm_boat_anchor() {
   boat.push_back("                                                  /  |  \\                       \n");
   boat.push_back("                                                 /   |   \\                      \n");
   boat.push_back("                                                /    |    \\                     \n");
-  boat.push_back("                                               /     |     \\                    \n");
-  boat.push_back("                                              /      |      \\                   \n");
+  boat.push_back("                                               /     |UVM- \\                    \n");
+  boat.push_back("                                              /      |UTEST \\                   \n");
   boat.push_back("                                             ._______|_______.                  \n");
   boat.push_back("                                      `--.___________|___________               \n");
 
@@ -141,7 +141,7 @@ void uvm_boat_anchor::sailIn() {
     drawAll();
 
     wrefresh(myWin);
-    wait(0.1);
+    wait(0.2);
   }
 
   wait(2);
@@ -173,7 +173,7 @@ void uvm_boat_anchor::sailOut() {
     drawAll();
 
     wrefresh(myWin);
-    wait(0.1);
+    wait(0.2);
   }
 
   wait(1);
@@ -190,6 +190,36 @@ void uvm_boat_anchor::sailOut() {
   }
 
   wait(1);
+}
+
+
+void uvm_boat_anchor::finalScene() {
+  sky.clear();
+  sky.push_back("              TTTTTTT H   H EEEEEE      EEEEEE N    N DDDD                       \n");
+  sky.push_back("                 T    H   H E           E      NN   N D   D                      \n");
+  sky.push_back("                 T    HHHHH EEE         EEE    N N  N D    D                     \n");
+  sky.push_back("                 T    H   H E           E      N  N N D    D                     \n");
+  sky.push_back("                 T    H   H E           E      N   NN D   D                      \n");
+  sky.push_back("                 T    H   H EEEEEE      EEEEEE N    N DDDD                       \n");
+
+  boat.clear();
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                            http://www.agilesoc.com/open-source-projects/uvm-utest                  \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+  boat.push_back("                                                                                                                                                    \n");
+
+  wclear(myWin);
+
+  buildAll(TRAVEL, 0);
+  drawAll();
+
+  wrefresh(myWin);
 }
 
 void uvm_boat_anchor::wait ( float seconds )
