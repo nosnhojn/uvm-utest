@@ -4,12 +4,15 @@
 #    uvm_boat_anchor.cpp -o uvm_boat_anchor.so
 
 rm -rf work
-vlib work > sim.log
+vlib work
 
 vlog -sv \
-     uvm_boat_anchor_demo.sv >> sim.log
+     $UVM_HOME/src/uvm.sv \
+     +incdir+$UVM_HOME/src \
+     uvm_boat_anchor_demo.sv
 
 vsim -c \
      -l run.log \
      uvm_boat_anchor_demo \
-     -do "run -all" >> sim.log
+     -sv_lib $UVM_HOME/lib/uvm_dpi64 \
+     -do "run -all"

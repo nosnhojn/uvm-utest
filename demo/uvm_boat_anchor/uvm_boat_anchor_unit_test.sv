@@ -117,12 +117,12 @@ module uvm_boat_anchor_unit_test;
 
   `SVTEST(weigh_anchor_failed)
     boat_anchor.set_fake_failure();
-    `FAIL_UNLESS_STR_EQUAL(boat_anchor.weight_anchor(), "Uh oh! You're boat anchor is broken. Looks like someone \"fixed\" something.");
+    `FAIL_UNLESS(boat_anchor.weigh_anchor() == 0);
   `SVTEST_END
 
 
   `SVTEST(weigh_anchor)
-    `FAIL_UNLESS_STR_EQUAL(boat_anchor.weight_anchor(), "Great! You're boat anchor is working perfectly!");
+    `FAIL_UNLESS(boat_anchor.weigh_anchor() == 1);
   `SVTEST_END
 
 

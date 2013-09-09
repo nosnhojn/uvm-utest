@@ -4,7 +4,7 @@ SCREEN * fullScreen;
 FILE * fdfile;
 WINDOW * simWin;
 WINDOW * guiWin;
-ifstream iStream;
+fstream iStream;
 uvm_boat_anchor boat_anchor;
 
 void register_sig_handler(void);
@@ -16,23 +16,23 @@ void shutdown(void);
 void sig_handler (int);
 
 struct sigaction act;
-char iBuf [400];
+string iBuf;
 
 int xSimPos = 0;
 int ySimPos = 0;
 
 int main()
 {
+  pid_t PID;
+  int status;
+
   register_sig_handler();
 
   setup();
 
   runSim();
 
-  sailBoat();
-
   shutdown();
-
 }
 
 
@@ -52,35 +52,46 @@ void setup() {
   set_term(fullScreen);
 
   simWin = newwin(SIMWINHEIGHT, 400, xSimPos, ySimPos);
+  scrollok(simWin, TRUE);
   wmove(simWin, xSimPos, ySimPos);
-  waddstr(simWin, "jokes");
-  wmove(simWin, ++xSimPos, ySimPos);
   wrefresh(simWin);
 
   guiWin = newwin(GUIWINHEIGHT, 400, SIMWINHEIGHT+1, 0);
-  waddstr(guiWin, "dingle");
+  boat_anchor.setWindow(guiWin);
+  boat_anchor.startingScene();
   wrefresh(guiWin);
 }
 
 
 // runSim
 void runSim() {
-  system("./run");
-  iStream.open("sim.log", ifstream::in);
-  while (!iStream.eof()) {
-    iStream.getline(iBuf, 400);
-    waddstr(simWin, iBuf);
-    wmove(simWin, ++xSimPos, ySimPos);
-    wrefresh(simWin);
+  string lineInput;
+  int postLogging = 0;
+
+  while (getline(cin,iBuf)) {
+    iBuf.append("\n");
+    iBuf.replace(0, 1, " ");
+
+    if (postLogging > 0) {
+      waddstr(simWin, iBuf.c_str());
+      wrefresh(simWin);
+      wmove(simWin, ++xSimPos, ySimPos);
+    }
+
+    if (!iBuf.compare("  Sail in\n")) {
+      boat_anchor.setWindow(guiWin);
+      boat_anchor.sailIn();
+    }
+
+    else if (!iBuf.compare("  Sail away\n")) {
+      boat_anchor.setWindow(guiWin);
+      boat_anchor.sailOut();
+    }
+
+    else if (!iBuf.compare("  run -all \n")) {
+      postLogging = 243;
+    }
   }
-}
-
-
-void sailBoat() {
-  boat_anchor.setWindow(guiWin);
-  boat_anchor.sailIn();
-  boat_anchor.startRaining();
-  boat_anchor.sailOut();
 }
 
 

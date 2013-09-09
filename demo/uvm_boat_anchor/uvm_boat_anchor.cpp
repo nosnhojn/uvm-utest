@@ -112,6 +112,15 @@ void uvm_boat_anchor::drawAll() {
   fullDrawing.clear();
 }
 
+void uvm_boat_anchor::startingScene() {
+  wclear(myWin);
+
+  buildAll(TRAVEL, 0);
+  drawAll();
+
+  wrefresh(myWin);
+}
+
 void uvm_boat_anchor::sailIn() {
   // boat sails in
   for (int i=TRAVEL; i>=0; i--) {

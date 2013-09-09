@@ -34,6 +34,7 @@ class uvm_boat_anchor {
   public:
     uvm_boat_anchor();
     void setWindow(WINDOW*);
+    void startingScene();
     void sailIn();
     void startRaining();
     void sailOut();

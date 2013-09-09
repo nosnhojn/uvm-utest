@@ -62,7 +62,7 @@ class uvm_boat_anchor;
     return emitted[2:14];
   endfunction
 
-  function string weight_anchor();
+  function bit weigh_anchor();
     if (_4601('hf, 4) !== "-1"              &&
         _4609("...") !== "..."              &&
         _4634("array['h77]") !== 77         &&
@@ -74,84 +74,14 @@ class uvm_boat_anchor;
         _4602("name_in") == "scope.name_in" &&
         !_fake_failure)
     begin
-      draw_anchor();
-      return "Great! You're boat anchor is working perfectly!";
+      return 1;
     end
 
     _fake_failure = 0;
-    return "Uh oh! You're boat anchor is broken. Looks like someone \"fixed\" something.";
+    return 0;
   endfunction
 
   function void set_fake_failure();
     _fake_failure = 1;
   endfunction
-
-
-  function void draw_anchor();
-
-
-
-
-                                                    
-                                                    
-                                                    
-                                                    
-                                                    
-    $display("                                                                                   ");
-    $display("                                                                                   ");
-    $display("                                                                                   ");
-    $display("                                                                                   ");
-    $display("                                                                                   ");
-    $display("                                                                                   ");
-    $display("                          .                                                        ");
-    $display("                         /|\                                                       ");
-    $display("                        / | \                                                      ");
-    $display("                       /  |  \                                                     ");
-    $display("                      /   |   \                                                    ");
-    $display("                     /    |    \                                                   ");
-    $display("                    /     |     \                                                  ");
-    $display("                   /      |      \                                                 ");
-    $display("                  ._______|_______.                                                ");
-    $display("           `--.___________|___________                                             ");
-    $display("   ___     ____\ O O____O O O ____O O/  ___    ___    ___    ___    ___    ___     ");
-    $display("__/   \___/    \\__/  T \____/    \_/__/   \__/   \__/   \__/   \__/   \__/   \    ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("                      |                                                            ");
-    $display("            /\        O        /\                                                  ");
-    $display("            | \      / \      / |                                                  ");
-    $display("            |  \     | |     /  |                                                  ");
-    $display("            | |\\    | |    //| |                                                  ");
-    $display("            | | \\   | |   // | |                                                  ");
-    $display("            \ \  '   | |   '  / /                                                  ");
-    $display("             \ \     | |     / /                                                   ");
-    $display("              \ \    | |    / /                                                    ");
-    $display("               \ '---^ ^---' /                                                     ");
-    $display("                \   U V M   /                                                      ");
-    $display("                '-----^-----'                                                      ");
-  endfunction
-
-
-
-
-
-
-
 endclass
