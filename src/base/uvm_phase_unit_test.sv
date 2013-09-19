@@ -116,6 +116,54 @@ module uvm_phase_unit_test;
     `FAIL_UNLESS(default_uut.get_parent() == null);
   `SVTEST_END
 
+  `SVTEST(new_initializes_phase_trace)
+    `FAIL_UNLESS(uut.get_phase_trace() == 0);
+  `SVTEST_END
+
+  // WARNING: Can't verify uvm_use_ovm_run_semantic directly from constructor
+
+  `SVTEST(new_end_node_is_null_if_parent_is_specified)
+    uut = new("uut", UVM_PHASE_SCHEDULE, default_uut);
+    `FAIL_UNLESS(uut.get_end_node() == null);
+  `SVTEST_END
+
+  `SVTEST(new_end_node_is_null_if_phase_type_is_neither_schedule_or_domain)
+    uut = new("uut", UVM_PHASE_IMP);
+    `FAIL_UNLESS(uut.get_end_node() == null);
+  `SVTEST_END
+
+// START
+
+  `SVTEST(new_end_node_set_with_null_parent_and_phase_type_of_schedule)
+    uut = new("uut", UVM_PHASE_SCHEDULE);
+    `FAIL_UNLESS(uut.get_end_node() != null);
+  `SVTEST_END
+
+  `SVTEST(new_end_node_set_with_name_end_as_name)
+    uvm_phase en;
+    uut = new("uut", UVM_PHASE_SCHEDULE);
+    en = uut.get_end_node();
+    `FAIL_UNLESS_STR_EQUAL(en.get_name(), "uut_end");
+  `SVTEST_END
+
+  `SVTEST(new_end_node_set_with_terminal_as_type)
+    uvm_phase en;
+    uut = new("uut", UVM_PHASE_SCHEDULE);
+    en = uut.get_end_node();
+    `FAIL_UNLESS(en.get_phase_type() == UVM_PHASE_TERMINAL);
+  `SVTEST_END
+
+  `SVTEST(new_end_node_set_with_this_as_parent)
+    uvm_phase en;
+    uut = new("uut", UVM_PHASE_SCHEDULE);
+    en = uut.get_end_node();
+    `FAIL_UNLESS(en.get_parent() == uut);
+  `SVTEST_END
+
+  `SVTEST(new_this_has_1_successor)
+    uut = new();
+    `FAIL_UNLESS(uut.get_num_successors() == 1);
+  `SVTEST_END
 
   //----------------------
   // get_phase_type
@@ -194,6 +242,46 @@ module uvm_phase_unit_test;
   // get_schedule tests
   //----------------------
 
+  `SVTEST(get_schedule_returns_this_for_schedule)
+    uut = new("uut", UVM_PHASE_SCHEDULE, default_uut);
+    `FAIL_UNLESS(uut.get_schedule() == uut);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_null_for_node_with_no_parent)
+    uut = new("uut", UVM_PHASE_NODE);
+    `FAIL_UNLESS(uut.get_schedule() == null);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_this_for_hierarchy_with_no_parent)
+    uut = new("uut", UVM_PHASE_SCHEDULE);
+    `FAIL_UNLESS(uut.get_schedule(1) == uut);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_parent_for_single_hierarchy_when_parent_is_schedule)
+    uvm_phase parent_phase = new("parent_phase", UVM_PHASE_SCHEDULE);
+    uut = new("uut", UVM_PHASE_NODE, parent_phase);
+    `FAIL_UNLESS(uut.get_schedule(1) == parent_phase);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_parents_parent_for_double_hierarchy_when_parents_parent_is_schedule)
+    uvm_phase parent0_phase = new("parent0_phase", UVM_PHASE_SCHEDULE);
+    uvm_phase parent1_phase = new("parent1_phase", UVM_PHASE_SCHEDULE, parent0_phase);
+    uut = new("uut", UVM_PHASE_NODE, parent1_phase);
+    `FAIL_UNLESS(uut.get_schedule(1) == parent0_phase);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_null_for_node_with_domain_parent)
+    uvm_phase parent_phase = new("parent_phase", UVM_PHASE_DOMAIN);
+    uut = new("uut", UVM_PHASE_NODE, parent_phase);
+    `FAIL_UNLESS(uut.get_schedule() == null);
+  `SVTEST_END
+
+  `SVTEST(get_schedule_returns_parent_for_node_without_domain_parent)
+    uvm_phase parent_phase = new("parent_phase", UVM_PHASE_NODE);
+    uut = new("uut", UVM_PHASE_NODE, parent_phase);
+    `FAIL_UNLESS(uut.get_schedule() == parent_phase);
+  `SVTEST_END
+
 
   //----------------------
   // get_schedule_name tests
@@ -269,6 +357,19 @@ module uvm_phase_unit_test;
   // m_find_successor tests
   //----------------------
 
+  `SVTEST(find_successor_returns_null)
+    `FAIL_UNLESS(uut.m_find_successor(null) == null);
+  `SVTEST_END
+
+  `SVTEST(find_successor_returns_this)
+    `FAIL_UNLESS(uut.m_find_successor(uut) == uut);
+  `SVTEST_END
+
+  `SVTEST(find_successor_returns_m_imp)
+    uut.m_imp = default_uut;
+    `FAIL_UNLESS(uut.m_find_successor(default_uut) == uut);
+  `SVTEST_END
+
 
   //----------------------
   // m_find_predecessor_by_name tests
@@ -303,6 +404,12 @@ module uvm_phase_unit_test;
   //----------------------
   // get_end_node tests
   //----------------------
+
+  `SVTEST(get_end_node)
+    uvm_phase some_phase = new("");
+    uut.set_end_node(some_phase);
+    `FAIL_IF(uut.get_end_node() !== some_phase);
+  `SVTEST_END
 
 
   //----------------------
