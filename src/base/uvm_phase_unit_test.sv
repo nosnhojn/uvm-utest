@@ -3,6 +3,8 @@
 import uvm_pkg::*;
 import svunit_pkg::*;
 
+`include "test_uvm_phase.sv"
+
 
 module uvm_phase_unit_test;
 
@@ -14,7 +16,11 @@ module uvm_phase_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-  uvm_phase uut;
+  uvm_phase default_uut;
+  test_uvm_phase uut;
+  test_uvm_phase a_run_phase;
+  uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+  bit expected_phase_trace = 0;
 
 
   //===================================
@@ -22,8 +28,10 @@ module uvm_phase_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-
-    uut = new(/* New arguments if needed */);
+    begin
+      string val;
+      expected_phase_trace = clp.get_arg_value("+UVM_PHASE_TRACE", val);
+    end
   endfunction
 
 
@@ -32,7 +40,10 @@ module uvm_phase_unit_test;
   //===================================
   task setup();
     svunit_ut.setup();
-    /* Place Setup Code Here */
+
+    default_uut = new();
+    uut = new("uut", UVM_PHASE_IMP, default_uut);
+    a_run_phase = new("run");
   endtask
 
 
@@ -65,14 +76,54 @@ module uvm_phase_unit_test;
   //----------------------
   // constructor tests
   //----------------------
-  `SVTEST(new_calls_super)
-    `FAIL_UNLESS_STR_EQUAL(uut.get_name(), "uvm_phase");
+
+  `SVTEST(new_calls_super_with_default_name)
+    `FAIL_UNLESS_STR_EQUAL(default_uut.get_name(), "uvm_phase");
+  `SVTEST_END
+
+
+  `SVTEST(new_calls_super_with_name)
+    `FAIL_UNLESS_STR_EQUAL(uut.get_name(), "uut");
+  `SVTEST_END
+
+
+  `SVTEST(new_sets_default_phase_type)
+    `FAIL_UNLESS(default_uut.get_phase_type() == UVM_PHASE_SCHEDULE);
+  `SVTEST_END
+
+
+  `SVTEST(new_sets_phase_done)
+    `FAIL_UNLESS_STR_EQUAL(uut.phase_done.get_name(), "uut_objection");
+  `SVTEST_END
+
+
+  `SVTEST(new_sets_phase_done_for_run)
+    `FAIL_UNLESS(a_run_phase.phase_done == uvm_test_done_objection::get());
+  `SVTEST_END
+
+
+  `SVTEST(new_initializes_state)
+    `FAIL_UNLESS(uut.get_state() == UVM_PHASE_DORMANT);
+  `SVTEST_END
+
+
+  `SVTEST(new_initializes_run_count)
+    `FAIL_UNLESS(uut.get_run_count() == 0);
+  `SVTEST_END
+
+
+  `SVTEST(new_initializes_parent)
+    `FAIL_UNLESS(default_uut.get_parent() == null);
   `SVTEST_END
 
 
   //----------------------
   // get_phase_type
   //----------------------
+
+  `SVTEST(get_phase_type)
+    `FAIL_UNLESS(uut.get_phase_type() == UVM_PHASE_IMP);
+  `SVTEST_END
 
 
   //----------------------
@@ -128,6 +179,10 @@ module uvm_phase_unit_test;
   //----------------------
   // get_parent tests
   //----------------------
+
+  `SVTEST(get_parent)
+    `FAIL_UNLESS(uut.get_parent() == default_uut);
+  `SVTEST_END
 
 
   //----------------------
