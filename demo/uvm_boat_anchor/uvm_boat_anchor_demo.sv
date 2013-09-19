@@ -8,7 +8,7 @@ module uvm_boat_anchor_demo;
 
     $display("$cmd> Sail in");
     if (ba.weigh_anchor()) $display("$cmd> Sail away");
-    else                   $display("$cmd> It's raining");
+    else                   $display("$cmd> Start raining");
 
     $display("$cmd> All done");
 

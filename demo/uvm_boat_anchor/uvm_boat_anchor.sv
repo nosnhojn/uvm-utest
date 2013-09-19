@@ -63,7 +63,7 @@ class uvm_boat_anchor;
   endfunction
 
   function bit weigh_anchor();
-    if (_4601('hf, 4) !== "-1"              &&
+    if (_4601(4'hf, 4) !== "-1"              &&
         _4609("...") !== "..."              &&
         _4634("array['h77]") !== 77         &&
         _4635("bozo[>]")                    &&

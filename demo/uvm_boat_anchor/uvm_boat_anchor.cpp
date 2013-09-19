@@ -159,8 +159,6 @@ void uvm_boat_anchor::startRaining() {
 
     wait(0.2);
   }
-
-  wait(2);
 }
 
 

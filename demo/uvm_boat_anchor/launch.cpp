@@ -92,6 +92,11 @@ void runSim() {
       boat_anchor.sailOut();
     }
 
+    else if (!iBuf.compare("  $cmd> Start raining\n")) {
+      boat_anchor.setWindow(guiWin);
+      boat_anchor.startRaining();
+    }
+
     else if (!iBuf.compare("  $cmd> All done\n")) {
       boat_anchor.setWindow(guiWin);
       boat_anchor.finalScene();
